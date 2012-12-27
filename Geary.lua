@@ -11,12 +11,13 @@ Geary = {
 }
 
 -- "VERSION" gets replaced with the TOC version
-local usage = [[
+local _usage = [[
 Geary version VERSION Usage
 /geary inspect [player | target | group]
-/geary [show | hide | toggle]
-/geary dumpitem [itemid | itemlink]
+/geary ui [show | hide | toggle]
+/geary icon [show | hide | toggle]
 /geary debug [on | off]
+/geary dumpitem [itemid | itemlink]
 ]]
 
 function Geary:init()
@@ -24,7 +25,7 @@ function Geary:init()
 	self.version = GetAddOnMetadata("Geary", "Version")
 	self.title = GetAddOnMetadata("Geary", "Title")
 	self:print("Loaded version " .. self.version)
-	usage = usage:gsub("VERSION", Geary.version, 1)
+	_usage = _usage:gsub("VERSION", Geary.version, 1)
 
 	-- Key bindings
 	_G["BINDING_HEADER_GEARY_BINDINGS_HEADER"] = self.title
@@ -123,64 +124,97 @@ Geary:init()
 -- Slash commands
 --
 
+local function _slashCommandInspect(rest)
+	if rest == "player" then
+		Geary_Inspect:inspectPlayer()
+	elseif rest == "target" then
+		Geary_Inspect:inspectTarget()
+	elseif rest == "group" then
+		Geary_Inspect:inspectGroup()
+	else
+		print(_usage)
+	end
+end
+
+local function _slashCommandUi(rest)
+	if rest == "show" then
+		Geary_Interface:Show()
+	elseif rest == "hide" then
+		Geary_Interface:Hide()
+	elseif rest == "toggle" then
+		Geary_Interface:toggle()
+	else
+		print(_usage)
+	end
+end
+
+local function _slashCommandIcon(rest)
+	if rest == "show" then
+		Geary_Interface_Icon:Show()
+	elseif rest == "hide" then
+		Geary_Interface_Icon:Hide()
+	elseif rest == "toggle" then
+		Geary_Interface_Icon:toggle()
+	else
+		print(_usage)
+	end
+end
+
+local function _slashCommandDebug(rest)		
+	if rest == "on" then
+		Geary.debugOn = true
+	elseif rest == "off" then
+		Geary.debugOn = false
+	elseif rest ~= "" then
+		print(_usage)
+		return
+	end
+	print("Geary debugging is " .. (Geary:isDebugOn() and "on" or "off"))
+end
+
+local function _slashCommandDumpItem(rest)
+	if rest:match("^%d+$") or rest:match("^|") then
+		Geary_Interface:Show()
+		Geary_Interface_Log:Clear()
+		local oldDebug = Geary.debugOn
+		Geary.debugOn = true
+		local itemLink
+		if rest:match("^|") then
+			itemLink = rest
+		else
+			_, itemLink = GetItemInfo(tonumber(rest))
+		end
+		Geary:debugLog("--- Dumping item " .. itemLink .. " ---")
+		local item = Geary_Item:new{
+			slot = "MainHandSlot",   -- Doesn't matter; just want something that can be enchanted
+			link = itemLink
+		}
+		item:probe()
+		if DevTools_Dump then
+			DevTools_Dump(item)
+		end
+		Geary.debugOn = oldDebug
+	else
+		print(_usage)
+	end
+end
+
 SLASH_GEARY1 = "/geary";
 
 function SlashCmdList.GEARY(msg, editBox)
 	local command, rest = msg:match("^(%S*)%s*(.-)$")
+	
 	if command == "inspect" then
-		if rest == "player" then
-			Geary_Inspect:inspectPlayer()
-		elseif rest == "target" then
-			Geary_Inspect:inspectTarget()
-		elseif rest == "group" then
-			Geary_Inspect:inspectGroup()
-		else
-			print(usage)
-			return
-		end
-	elseif command == "show" then
-		Geary_Interface:Show()
-	elseif command == "hide" then
-		Geary_Interface:Hide()
-	elseif command == "toggle" then
-		Geary_Interface:toggle()
+		_slashCommandInspect(rest)
+	elseif command == "ui" then
+		_slashCommandUi(rest)
+	elseif command == "icon" then
+		_slashCommandIcon(rest)
 	elseif command == "debug" then
-		if rest == "on" then
-			Geary.debugOn = true
-		elseif rest == "off" then
-			Geary.debugOn = false
-		elseif rest ~= "" then
-			print(usage)
-			return
-		end
-		print("Geary debugging is " .. (Geary:isDebugOn() and "on" or "off"))
+		_slashCommandDebug(rest)
 	elseif command == "dumpitem" then
-		if rest:match("^%d+$") or rest:match("^|") then
-			Geary_Interface:Show()
-			Geary_Interface_Log:Clear()
-			local oldDebug = Geary.debugOn
-			Geary.debugOn = true
-			local itemLink
-			if rest:match("^|") then
-				itemLink = rest
-			else
-				_, itemLink = GetItemInfo(tonumber(rest))
-			end
-			local item = Geary_Item:new{
-				slot = "MainHandSlot",   -- Doesn't matter; just want something that can be enchanted
-				link = itemLink
-			}
-			item:probe()
-			if DevTools_Dump then
-				DevTools_Dump(item)
-			end
-			Geary.debugOn = oldDebug
-		else
-			print(usage)
-			return
-		end
+		_slashCommandDumpItem(rest)
 	else
-		print(usage)
-		return
+		print(_usage)
 	end
 end

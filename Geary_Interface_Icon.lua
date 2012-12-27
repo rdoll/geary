@@ -15,7 +15,7 @@ function Geary_Interface_Icon:init()
 	button:SetScale(Geary_Options:getIconScale())
 	button:SetPoint("CENTER", UIParent, "CENTER")
 	button:SetBackdrop({
-		bgFile   = [[Interface\ICONS\Spell_Magic_PolymorphRabbit.png]],
+		bgFile   = [[Interface\ICONS\INV_Misc_EngGizmos_30.png]],
 		edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
 		tile     = false,
 		tileSize = 32,

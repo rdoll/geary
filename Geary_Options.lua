@@ -36,6 +36,6 @@ function Geary_Options:getIconScale()
 	return Geary_Saved_Options.icon.scale
 end
 
-function Geary_Options:setIconScale(sacle)
+function Geary_Options:setIconScale(scale)
 	Geary_Saved_Options.icon.scale = scale
 end
