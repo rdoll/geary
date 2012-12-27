@@ -1,0 +1,10 @@
+Geary License
+-------------
+Free, as in beer. Enjoy.
+Any credits to me (FoamHead) and/or Geary would be appreciated.
+
+Thanks
+------
+The helpful people in the WoW UI forum.
+The maintainers of wowpedia.org, wowwiki.com, wowprogramming.com, and go-hero.net.
+My friends for putting up with my testing.
