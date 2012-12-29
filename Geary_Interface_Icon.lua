@@ -1,5 +1,10 @@
 --[[
-
+	Geary icon manager
+	
+	LICENSE
+	Geary is in the Public Domain as a thanks for the efforts of other AddOn
+	developers that have made my WoW experience better for many years.
+	Any credits to me (FoamHead) and/or Geary would be appreciated.
 --]]
 
 Geary_Interface_Icon = {
@@ -15,8 +20,8 @@ function Geary_Interface_Icon:init()
 	button:SetScale(Geary_Options:getIconScale())
 	button:SetPoint("CENTER", UIParent, "CENTER")
 	button:SetBackdrop({
-		bgFile   = [[Interface\ICONS\INV_Misc_EngGizmos_30.png]],
-		edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
+		bgFile   = "Interface\\ICONS\\INV_Misc_EngGizmos_30.png",
+		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 		tile     = false,
 		tileSize = 32,
 		edgeSize = 32,
@@ -30,7 +35,7 @@ function Geary_Interface_Icon:init()
 	button:SetScript("OnDragStart", button.StartMoving)
 	button:SetScript("OnDragStop", button.StopMovingOrSizing)
 	button:SetScript("OnHide", button.StopMovingOrSizing)
-	button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+	button:RegisterForClicks("LeftButtonDown", "MiddleButtonDown", "RightButtonDown")
 	button:SetScript("OnClick", function (self) Geary_Interface_Icon:OnClick(self) end)
 	if Geary_Options:isIconShown() then
 		button:Show()
@@ -41,10 +46,15 @@ function Geary_Interface_Icon:init()
 end
 
 function Geary_Interface_Icon:OnClick(button)
-	if SecureCmdOptionParse("[btn:2]") then
-		Geary_Inspect:inspectPlayer()
-	else
+	local mouseButton = GetMouseButtonClicked()
+	if mouseButton == "LeftButton" then
 		Geary_Inspect:inspectTarget()
+	elseif mouseButton == "MiddleButton" then
+		Geary_Interface:toggle()
+	elseif mouseButton == "RightButton" then
+		Geary_Inspect:inspectSelf()
+	else
+		Geary:debugPrint("Ignoring icon click from mouse button " .. mouseButton)
 	end
 end
 

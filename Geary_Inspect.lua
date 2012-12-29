@@ -1,5 +1,10 @@
 --[[
-	Stuff
+	Geary inspection manager
+	
+	LICENSE
+	Geary is in the Public Domain as a thanks for the efforts of other AddOn
+	developers that have made my WoW experience better for many years.
+	Any credits to me (FoamHead) and/or Geary would be appreciated.
 --]]
 
 Geary_Inspect = {
@@ -250,7 +255,7 @@ function Geary_Inspect:inspectUnit(unit)
 	end
 end
 
-function Geary_Inspect:inspectPlayer()
+function Geary_Inspect:inspectSelf()
 	self:inspectUnitRequest("player")
 end
 

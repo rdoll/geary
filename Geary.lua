@@ -1,5 +1,10 @@
 --[[
-
+	Geary main module
+	
+	LICENSE
+	Geary is in the Public Domain as a thanks for the efforts of other AddOn
+	developers that have made my WoW experience better for many years.
+	Any credits to me (FoamHead) and/or Geary would be appreciated.
 --]]
 
 Geary = {
@@ -13,7 +18,7 @@ Geary = {
 -- "VERSION" gets replaced with the TOC version
 local _usage = [[
 Geary version VERSION Usage
-/geary inspect [player | target | group]
+/geary inspect [self | target | group]
 /geary ui [show | hide | toggle]
 /geary icon [show | hide | toggle]
 /geary debug [on | off]
@@ -29,15 +34,15 @@ function Geary:init()
 
 	-- Key bindings
 	_G["BINDING_HEADER_GEARY_BINDINGS_HEADER"] = self.title
-	_G["BINDING_NAME_Geary Show UI"] = "Show Interface"
-	_G["BINDING_NAME_Geary Hide UI"] = "Hide Interface"
-	_G["BINDING_NAME_Geary Toggle UI"] = "Toggle Interface"
-	_G["BINDING_NAME_Geary Show Icon"] = "Show Icon"
-	_G["BINDING_NAME_Geary Hide Icon"] = "Hide Icon"
-	_G["BINDING_NAME_Geary Toggle Icon"] = "Toggle Icon"
-	_G["BINDING_NAME_Geary Inspect Self"] = "Inspect Self"
-	_G["BINDING_NAME_Geary Inspect Target"] = "Inspect Target"
-	_G["BINDING_NAME_Geary Inspect Group"] = "Inspect Group"
+	_G["BINDING_NAME_GEARY_SHOW_UI"] = "Show Interface"
+	_G["BINDING_NAME_GEARY_HIDE_UI"] = "Hide Interface"
+	_G["BINDING_NAME_GEARY_TOGGLE_UI"] = "Toggle Interface"
+	_G["BINDING_NAME_GEARY_SHOW_ICON"] = "Show Icon"
+	_G["BINDING_NAME_GEARY_HIDE_ICON"] = "Hide Icon"
+	_G["BINDING_NAME_GEARY_TOGGLE_ICON"] = "Toggle Icon"
+	_G["BINDING_NAME_GEARY_INSPECT_SELF"] = "Inspect Self"
+	_G["BINDING_NAME_GEARY_INSPECT_TARGET"] = "Inspect Target"
+	_G["BINDING_NAME_GEARY_INSPECT_GROUP"] = "Inspect Group"
 	
 	-- Set script handlers for defined events
 	-- Note that the event first argument is eaten when the handler is invoked
@@ -125,8 +130,8 @@ Geary:init()
 --
 
 local function _slashCommandInspect(rest)
-	if rest == "player" then
-		Geary_Inspect:inspectPlayer()
+	if rest == "self" then
+		Geary_Inspect:inspectSelf()
 	elseif rest == "target" then
 		Geary_Inspect:inspectTarget()
 	elseif rest == "group" then
