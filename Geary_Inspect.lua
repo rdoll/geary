@@ -31,6 +31,7 @@ function Geary_Inspect:resetData()
 	wipe(self.items)
 	self.filledSockets = 0
 	self.emptySockets = 0
+	self.missingBeltBuckle = false
 	self.unenchantedCount = 0
 	self.upgradeLevel = 0
 	self.upgradeMax = 0
@@ -110,6 +111,9 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 			if self.maxItem == nil or item.iLevel > self.maxItem.iLevel then
 				self.maxItem = item
 			end
+			if item.missingBeltBuckle then
+				self.missingBeltBuckle = true
+			end
 			if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
 				self.hasTwoHandWeapon = true
 			end
@@ -179,10 +183,13 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	if self.emptySlots > 0 then
 		Geary:log(self.emptySlots .. " item slots are empty!", 1, 0, 0)
 	end
+	if self.missingBeltBuckle then
+		Geary:log("Missing belt buckle!", 1, 0, 0)
+	end
 	if self.emptySockets > 0 then
 		Geary:log(self.emptySockets .. " gem sockets empty!", 1, 0, 0)
 	elseif self.filledSockets > 0 then
-		Geary:log("All  sockets are filled", 0, 1, 0)
+		Geary:log("All sockets are filled", 0, 1, 0)
 	end
 	if self.unenchantedCount > 0 then
 		Geary:log(self.unenchantedCount .. " items missing enchants!", 1, 0, 0)

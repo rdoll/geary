@@ -180,7 +180,6 @@ end
 local function _slashCommandDumpItem(rest)
 	if rest:match("^%d+$") or rest:match("^|") then
 		Geary_Interface:Show()
-		Geary_Interface_Log:Clear()
 		local oldDebug = Geary.debugOn
 		Geary.debugOn = true
 		local itemLink
@@ -189,14 +188,20 @@ local function _slashCommandDumpItem(rest)
 		else
 			_, itemLink = GetItemInfo(tonumber(rest))
 		end
+		Geary:debugLog(" ")
 		Geary:debugLog("--- Dumping item " .. itemLink .. " ---")
 		local item = Geary_Item:new{
 			slot = "MainHandSlot",   -- Doesn't matter; just want something that can be enchanted
 			link = itemLink
 		}
 		item:probe()
-		if DevTools_Dump then
-			DevTools_Dump(item)
+		if not DevTools_Dump then
+			LoadAddOn("Blizzard_DebugTools")
+			if DevTools_Dump then
+				DevTools_Dump(item)
+			else
+				Geary:debugPrint("Failed to load Blizzard_DebugTools or find DevTools_Dump")
+			end
 		end
 		Geary.debugOn = oldDebug
 	else

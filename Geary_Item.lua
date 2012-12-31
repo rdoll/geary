@@ -11,72 +11,25 @@ Geary_Item = {
 	tooltip = CreateFrame("GameTooltip", "Geary_Tooltip_Scanner", UIParent, "GameTooltipTemplate")
 }
 
--- Details of all slots and what they can contain
+-- Details of all slots and what they can contain (slotNumber filled in during init)
+-- TODO Add info about profession perks (e.g. enchants on rings, sockets on wrist/hands, etc)
 local slotDetails = {
-	HeadSlot = {
-		slotNumber = nil,
-		canEnchant = false
-	},
-	NeckSlot = {
-		slotNumber = nil,
-		canEnchant = false
-	},
-	ShoulderSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	BackSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	ChestSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	WaistSlot = {
-		slotNumber = nil,
-		canEnchant = false  -- TODO Does belt buckle count as an enchant?
-	},
-	LegsSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	FeetSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	WristSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	HandsSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	Finger0Slot = {
-		slotNumber = nil,
-		canEnchant = false  -- TODO Must handle enchanter enchants
-	},
-	Finger1Slot = {
-		slotNumber = nil,
-		canEnchant = false  -- TODO Must handle enchanter enchants
-	},
-	Trinket0Slot = {
-		slotNumber = nil,
-		canEnchant = false
-	},
-	Trinket1Slot = {
-		slotNumber = nil,
-		canEnchant = false
-	},
-	MainHandSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	},
-	SecondaryHandSlot = {
-		slotNumber = nil,
-		canEnchant = true
-	}
+	HeadSlot          = { slotNumber = nil, canEnchant = false },
+	NeckSlot          = { slotNumber = nil, canEnchant = false },
+	ShoulderSlot      = { slotNumber = nil, canEnchant = true  },
+	BackSlot          = { slotNumber = nil, canEnchant = true  },
+	ChestSlot         = { slotNumber = nil, canEnchant = true  },
+	WaistSlot         = { slotNumber = nil, canEnchant = false },
+	LegsSlot          = { slotNumber = nil, canEnchant = true  },
+	FeetSlot          = { slotNumber = nil, canEnchant = true  },
+	WristSlot         = { slotNumber = nil, canEnchant = true  },
+	HandsSlot         = { slotNumber = nil, canEnchant = true  },
+	Finger0Slot       = { slotNumber = nil, canEnchant = false },
+	Finger1Slot       = { slotNumber = nil, canEnchant = false },
+	Trinket0Slot      = { slotNumber = nil, canEnchant = false },
+	Trinket1Slot      = { slotNumber = nil, canEnchant = false },
+	MainHandSlot      = { slotNumber = nil, canEnchant = true  },
+	SecondaryHandSlot = { slotNumber = nil, canEnchant = true  }
 }
 
 -- Names of empty gem sockets in tooltips
@@ -138,6 +91,7 @@ function Geary_Item:new(o)
 	local newObject = {
 		slot = nil,
 		link = nil,
+		id = nil,
 		name = nil,
 		rarity = nil,
 		iLevel = 0,
@@ -145,6 +99,7 @@ function Geary_Item:new(o)
 		subType = nil,
 		filledSockets = {},
 		emptySockets = {},
+		missingBeltBuckle = false,
 		canEnchant = false,
 		enchantText = nil,
 		upgradeLevel = 0,
@@ -172,8 +127,9 @@ function Geary_Item:probe()
 		error("Cannot probe item without slot")
 		return
 	end
-
+	
 	-- Get base item info
+	self.id = self.link:match("|Hitem:(%d+):")
 	self.canEnchant = slotDetails[self.slot].canEnchant
 	self.name, _, self.rarity, _, _, self.iType, self.subType, _, _, _, _ = GetItemInfo(self.link)
 
@@ -183,6 +139,11 @@ function Geary_Item:probe()
 	-- Get socketed gem information
 	self:_getGems()
 
+	-- If this is a waist item, see if the belt buckle is missing
+	if self.slot == "WaistSlot" then
+		self:_checkForBeltBuckle()
+	end
+	
 	-- Ensure we got the data we should have
 	if self.iLevel < 1 then
 		Geary:print(RED_FONT_COLOR_CODE .. "ERROR: No item level found in " .. self.link ..
@@ -210,6 +171,11 @@ function Geary_Item:probe()
 	elseif self.canEnchant then
 		-- TODO Abstract colors to constants or methods
 		Geary:log("   Missing enchant!", 1, 0, 0)
+	end
+	
+	if self.missingBeltBuckle then
+		-- TODO Abstract colors to constants or methods
+		Geary:log("   Missing belt buckle!", 1, 0, 0)
 	end
 end
 
@@ -312,5 +278,52 @@ function Geary_Item:_setEnchantText(enchantText)
 			FONT_COLOR_CODE_CLOSE)
 	else
 		self.enchantText = enchantText
+	end
+end
+
+-- There is no good way to check for a belt buckle
+-- What we do is count the gems in the BASE item and compare that with the
+-- number of gem's in THIS item. If THIS item doesn't have one more gem than
+-- the BASE item, it doesn't have a belt buckle (or has a belt buckle with no gem in it)
+-- Note: This is tooltip parsing similar to the full parse, but we just care about empty sockets
+function Geary_Item:_checkForBeltBuckle()
+
+	-- Get the base item info from this item
+	local _, baseItemLink = GetItemInfo(self.id)
+
+	-- Ensure owner is set (ClearLines unsets owner)
+	-- ANCHOR_NONE without setting any points means it's never rendered)
+	self.tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+
+	-- Build tooltip for item
+	-- Note that SetHyperlink on the same item link twice in a row closes the tooltip
+	-- which deletes its content; so we ClearLines when done
+	self.tooltip:SetHyperlink(baseItemLink)
+
+	-- Parase the left side text (right side text isn't useful)
+	local lineNum, baseSocketCount = 0, 0
+	for lineNum = 1, self.tooltip:NumLines(), 1 do
+		(function ()  -- Function so we can use return as "continue"
+			local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
+			Geary:debugLog("buckle: " .. text, 0.5, 0.5, 0.5)
+			
+			for _, socketName in pairs(socketNames) do
+				if text == socketName then
+					baseSocketCount = baseSocketCount + 1
+					return  -- "continue"
+				end
+			end
+		end)()
+	end
+
+	-- Clear the tooltip's content (which also clears its owner)
+	self.tooltip:ClearLines()
+	
+	-- Total sockets in THIS item is filled plus empty
+	-- If total is <= the count in the base item, the belt buckle is missing
+	Geary:debugLog(("buckle: filled=%i, empty=%i, base=%i"):format(#self.filledSockets,
+		#self.emptySockets, baseSocketCount), 0.5, 0.5, 0.5)
+	if #self.filledSockets + #self.emptySockets <= baseSocketCount then
+		self.missingBeltBuckle = true
 	end
 end
