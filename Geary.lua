@@ -10,6 +10,7 @@
 Geary = {
 	version = nil,
 	title = nil,
+	notes = nil,
 	debugOn = false,
 	eventsFrame = nil,
 	events = {}
@@ -21,6 +22,7 @@ Geary version VERSION Usage
 /geary inspect [self | target | group]
 /geary ui [show | hide | toggle]
 /geary icon [show | hide | toggle]
+/geary options
 /geary debug [on | off]
 /geary dumpitem [itemid | itemlink]
 ]]
@@ -29,6 +31,7 @@ function Geary:init()
 	-- Our info
 	self.version = GetAddOnMetadata("Geary", "Version")
 	self.title = GetAddOnMetadata("Geary", "Title")
+	self.notes = GetAddOnMetadata("Geary", "Notes")
 	self:print("Loaded version " .. self.version)
 	_usage = _usage:gsub("VERSION", Geary.version, 1)
 
@@ -165,6 +168,10 @@ local function _slashCommandIcon(rest)
 	end
 end
 
+local function _slashCommandOptions(rest)
+	Geary_Interface_Options:Show()
+end
+
 local function _slashCommandDebug(rest)		
 	if rest == "on" then
 		Geary.debugOn = true
@@ -197,11 +204,11 @@ local function _slashCommandDumpItem(rest)
 		item:probe()
 		if not DevTools_Dump then
 			LoadAddOn("Blizzard_DebugTools")
-			if DevTools_Dump then
-				DevTools_Dump(item)
-			else
-				Geary:debugPrint("Failed to load Blizzard_DebugTools or find DevTools_Dump")
-			end
+		end
+		if DevTools_Dump then
+			DevTools_Dump(item)
+		else
+			Geary:debugPrint("Failed to load Blizzard_DebugTools or find DevTools_Dump")
 		end
 		Geary.debugOn = oldDebug
 	else
@@ -220,6 +227,8 @@ function SlashCmdList.GEARY(msg, editBox)
 		_slashCommandUi(rest)
 	elseif command == "icon" then
 		_slashCommandIcon(rest)
+	elseif command == "options" then
+		_slashCommandOptions(rest)
 	elseif command == "debug" then
 		_slashCommandDebug(rest)
 	elseif command == "dumpitem" then

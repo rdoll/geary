@@ -75,3 +75,8 @@ function Geary_Interface_Icon:toggle()
 		self:Show()
 	end
 end
+
+function Geary_Interface_Icon:setScale(scale)
+	self.button:SetScale(scale)
+	Geary_Options:setIconScale(scale)
+end

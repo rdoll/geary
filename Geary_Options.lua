@@ -7,15 +7,18 @@
 	Any credits to me (FoamHead) and/or Geary would be appreciated.
 --]]
 
-Geary_Options = {}
+Geary_Options = {
+	defaultIconShown = true,
+	defaultIconScale = 1.0
+}
 
 -- Note: At this point, the rest of the addon is not initialized
 function Geary_Options:ADDON_LOADED()
 	if Geary_Saved_Options == nil or Geary_Saved_Options.version == nil then
 		Geary_Saved_Options = {
 			icon = {
-				shown = true,
-				scale = 0.5
+				shown = self.iconShownDefault,
+				scale = defaultIconScale
 			}
 		}
 		Geary:debugPrint("Initialized Geary_Saved_Options")
