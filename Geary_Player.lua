@@ -43,8 +43,9 @@ function Geary_Player:probeInfo()
 	self.faction, _ = UnitFactionGroup(self.unit)
 end
 
-function Geary_Player:getFullName()
-	return self.name .. (((self.realm == nil) or (self.realm == "")) and "" or ("-" .. self.realm))
+function Geary_Player:getFullNameLink()
+	return format(TEXT_MODE_A_STRING_DEST_UNIT, "", self.guid, self.name,
+		self.name .. (((self.realm == nil) or (self.realm == "")) and "" or ("-" .. self.realm)))
 end
 
 function Geary_Player:getFactionInlineIcon()

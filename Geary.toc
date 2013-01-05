@@ -16,7 +16,6 @@ Geary_Interface_Group.lua
 Geary_Interface_Database.lua
 Geary_Interface_Log.lua
 Geary_Interface_Options.lua
-Geary_Interface_Help.lua
 Geary_Interface_Icon.lua
 Geary_Interface.lua
 

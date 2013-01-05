@@ -89,7 +89,7 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 		return
 	end
 
-	-- Player's inspection info from the server
+	-- Player's specialization
 	self.player:INSPECT_READY()
 	
 	-- Player inventory
@@ -158,7 +158,7 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	-- Summary
 	Geary:log(" ")
 	Geary:log(("--- %s %s %i %s %s ---"):format(self.player:getFactionInlineIcon(),
-		self.player:getFullName(), self.player.level, self.player:getColorizedClassName(),
+		self.player:getFullNameLink(), self.player.level, self.player:getColorizedClassName(),
 		self.player:getSpecWithInlineIcon()))
 	Geary:log(("%.2f equipped iLevel (%i%s items with %i total)"):format(self.iLevelEquipped,
 		self.itemCount, self.hasTwoHandWeapon and " (2H)" or "", self.iLevelTotal))
@@ -219,7 +219,7 @@ function Geary_Inspect:inspectUnitRequest(unit)
 	-- Cannot do two inspections at once
 	if self.inProgress then
 		Geary:print(RED_FONT_COLOR_CODE .. "Cannot inspect " .. unit .. " while inspection of " ..
-			self.player:getFullName() .. " still in progress." .. FONT_COLOR_CODE_CLOSE)
+			self.player:getFullNameLink() .. " still in progress." .. FONT_COLOR_CODE_CLOSE)
 		return
 	end
 
@@ -246,8 +246,8 @@ function Geary_Inspect:makeInspectRequest()
 	self:resetData()
 	Geary:log(" ")
 	Geary:log(("Inspecting %s %s %s %i %s (%s)"):format(self.player.unit,
-		self.player:getFullName(), self.player.faction,	self.player.level, self.player.className,
-		self.player.guid))
+		self.player:getFactionInlineIcon(), self.player:getFullNameLink(), self.player.level,
+		self.player:getColorizedClassName(), self.player.guid))
 	self.inspectTry = self.inspectTry + 1
 	self:startTimer(self.inspectTimeout)
 	Geary:RegisterEvent("INSPECT_READY")

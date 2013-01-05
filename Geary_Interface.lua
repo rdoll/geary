@@ -13,21 +13,22 @@ Geary_Interface = {
 
 function Geary_Interface:init()
 
-	-- Create our UI element
+	-- Create the interface elements
 	self:_createMainFrame()
 	self:_createHeader()
 	self:_createClearButton()
 	self:_createCloseButton()
 	
-	-- Init other modules to create their UI elements
+	-- Init interface tab modules
 	Geary_Interface_Player:init()
 	Geary_Interface_Group:init()
 	Geary_Interface_Database:init()
 	Geary_Interface_Log:init()
-	Geary_Interface_Options:init()
-	Geary_Interface_Help:init()
 	
-	-- Create the main icon button
+	-- Init integrated options
+	Geary_Interface_Options:init()
+	
+	-- Init the main icon button
 	Geary_Interface_Icon:init()
 end
 

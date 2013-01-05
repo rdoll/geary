@@ -27,7 +27,7 @@ function Geary_Interface_Options:init()
 end
 
 function Geary_Interface_Options:_createContents()
-
+	
 	-- Title
 	local title = self.mainFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
@@ -43,12 +43,27 @@ function Geary_Interface_Options:_createContents()
 	subtitle:SetJustifyV("TOP")
 	subtitle:SetText("Version: " .. Geary.version .. "\n" .. Geary.notes)
 	
+	-- Create sections
+	local section = self:_createIconSection(subtitle)
+	section = self:_createInterfaceSection(section)
+	
+	-- Mark created so we don't recreate everything
+	self.contentsCreated = true
+end
+
+function Geary_Interface_Options:_createIconSection(previousItem)
+
+	-- Geary icon header
+	local iconHeader = self:_createHeader(self.mainFrame, "Geary Icon Button")
+	iconHeader:SetWidth(self.mainFrame:GetWidth() - 32)
+	iconHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -2, -5)
+
 	-- Icon shown
 	local checkbox = CreateFrame("CheckButton", "$parent_Icon_Shown_Checkbox", self.mainFrame,
 		"InterfaceOptionsCheckButtonTemplate")
-	checkbox:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", -2, -5)
+	checkbox:SetPoint("TOPLEFT", iconHeader, "BOTTOMLEFT", -2, -5)
 	checkbox.Label = _G[checkbox:GetName() .. "Text"]
-	checkbox.Label:SetText("Show Icon")
+	checkbox.Label:SetText("Show Icon Button")
 	checkbox:SetScript("OnEnter", function (self)
 		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
 		GameTooltip:SetText("Shows the Geary quick access icon")
@@ -70,7 +85,7 @@ function Geary_Interface_Options:_createContents()
 	-- Label above
 	slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
 	slider.Label:SetPoint("TOPLEFT", -5, 18)
-	slider.Label:SetText("Icon Scale:")
+	slider.Label:SetText("Icon Button Scale:")
 	-- Lowest value label
 	slider.Low = _G[slider:GetName() .. "Low"]
 	slider.Low:SetText("10%")
@@ -94,7 +109,50 @@ function Geary_Interface_Options:_createContents()
 	-- Save it
 	self.iconScaleSlider = slider
 
-	self.contentsCreated = true
+	return slider
+end
+
+function Geary_Interface_Options:_createInterfaceSection(previousItem)
+
+	-- Geary interface header
+	local interfaceHeader = self:_createHeader(self.mainFrame, "Geary Interface")
+	interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
+	interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -8, -25)
+
+	-- TODO Add font size and possibly font here
+	local comingSoon = self.iconScaleSlider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+	comingSoon:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 2, -10)
+	comingSoon:SetText("Coming soon...")
+	
+	return comingSoon
+end
+
+function Geary_Interface_Options:_createHeader(parent, name)
+
+	local frame = CreateFrame("Frame", nil, parent)
+	frame:SetHeight(16)
+
+	local text = frame:CreateFontString(nil, "BACKGROUND", "GameFontNormal")
+	text:SetPoint("TOP")
+	text:SetPoint("BOTTOM")
+	text:SetJustifyH("CENTER")
+	text:SetText(name)
+
+	local leftLine = frame:CreateTexture(nil, "BACKGROUND")
+	leftLine:SetHeight(8)
+	leftLine:SetPoint("LEFT", 3, 0)
+	leftLine:SetPoint("RIGHT", text, "LEFT", -5, 0)
+	leftLine:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
+	leftLine:SetTexCoord(0.81, 0.94, 0.5, 1)
+
+	local rightLine = frame:CreateTexture(nil, "BACKGROUND")
+	rightLine:SetHeight(8)
+	rightLine:SetPoint("RIGHT", -3, 0)
+	rightLine:SetPoint("LEFT", text, "RIGHT", 5, 0)
+	rightLine:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
+	rightLine:SetTexCoord(0.81, 0.94, 0.5, 1)
+	
+	return frame
 end
 
 function Geary_Interface_Options:Show()
