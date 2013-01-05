@@ -128,6 +128,9 @@ function Geary_Item:probe()
 		return
 	end
 	
+	-- Workaround an item link bug with the signed suffixId being unsigned in the link
+	self.link = self:_itemLinkSuffixIdBugWorkaround(self.link)
+	
 	-- Get base item info
 	self.id = self.link:match("|Hitem:(%d+):")
 	self.canEnchant = slotDetails[self.slot].canEnchant
@@ -176,6 +179,33 @@ function Geary_Item:probe()
 	if self.missingBeltBuckle then
 		-- TODO Abstract colors to constants or methods
 		Geary:log("   Missing belt buckle!", 1, 0, 0)
+	end
+end
+
+--
+-- As of 5.1, there is a bug that causes tooltip's SetHyperlink to not render
+-- the stats on random stat items when the suffixId is greater than 32767.
+--
+-- Details:
+--   http://us.battle.net/wow/en/forum/topic/7414946222
+--
+-- Example link that doesn't render stats unless we make the suffixId signed:
+--   |cff0070dd|Hitem:89491:0:0:0:0:0:65398:1042810102:90:451|h[Firewool Cord]|h|r
+--
+-- Fixed link:
+--   |cff0070dd|Hitem:89491:0:0:0:0:0:-138:1042810102:90:451|h[Firewool Cord of the Feverflare]|h|r
+
+-- The root cause seems to be GetInventoryItemLink returns a link with the suffixId as
+-- unsigned when it has to be signed.
+--
+function Geary_Item:_itemLinkSuffixIdBugWorkaround(link)
+	local before, suffixId, after = link:match("(.-item:.-:.-:.-:.-:.-:.-:)(.-)(:.+)")
+	if tonumber(suffixId) > 32767 then
+		-- Too large for 16-bit signed, so convert unsigned to signed
+		return before .. (-1 * (65536 - suffixId)) .. after
+	else
+		-- Already a signed int, so no workaround necessary
+		return link
 	end
 end
 
@@ -281,11 +311,11 @@ function Geary_Item:_setEnchantText(enchantText)
 	end
 end
 
--- There is no good way to check for a belt buckle
--- What we do is count the gems in the BASE item and compare that with the
--- number of gem's in THIS item. If THIS item doesn't have one more gem than
--- the BASE item, it doesn't have a belt buckle (or has a belt buckle with no gem in it)
--- Note: This is tooltip parsing similar to the full parse, but we just care about empty sockets
+-- There is no good way to check for a belt buckle.
+-- What we do is count the gems in the BASE item and compare that with the number of gem's
+-- in THIS item. If THIS item doesn't have one more gem than the BASE item, it doesn't have
+-- a belt buckle (or has a belt buckle with no gem in it).
+-- Note: This is tooltip parsing similar to the full parse, but we just care about empty sockets.
 function Geary_Item:_checkForBeltBuckle()
 
 	-- Get the base item info from this item

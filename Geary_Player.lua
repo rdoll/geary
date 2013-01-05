@@ -13,9 +13,10 @@ Geary_Player = {
 	name = nil,
 	realm = nil,
 	faction = nil,
-	classId = nil,
 	className = nil,
-	level = nil
+	classFilename = nil,
+	level = nil,
+	spec = nil
 }
 
 function Geary_Player:new(o)
@@ -29,18 +30,111 @@ function Geary_Player:isMaxLevel()
 	return self.level == 90
 end
 
-function Geary_Player:getInfo()
+function Geary_Player:probeInfo()
 	if self.unit == nil then
 		error("Cannot get player info without unit!")
 		return
 	end
 	
 	self.guid = UnitGUID(self.unit)
-	self.className, self.classId, _, _, _, self.name, self.realm = GetPlayerInfoByGUID(self.guid)
-	self.faction = select(1, UnitFactionGroup(self.unit))
+	self.name, self.realm = UnitName(self.unit)
+	self.className, self.classFilename = UnitClass(self.unit)
 	self.level = UnitLevel(self.unit)
+	self.faction, _ = UnitFactionGroup(self.unit)
 end
 
 function Geary_Player:getFullName()
 	return self.name .. (((self.realm == nil) or (self.realm == "")) and "" or ("-" .. self.realm))
+end
+
+function Geary_Player:getFactionInlineIcon()
+	if self.faction == "Horde" then
+		return "|TInterface\\PVPFrame\\PVP-Currency-Horde.png:16:16:0:0:32:32:2:30:2:30|t"
+	elseif self.faction == "Alliance" then
+		return "|TInterface\\PVPFrame\\PVP-Currency-Alliance.png:16:16:0:0:32:32:4:28:2:30|t"
+	else
+		return "(?)"
+	end
+end
+
+function Geary_Player:getColorizedClassName()
+	if RAID_CLASS_COLORS[self.classFilename] == nil then
+		return self.className
+	else
+		return "|c" .. RAID_CLASS_COLORS[self.classFilename].colorStr .. self.className ..
+			FONT_COLOR_CODE_CLOSE   
+	end
+end
+
+function Geary_Player:getSpecWithInlineIcon()
+	if self.spec == nil then
+		return "NoSpec"
+	elseif self.spec.inlineIcon == nil then
+		return self.spec.name
+	else
+		return self.spec.name .. " " .. self.spec.inlineIcon
+	end
+end
+
+local _roleInlineIcons = {
+	["TANK"]    = INLINE_TANK_ICON,
+	["HEALER"]  = INLINE_HEALER_ICON,
+	["DAMAGER"] = INLINE_DAMAGER_ICON
+}
+
+function Geary_Player:INSPECT_READY()
+
+	-- This can be called multiple times if inspection retries are necessary,
+	-- so if we already have spec info, don't bother asking for it again
+	if self.spec ~= nil then
+		return
+	end
+	
+	local specName, specRole
+	if self.unit == "player" then
+		local nonGlobSpecId = GetSpecialization()
+		if nonGlobSpecId == nil then
+			Geary:print("nonGlobSpecId is nil!")
+			return
+		end
+		_, specName, _, _, _, specRole = GetSpecializationInfo(nonGlobSpecId)
+	else
+		local globSpecId = GetInspectSpecialization(self.unit)
+		if globSpecId == nil then
+			Geary:print("globSpecId is nil!")
+			return
+		elseif globSpecId == 0 then
+			Geary:print("globSpecId is 0 -- server didn't send it")
+			return
+		end
+		--
+		-- From http://www.wowpedia.org/API_GetSpecializationInfoByID
+		--
+		-- Warning: As of 2012/07/12, this seems to be quite often buggy:
+		-- The return of GetInspectSpecialization() should be a number less than 500,
+		-- but sometimes is far greater and not interpretable. FrameXML is therefore
+		-- 'validating' the value by calling GetSpecializationRoleByID(), and only
+		-- if that returns a non-nil value, it decodes the number with GetSpecializationInfoByID().
+		--
+		specRole = GetSpecializationRoleByID(globSpecId)
+		if specRole == nil then
+			Geary:print("globSpecId " .. globSpecId .. " is invalid!")
+			return
+		end
+		_, specName, _, _, _, _, _ = GetSpecializationInfoByID(globSpecId)
+	end
+	
+	if specName == nil then
+		Geary:print("specName is nil!")
+		return
+	elseif specRole == nil then
+		Geary:print("specRole is nil!")
+		return
+	end
+	
+	self.spec = {
+		name = specName,
+		role = specRole,
+		inlineIcon = _roleInlineIcons[specRole] == nil and nil or _roleInlineIcons[specRole]
+	}
 end

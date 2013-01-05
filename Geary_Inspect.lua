@@ -89,6 +89,9 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 		return
 	end
 
+	-- Player's inspection info from the server
+	self.player:INSPECT_READY()
+	
 	-- Player inventory
 	local slotNumber, slotName
 	for slotNumber, slotName in pairs(Geary_Item:getInvSlots()) do
@@ -154,8 +157,9 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 
 	-- Summary
 	Geary:log(" ")
-	Geary:log(("--- %s %s %i %s ---"):format(self.player:getFullName(), self.player.faction,
-		self.player.level, self.player.className))
+	Geary:log(("--- %s %s %i %s %s ---"):format(self.player:getFactionInlineIcon(),
+		self.player:getFullName(), self.player.level, self.player:getColorizedClassName(),
+		self.player:getSpecWithInlineIcon()))
 	Geary:log(("%.2f equipped iLevel (%i%s items with %i total)"):format(self.iLevelEquipped,
 		self.itemCount, self.hasTwoHandWeapon and " (2H)" or "", self.iLevelTotal))
 	if self.player:isMaxLevel() then
@@ -226,7 +230,7 @@ function Geary_Inspect:inspectUnitRequest(unit)
 
 	-- Player info
 	self.player = Geary_Player:new{unit = unit}
-	self.player:getInfo()
+	self.player:probeInfo()
 
 	-- Request inspection
 	self:makeInspectRequest()
