@@ -53,7 +53,7 @@ end
 
 function Geary_Interface_Options:_createIconSection(previousItem)
 
-	-- Geary icon header
+	-- Icon header
 	local iconHeader = self:_createHeader(self.mainFrame, "Geary Icon Button")
 	iconHeader:SetWidth(self.mainFrame:GetWidth() - 32)
 	iconHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -2, -5)
@@ -80,7 +80,8 @@ function Geary_Interface_Options:_createIconSection(previousItem)
 	slider:SetMinMaxValues(10, 200)
 	slider:SetValueStep(1)
 	slider:SetOrientation("HORIZONTAL")
-	slider:SetPoint("TOPLEFT", self.iconShownCheckbox, "BOTTOMLEFT", 10, -30)
+	slider:SetPoint("TOPLEFT", iconHeader, "BOTTOM", 0, -30)
+--	slider:SetPoint("TOPLEFT", self.iconShownCheckbox, "BOTTOMLEFT", 10, -30)
 	slider:Enable()
 	-- Label above
 	slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
@@ -109,7 +110,7 @@ function Geary_Interface_Options:_createIconSection(previousItem)
 	-- Save it
 	self.iconScaleSlider = slider
 
-	return slider
+	return self.iconShownCheckbox
 end
 
 function Geary_Interface_Options:_createInterfaceSection(previousItem)
@@ -117,7 +118,7 @@ function Geary_Interface_Options:_createInterfaceSection(previousItem)
 	-- Geary interface header
 	local interfaceHeader = self:_createHeader(self.mainFrame, "Geary Interface")
 	interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
-	interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -8, -25)
+	interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -45)
 
 	-- TODO Add font size and possibly font here
 	local comingSoon = self.iconScaleSlider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
@@ -171,8 +172,8 @@ function Geary_Interface_Options:OnShow(frame)
 end
 
 function Geary_Interface_Options:onDefault(frame)
-	self.iconShownCheckbox:SetChecked(Geary_Options.defaultIconShown)
-	self.iconScaleSlider:SetValue(ceil(Geary_Options.defaultIconScale * 100))
+	self.iconShownCheckbox:SetChecked(Geary_Options.default.iconShown)
+	self.iconScaleSlider:SetValue(ceil(Geary_Options.default.iconScale * 100))
 end
 
 function Geary_Interface_Options:onOkay(frame)
