@@ -200,6 +200,23 @@ function Geary_Interface_Options:Show()
 	 InterfaceOptionsFrame_OpenToCategory(self.mainFrame)
 end
 
+function Geary_Interface_Options:Hide()
+	if InterfaceOptionsFrameCancel == nil then
+		Geary:print("Cannot hide Interface options")
+	else
+		-- Simulate a left-mouse button click on the Interface frame's cancel button
+		InterfaceOptionsFrameCancel:Click("LeftButton", true)
+	end
+end
+
+function Geary_Interface_Options:toggle()
+	if InterfaceOptionsFrame:IsShown() then
+		Geary_Interface_Options:Hide()
+	else
+		Geary_Interface_Options:Show()
+	end
+end
+
 function Geary_Interface_Options:OnShow(frame)
 	-- Create options frame contents once when necessary
 	if not self.contentsCreated then
