@@ -14,6 +14,21 @@ Geary_Interface_Options = {
 	iconScaleSlider = nil
 }
 
+local _fontFilenames = {
+	byFilename = {
+		["Fonts\\FRIZQT__.TTF"] = { id = 1, name = "Friz Quadrata" },
+		["Fonts\\ARIALN.TTF"]   = { id = 2, name = "Arial Narrow"  },
+		["Fonts\\SKURRI.ttf"]   = { id = 3, name = "Skurri"        },
+		["Fonts\\MORPHEUS.ttf"] = { id = 4, name = "Morpheus"      }
+	},
+	byId = {
+		[1] = "Fonts\\FRIZQT__.TTF",
+		[2] = "Fonts\\ARIALN.TTF",
+		[3] = "Fonts\\SKURRI.ttf",
+		[4] = "Fonts\\MORPHEUS.ttf"
+	}
+}
+
 function Geary_Interface_Options:init()
 	-- Add our options frame to the Interface Addon Options GUI
 	local frame = CreateFrame("Frame", "Geary_Ui_Options_Frame", UIParent)
@@ -81,7 +96,6 @@ function Geary_Interface_Options:_createIconSection(previousItem)
 	slider:SetValueStep(1)
 	slider:SetOrientation("HORIZONTAL")
 	slider:SetPoint("TOPLEFT", iconHeader, "BOTTOM", 0, -30)
---	slider:SetPoint("TOPLEFT", self.iconShownCheckbox, "BOTTOMLEFT", 10, -30)
 	slider:Enable()
 	-- Label above
 	slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
@@ -113,6 +127,19 @@ function Geary_Interface_Options:_createIconSection(previousItem)
 	return self.iconShownCheckbox
 end
 
+local function _logFontFilenameDropdownInitialize(self, level)
+	local id, filename, info
+	for id, filename in ipairs(_fontFilenames.byId) do
+		info = UIDropDownMenu_CreateInfo()
+		info.text = _fontFilenames.byFilename[filename].name
+		info.value = filename
+		info.func = function (self)
+			UIDropDownMenu_SetSelectedID(Geary_Interface_Options.logFontFilenameDropdown, self:GetID())
+		end
+		UIDropDownMenu_AddButton(info, level)
+	end
+end
+
 function Geary_Interface_Options:_createInterfaceSection(previousItem)
 
 	-- Geary interface header
@@ -120,12 +147,25 @@ function Geary_Interface_Options:_createInterfaceSection(previousItem)
 	interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
 	interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -45)
 
-	-- TODO Add font size and possibly font here
-	local comingSoon = self.iconScaleSlider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-	comingSoon:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 2, -10)
-	comingSoon:SetText("Coming soon...")
+	-- Log font filename dropdown
+	local label = self.mainFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+	label:SetText("Log Font:")
+	label:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 5, -15)
+
+	local dropdown = CreateFrame("Button", "$parent_Log_Font_Filename_Dropdown", self.mainFrame,
+		"UIDropDownMenuTemplate")
+	dropdown:SetPoint("LEFT", label, "RIGHT", 0, -3)
+	self.logFontFilenameDropdown = dropdown  -- Required by initialize function
+	UIDropDownMenu_Initialize(dropdown, _logFontFilenameDropdownInitialize)
+	UIDropDownMenu_SetWidth(dropdown, 100)
+	UIDropDownMenu_SetButtonWidth(dropdown, 124)
+	UIDropDownMenu_SetSelectedID(dropdown,
+		_fontFilenames.byFilename[Geary_Options.getLogFontFilename()].id)
+	UIDropDownMenu_JustifyText(dropdown, "LEFT")
 	
-	return comingSoon
+	-- Log font height slider
+	
+	return self.logFontFilenameDropdown  -- TODO update to font height slider
 end
 
 function Geary_Interface_Options:_createHeader(parent, name)
@@ -169,11 +209,19 @@ function Geary_Interface_Options:OnShow(frame)
 	-- Make the options match the current settings
 	self.iconShownCheckbox:SetChecked(Geary_Options:isIconShown())
 	self.iconScaleSlider:SetValue(ceil(Geary_Options:getIconScale() * 100))
+	-- Note: Not sure why, but must initialize before setting a value or we get garbage text
+	UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
+	UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
+		_fontFilenames.byFilename[Geary_Options:getLogFontFilename()].id)
 end
 
 function Geary_Interface_Options:onDefault(frame)
-	self.iconShownCheckbox:SetChecked(Geary_Options.default.iconShown)
-	self.iconScaleSlider:SetValue(ceil(Geary_Options.default.iconScale * 100))
+	self.iconShownCheckbox:SetChecked(Geary_Options:getDefaultIconShown())
+	self.iconScaleSlider:SetValue(ceil(Geary_Options:getDefaultIconScale() * 100))
+	-- Note: Not sure why, but must initialize before setting a value or we get garbage text
+	UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
+	UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
+		_fontFilenames.byFilename[Geary_Options:getDefaultLogFontFilename()].id)
 end
 
 function Geary_Interface_Options:onOkay(frame)
@@ -183,4 +231,7 @@ function Geary_Interface_Options:onOkay(frame)
 		Geary_Interface_Icon:Hide()
 	end
 	Geary_Interface_Icon:setScale(self.iconScaleSlider:GetValue() / 100)
+	Geary_Interface_Log:setFont(
+		_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
+		Geary_Options:getLogFontHeight())  -- TODO change to option slider
 end

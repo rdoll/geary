@@ -65,6 +65,14 @@ function Geary_Options:_upgradeTo5_1_17_beta()
 	Geary_Saved_Options = newOptions
 end
 
+--
+-- Icon shown
+--
+
+function Geary_Options:getDefaultIconShown()
+	return self.default.iconShown
+end
+
 function Geary_Options:isIconShown()
 	return Geary_Saved_Options.iconShown
 end
@@ -77,6 +85,14 @@ function Geary_Options:setIconHidden()
 	Geary_Saved_Options.iconShown = false
 end
 
+--
+-- Icon scale
+--
+
+function Geary_Options:getDefaultIconScale()
+	return self.default.iconScale
+end
+
 function Geary_Options:getIconScale()
 	return Geary_Saved_Options.iconScale
 end
@@ -85,12 +101,28 @@ function Geary_Options:setIconScale(scale)
 	Geary_Saved_Options.iconScale = scale
 end
 
+--
+-- Log font filename
+--
+
+function Geary_Options:getDefaultLogFontFilename()
+	return self.default.logFontFilename
+end
+
 function Geary_Options:getLogFontFilename()
 	return Geary_Saved_Options.logFontFilename
 end
 
 function Geary_Options:setLogFontFilename(fontFilename)
 	Geary_Saved_Options.logFontFilename = fontFilename
+end
+
+--
+-- Log font height
+--
+
+function Geary_Options:getDefaultLogFontHeight()
+	return self.default.logFontHeight
 end
 
 function Geary_Options:getLogFontHeight()

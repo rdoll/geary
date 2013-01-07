@@ -156,3 +156,9 @@ function Geary_Interface_Log:OnMouseWheel(scrollBar, delta)
 		scrollBar:SetValue(currentValue)
 	end
 end
+
+function Geary_Interface_Log:setFont(fontFilename, fontHeight)
+	self.messages:SetFont(fontFilename, fontHeight)
+	Geary_Options:setLogFontFilename(fontFilename)
+	Geary_Options:setLogFontHeight(fontHeight)
+end
