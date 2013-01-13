@@ -13,7 +13,7 @@ Geary_Interface_Log = {
 	scrollBar = nil,
 	scrollUpButton = nil,
 	scrollDownButton = nil,
-	MAX_MESSAGE_LINES = 23  -- TODO This should be calculated, not hard coded
+	visibleMessageLines = nil
 }
 
 function Geary_Interface_Log:init()
@@ -75,6 +75,7 @@ function Geary_Interface_Log:_createScrollBar()
 	self.scrollBar = scrollBar
 	self.scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
 	self.scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
+	self:_calculateVisibleMessageLines()
 	self:_syncScrollBar()
 end
 
@@ -98,7 +99,7 @@ end
 --     so make the min value 1 and use 0 when the scrollbar is disabled
 function Geary_Interface_Log:_syncScrollBar()
 	local numMessages = self.messages:GetNumMessages()
-	if  numMessages <= self.MAX_MESSAGE_LINES then
+	if  numMessages <= self.visibleMessageLines then
 		self.scrollBar:Disable()
 		self.scrollBar:SetMinMaxValues(0, 0)
 		self.scrollBar:SetValue(0)
@@ -106,18 +107,33 @@ function Geary_Interface_Log:_syncScrollBar()
 		self.scrollDownButton:Disable()
 	else
 		local minValue = 1
-		local maxValue = numMessages - self.MAX_MESSAGE_LINES + 1
+		local maxValue = numMessages - self.visibleMessageLines + 1
 		local currentScroll = self.messages:GetCurrentScroll()
 		local newValue = maxValue - currentScroll
 		if newValue < minValue then
 			newValue = minValue
 		end
-		-- Geary:debugPrint(("sync: numMess=%i, currScroll=%i, newVal=%i, minVal=%i, maxVal=%i"):format(
-		--	numMessages, currentScroll, newValue, minValue, maxValue))
+		-- Geary:print(("sync: numMess=%i, visLines=%i, currScroll=%i, newVal=%i, minVal=%i, " ..
+		--	"maxVal=%i"):format(
+		--	numMessages, self.visibleMessageLines, currentScroll, newValue, minValue, maxValue))
 		self.scrollBar:Enable()
 		self.scrollBar:SetMinMaxValues(minValue, maxValue)
 		self.scrollBar:SetValue(newValue)
 	end
+end
+
+-- This sounds good, but the height of each message line isn't exactly getLogFontHeight;
+-- e.g. a 14 Skurri was actually 14.222. think we need to measure the height of the first
+-- child in the scrollmessageframe and, if there isn't one, add a blank line, measure,
+-- then clear it again. Yuck.
+-- Also, I think multi-line messages aren't taken into account correctly.
+-- I think I need to sum up the height of all children divided minus the height of the
+-- visible lines divided by the height of a single line child
+function Geary_Interface_Log:_calculateVisibleMessageLines()
+	-- TODO remove this -- for now, adding 1 to font height
+	self.visibleMessageLines = floor(self.messages:GetHeight() / (Geary_Options:getLogFontHeight() + 1))
+	-- Geary:print(("height=%f, fontHeight=%i, floor=%i"):format(self.messages:GetHeight(),
+	--	Geary_Options:getLogFontHeight(), self.visibleMessageLines))
 end
 
 -- Enable or disable the scroll bar buttons based on the scroll bar's
@@ -129,7 +145,7 @@ function Geary_Interface_Log:_syncScrollBarButtons(currentValue, minValue, maxVa
 		self.scrollUpButton:Enable()
 	end
 	if currentValue == maxValue then
-		self.scrollDownButton:Disable()
+		self.scrollDownButton:Disable() 
 	else
 		self.scrollDownButton:Enable()
 	end
@@ -137,7 +153,7 @@ end
 
 function Geary_Interface_Log:OnValueChanged(scrollBar, value)
 	local minValue, maxValue = scrollBar:GetMinMaxValues()
-	-- Geary:debugPrint(("sbvalchange: val=%i, min=%i, max=%i, currOffset=%i, numLines=%i, newOffset=%i"):
+	-- Geary:print(("sbvalchange: val=%i, min=%i, max=%i, currOffset=%i, numLines=%i, newOffset=%i"):
 	--	format(value, minValue, maxValue, self.messages:GetCurrentScroll(),
 	--	self.messages:GetNumMessages(), maxValue - value))
 	self.messages:SetScrollOffset(maxValue - value)
@@ -161,4 +177,6 @@ function Geary_Interface_Log:setFont(fontFilename, fontHeight)
 	self.messages:SetFont(fontFilename, fontHeight)
 	Geary_Options:setLogFontFilename(fontFilename)
 	Geary_Options:setLogFontHeight(fontHeight)
+	self:_calculateVisibleMessageLines()
+	self:_syncScrollBar()
 end

@@ -31,6 +31,7 @@ function Geary_Inspect:resetData()
 	wipe(self.items)
 	self.filledSockets = 0
 	self.emptySockets = 0
+	self.failedJewelIds = 0
 	self.missingBeltBuckle = false
 	self.unenchantedCount = 0
 	self.upgradeLevel = 0
@@ -93,7 +94,6 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	self.player:INSPECT_READY()
 	
 	-- Player inventory
-	local slotNumber, slotName
 	for slotNumber, slotName in pairs(Geary_Item:getInvSlots()) do
 		self.itemCount = self.itemCount + 1
 		local itemLink = GetInventoryItemLink(self.player.unit, slotNumber)
@@ -130,6 +130,7 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 			self.items[slotName] = item
 			self.filledSockets = self.filledSockets + #item.filledSockets
 			self.emptySockets = self.emptySockets + #item.emptySockets
+			self.failedJewelIds = self.failedJewelIds + #item.failedJewelIds
 			if item.canEnchant and not item.enchantText then
 				self.unenchantedCount = self.unenchantedCount + 1
 			end
@@ -139,10 +140,10 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 		end
 	end
 
-	if self.emptySlots > 0 and self.player.level >= 60 and self.inspectTry < self.inspectTries then
-		-- The character should have items in every slot, so retry assuming the server
-		-- didn't send us the item info.
-		Geary:log("Will retry to get data for empty slots.", 1, 0, 1)
+	if (self.failedJewelIds > 0 or self.emptySlots > 0) and	self.inspectTry < self.inspectTries then
+		-- We failed to get them gem for a jewelId or there are empty slots which the server
+		-- may not have sent to us. Since retries are left, hope one will get the missing data.
+		Geary:log("Will retry to get missing data.", 1, 0, 1)
 		return
 	end
 
@@ -194,6 +195,9 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 		Geary:log(self.emptySockets .. " gem sockets empty!", 1, 0, 0)
 	elseif self.filledSockets > 0 then
 		Geary:log("All sockets are filled", 0, 1, 0)
+	end
+	if self.failedJewelIds > 0 then
+		Geary:log(self.failedJewelIds .. " gems could not be obtained!", 1, 0, 1)
 	end
 	if self.unenchantedCount > 0 then
 		Geary:log(self.unenchantedCount .. " items missing enchants!", 1, 0, 0)

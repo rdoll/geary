@@ -35,8 +35,8 @@ function Geary_Interface_Icon:init()
 	button:SetScript("OnDragStart", button.StartMoving)
 	button:SetScript("OnDragStop", button.StopMovingOrSizing)
 	button:SetScript("OnHide", button.StopMovingOrSizing)
-	button:RegisterForClicks("LeftButtonDown", "MiddleButtonDown", "RightButtonDown",
-		"Button4Down", "Button5Down")
+	button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp",
+		"Button4Up", "Button5Up")
 	button:SetScript("OnClick", function (self) Geary_Interface_Icon:OnClick(self) end)
 	if Geary_Options:isIconShown() then
 		button:Show()

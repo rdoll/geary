@@ -19,12 +19,12 @@ Geary = {
 -- "VERSION" gets replaced with the TOC version
 local _usage = [[
 Geary version VERSION Usage
-/geary inspect [self | target | group]
-/geary ui [show | hide | toggle]
-/geary icon [show | hide | toggle]
-/geary options
+/geary inspect <self | target | group>
+/geary ui <show | hide | toggle>
+/geary icon <show | hide | toggle>
+/geary options <show | hide | toggle>
 /geary debug [on | off]
-/geary dumpitem [itemid | itemlink]
+/geary dumpitem <itemid | itemlink> [slotname]
 ]]
 
 function Geary:init()
@@ -37,15 +37,18 @@ function Geary:init()
 
 	-- Key bindings
 	_G["BINDING_HEADER_GEARY_BINDINGS_HEADER"] = self.title
+	_G["BINDING_NAME_GEARY_INSPECT_SELF"] = "Inspect Self"
+	_G["BINDING_NAME_GEARY_INSPECT_TARGET"] = "Inspect Target"
+	_G["BINDING_NAME_GEARY_INSPECT_GROUP"] = "Inspect Group"
 	_G["BINDING_NAME_GEARY_SHOW_UI"] = "Show Interface"
 	_G["BINDING_NAME_GEARY_HIDE_UI"] = "Hide Interface"
 	_G["BINDING_NAME_GEARY_TOGGLE_UI"] = "Toggle Interface"
 	_G["BINDING_NAME_GEARY_SHOW_ICON"] = "Show Icon"
 	_G["BINDING_NAME_GEARY_HIDE_ICON"] = "Hide Icon"
 	_G["BINDING_NAME_GEARY_TOGGLE_ICON"] = "Toggle Icon"
-	_G["BINDING_NAME_GEARY_INSPECT_SELF"] = "Inspect Self"
-	_G["BINDING_NAME_GEARY_INSPECT_TARGET"] = "Inspect Target"
-	_G["BINDING_NAME_GEARY_INSPECT_GROUP"] = "Inspect Group"
+	_G["BINDING_NAME_GEARY_SHOW_OPTIONS"] = "Show Options"
+	_G["BINDING_NAME_GEARY_HIDE_OPTIONS"] = "Hide Options"
+	_G["BINDING_NAME_GEARY_TOGGLE_OPTIONS"] = "Toggle Options"
 	
 	-- Set script handlers for defined events
 	-- Note that the event first argument is eaten when the handler is invoked
@@ -169,7 +172,15 @@ local function _slashCommandIcon(rest)
 end
 
 local function _slashCommandOptions(rest)
-	Geary_Interface_Options:Show()
+	if rest == "show" then
+		Geary_Interface_Options:Show()
+	elseif rest == "hide" then
+		Geary_Interface_Options:Hide()
+	elseif rest == "toggle" then
+		Geary_Interface_Options:toggle()
+	else
+		print(_usage)
+	end
 end
 
 local function _slashCommandDebug(rest)		
@@ -177,7 +188,7 @@ local function _slashCommandDebug(rest)
 		Geary.debugOn = true
 	elseif rest == "off" then
 		Geary.debugOn = false
-	elseif rest ~= "" then
+	elseif rest:len() > 0 then
 		print(_usage)
 		return
 	end
@@ -185,42 +196,61 @@ local function _slashCommandDebug(rest)
 end
 
 local function _slashCommandDumpItem(rest)
-	if rest:match("^%d+$") or rest:match("^|") then
-		Geary_Interface:Show()
-		local oldDebug = Geary.debugOn
-		Geary.debugOn = true
-		local itemLink
-		if rest:match("^|") then
-			itemLink = rest
-		else
-			_, itemLink = GetItemInfo(tonumber(rest))
+
+	local itemLink, slotBaseName, slotName
+	if rest:match("^|c") then
+		itemLink, slotBaseName = rest:match("^(|c.-|r)%s*(.*)$")
+	elseif rest:match("^%d") then
+		local itemId
+		itemId, slotBaseName = rest:match("^(%d+)%s*(.*)$")
+		_, itemLink = GetItemInfo(tonumber(itemId))
+		if itemLink == nil then
+			Geary:print("Item ID " .. itemId .. " not in local cache.")
+			return
 		end
-		Geary:debugLog(" ")
-		Geary:debugLog("--- Dumping item " .. itemLink .. " ---")
-		local item = Geary_Item:new{
-			slot = "MainHandSlot",   -- Doesn't matter; just want something that can be enchanted
-			link = itemLink
-		}
-		item:probe()
-		if not DevTools_Dump then
-			LoadAddOn("Blizzard_DebugTools")
-		end
-		if DevTools_Dump then
-			DevTools_Dump(item)
-		else
-			Geary:debugPrint("Failed to load Blizzard_DebugTools or find DevTools_Dump")
-		end
-		Geary.debugOn = oldDebug
 	else
 		print(_usage)
+		return
 	end
+	
+	if slotBaseName == nil or slotBaseName:len() == 0 then
+		slotName = "MainHandSlot"  -- Default to anything enchantable
+	else
+		slotName = slotBaseName .. "Slot"
+	end
+	if not Geary_Item:isInvSlotName(slotName) then
+		Geary:print("Invalid slot name " .. slotBaseName)
+		return
+	end
+	
+	local oldDebug = Geary.debugOn
+	Geary.debugOn = true
+	
+	Geary_Interface:Show()
+	Geary:debugLog(" ")
+	Geary:debugLog("--- Dumping " .. slotName .. " item " .. itemLink .. " ---")
+	local item = Geary_Item:new{
+		slot = slotName,
+		link = itemLink
+	}
+	item:probe()
+	
+	if not DevTools_Dump then
+		LoadAddOn("Blizzard_DebugTools")
+	end
+	if DevTools_Dump then
+		DevTools_Dump(item)
+	else
+		Geary:debugPrint("Failed to load Blizzard_DebugTools or find DevTools_Dump")
+	end
+	
+	Geary.debugOn = oldDebug
 end
 
 SLASH_GEARY1 = "/geary";
 
 function SlashCmdList.GEARY(msg, editBox)
 	local command, rest = msg:match("^(%S*)%s*(.-)$")
-	
 	if command == "inspect" then
 		_slashCommandInspect(rest)
 	elseif command == "ui" then

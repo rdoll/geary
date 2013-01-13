@@ -37,7 +37,6 @@ function Geary_Options:ADDON_LOADED()
 	end
 	
 	-- If any option is missing, set it to the default
-	local name, value
 	for name, value in pairs(self.default) do
 		if Geary_Saved_Options[name] == nil then
 			Geary_Saved_Options[name] = value

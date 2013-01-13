@@ -128,7 +128,7 @@ function Geary_Interface_Options:_createIconSection(previousItem)
 end
 
 local function _logFontFilenameDropdownInitialize(self, level)
-	local id, filename, info
+	local info
 	for id, filename in ipairs(_fontFilenames.byId) do
 		info = UIDropDownMenu_CreateInfo()
 		info.text = _fontFilenames.byFilename[filename].name
@@ -164,8 +164,43 @@ function Geary_Interface_Options:_createInterfaceSection(previousItem)
 	UIDropDownMenu_JustifyText(dropdown, "LEFT")
 	
 	-- Log font height slider
-	
-	return self.logFontFilenameDropdown  -- TODO update to font height slider
+	local slider = CreateFrame("Slider", "$parent_Log_Font_Height_Slider", self.mainFrame,
+		"OptionsSliderTemplate")
+	slider:SetWidth(190)
+	slider:SetHeight(14)
+	slider:SetMinMaxValues(8, 16)
+	slider:SetValueStep(1)
+	slider:SetOrientation("HORIZONTAL")
+	slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOM", 0, -30)
+	slider:Enable()
+	-- Label above
+	slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+	slider.Label:SetPoint("TOPLEFT", -5, 18)
+	slider.Label:SetText("Log Font Height:")
+	-- Lowest value label
+	slider.Low = _G[slider:GetName() .. "Low"]
+	slider.Low:SetText("8")
+	-- Highest value label
+	slider.High = _G[slider:GetName() .. "High"]
+	slider.High:SetText("16")
+	-- Current value label
+	slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
+	slider.Value:SetPoint("BOTTOM", 0, -10)
+	slider.Value:SetWidth(50)
+	-- Handlers
+	slider:SetScript("OnValueChanged", function (self, value)
+		self.Value:SetText(value)
+	end)
+	slider:SetScript("OnEnter", function (self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
+		GameTooltip:SetText("Height of the font in the log interface")
+	end)
+	slider:SetScript("OnLeave", function (self) GameTooltip:Hide() end)
+	BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
+	-- Save it
+	self.logFontHeightSlider = slider
+
+	return self.logFontHeightSlider
 end
 
 function Geary_Interface_Options:_createHeader(parent, name)
@@ -230,6 +265,7 @@ function Geary_Interface_Options:OnShow(frame)
 	UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
 	UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
 		_fontFilenames.byFilename[Geary_Options:getLogFontFilename()].id)
+	self.logFontHeightSlider:SetValue(Geary_Options:getLogFontHeight())
 end
 
 function Geary_Interface_Options:onDefault(frame)
@@ -239,6 +275,7 @@ function Geary_Interface_Options:onDefault(frame)
 	UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
 	UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
 		_fontFilenames.byFilename[Geary_Options:getDefaultLogFontFilename()].id)
+	self.logFontHeightSlider:SetValue(Geary_Options:getDefaultLogFontHeight())
 end
 
 function Geary_Interface_Options:onOkay(frame)
@@ -250,5 +287,5 @@ function Geary_Interface_Options:onOkay(frame)
 	Geary_Interface_Icon:setScale(self.iconScaleSlider:GetValue() / 100)
 	Geary_Interface_Log:setFont(
 		_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
-		Geary_Options:getLogFontHeight())  -- TODO change to option slider
+		self.logFontHeightSlider:GetValue())
 end

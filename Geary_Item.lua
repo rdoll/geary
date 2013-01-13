@@ -8,12 +8,11 @@
 --]]
 
 Geary_Item = {
-	tooltip = CreateFrame("GameTooltip", "Geary_Tooltip_Scanner", UIParent, "GameTooltipTemplate")
+	tooltip = CreateFrame("GameTooltip", "Geary_Tooltip_Scanner", nil, "GameTooltipTemplate")
 }
 
 -- Details of all slots and what they can contain (slotNumber filled in during init)
--- TODO Add info about profession perks (e.g. enchants on rings, sockets on wrist/hands, etc)
-local slotDetails = {
+local _slotDetails = {
 	HeadSlot          = { slotNumber = nil, canEnchant = false },
 	NeckSlot          = { slotNumber = nil, canEnchant = false },
 	ShoulderSlot      = { slotNumber = nil, canEnchant = true  },
@@ -34,7 +33,7 @@ local slotDetails = {
 
 -- Names of empty gem sockets in tooltips
 -- TODO Make these locale specific Blizzard strings
-local socketNames = {
+local _socketNames = {
 	"Meta Socket",
 	"Blue Socket",
 	"Red Socket",
@@ -46,18 +45,21 @@ local socketNames = {
 
 function Geary_Item:init()
 	-- Determine inventory slot numbers from names
-	local slotName, slotData
-	for slotName, slotData in pairs(slotDetails) do
+	for slotName, slotData in pairs(_slotDetails) do
 		slotData.slotNumber, _ = GetInventorySlotInfo(slotName)
 	end
 end
 
 function Geary_Item:getInvSlots()
 	local slots = {}
-	for slotName, slotData in pairs(slotDetails) do
+	for slotName, slotData in pairs(_slotDetails) do
 		slots[slotData.slotNumber] = slotName
 	end
 	return slots
+end
+
+function Geary_Item:isInvSlotName(slotName)
+	return _slotDetails[slotName] ~= nil
 end
 
 function Geary_Item:isTwoHandWeapon()
@@ -99,6 +101,7 @@ function Geary_Item:new(o)
 		subType = nil,
 		filledSockets = {},
 		emptySockets = {},
+		failedJewelIds = {},
 		missingBeltBuckle = false,
 		canEnchant = false,
 		enchantText = nil,
@@ -107,7 +110,6 @@ function Geary_Item:new(o)
 		upgradeItemLevelMissing = 0
 	}
 	if o then
-		local name, value
 		for name, value in pairs(o) do
 			newObject[name] = value
 		end
@@ -133,7 +135,7 @@ function Geary_Item:probe()
 	
 	-- Get base item info
 	self.id = self.link:match("|Hitem:(%d+):")
-	self.canEnchant = slotDetails[self.slot].canEnchant
+	self.canEnchant = _slotDetails[self.slot].canEnchant
 	self.name, _, self.rarity, _, _, self.iType, self.subType, _, _, _, _ = GetItemInfo(self.link)
 
 	-- Parse data from the item's tooltip
@@ -157,17 +159,26 @@ function Geary_Item:probe()
 	Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(), self.link, 
 		self.slot:gsub("Slot$", ""), self.iType, self.subType))
 	
-	local text
 	for _, text in pairs(self.emptySockets) do
 		-- TODO Abstract colors to constants or methods
 		Geary:log("   No gem in " .. text, 1, 0, 0)
 	end
 
-	for _, text in pairs(self.filledSockets) do
+	for _, itemLink in pairs(self.filledSockets) do
+		local inlineGemTexture = self:_getGemInlineTexture(itemLink, Geary_Options:getLogFontHeight())
 		-- TODO Abstract colors to constants or methods
-		Geary:log("   Gem " .. text, 0, 1, 0)
+		if inlineGemTexture == nil then
+			Geary:log("   Gem " .. itemLink, 0, 1, 0)
+		else
+			Geary:log("   Gem " .. inlineGemTexture .. " " .. itemLink, 0, 1, 0)
+		end
 	end
 
+	for socketIndex, _ in ipairs(self.failedJewelIds) do
+		-- TODO Abstract colors to constants or methods
+		Geary:log("   Failed to get gem in socket " .. socketIndex, 1, 0, 1)
+	end
+	
 	if self.enchantText ~= nil then
 		-- TODO Abstract colors to constants or methods
 		Geary:log("   " .. self.enchantText, 0, 1, 0)
@@ -213,7 +224,7 @@ function Geary_Item:_parseTooltip()
 
 	-- Ensure owner is set (ClearLines unsets owner)
 	-- ANCHOR_NONE without setting any points means it's never rendered
-	self.tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+	self.tooltip:SetOwner(WorldFrame, 'ANCHOR_NONE')
 
 	-- Build tooltip for item
 	-- Note that SetHyperlink on the same item link twice in a row closes the tooltip
@@ -221,7 +232,6 @@ function Geary_Item:_parseTooltip()
 	self.tooltip:SetHyperlink(self.link)
 
 	-- Parase the left side text (right side text isn't useful)
-	local lineNum, socketName
 	for lineNum = 1, self.tooltip:NumLines(), 1 do
 		(function ()  -- Function so we can use return as "continue"
 			local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
@@ -251,7 +261,7 @@ function Geary_Item:_parseTooltip()
 				return  -- "continue"
 			end
 
-			for _, socketName in pairs(socketNames) do
+			for _, socketName in pairs(_socketNames) do
 				if text == socketName then
 					tinsert(self.emptySockets, text)
 					return  -- "continue"
@@ -265,12 +275,38 @@ function Geary_Item:_parseTooltip()
 end
 
 function Geary_Item:_getGems()
-	local socketIndex
+	-- Get jewelIds from the item link
+	local jewelId = {}
+	jewelId[1], jewelId[2], jewelId[3], jewelId[4] =
+		self.link:match("item:%d+:%d+:(%d+):(%d+):(%d+):(%d+):")
+
+	-- Check all sockets for a gem
 	for socketIndex = 1, 4, 1 do
 		local itemName, itemLink = GetItemGem(self.link, socketIndex)
-		if itemName ~= nil then
+		if itemLink == nil then
+			if jewelId[socketIndex] ~= nil and tonumber(jewelId[socketIndex]) ~= 0 then
+				-- GetItemGem returned nil because the gem is not in the player's local cache
+				self.failedJewelIds[socketIndex] = jewelId[socketIndex]
+				Geary:debugLog(("GetItemGem(%s, %i) returned nil when link had %d"):format(
+					self.link:gsub("|", "||"), socketIndex, tonumber(jewelId[socketIndex])),
+					0.5, 0.5, 0.5)
+			end
+		else
 			tinsert(self.filledSockets, itemLink)
 		end
+	end
+end
+
+function Geary_Item:_getGemInlineTexture(itemLink, size)
+	local texture = select(10, GetItemInfo(itemLink))
+	if texture == nil and texture:len() == 0 then
+		return nil
+	end
+	local itemId = itemLink:match("item:(%d+):")
+	if itemId == nil then
+		return "|T" .. texture .. ":" .. size .. ":" .. size .. "|t"
+	else
+		return "|Hitem:" .. itemId .. "|h|T" .. texture .. ":" .. size .. ":" .. size .. "|t|h"
 	end
 end
 
@@ -331,13 +367,13 @@ function Geary_Item:_checkForBeltBuckle()
 	self.tooltip:SetHyperlink(baseItemLink)
 
 	-- Parase the left side text (right side text isn't useful)
-	local lineNum, baseSocketCount = 0, 0
+	local baseSocketCount = 0
 	for lineNum = 1, self.tooltip:NumLines(), 1 do
 		(function ()  -- Function so we can use return as "continue"
 			local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
 			Geary:debugLog("buckle: " .. text, 0.5, 0.5, 0.5)
 			
-			for _, socketName in pairs(socketNames) do
+			for _, socketName in pairs(_socketNames) do
 				if text == socketName then
 					baseSocketCount = baseSocketCount + 1
 					return  -- "continue"
@@ -349,11 +385,11 @@ function Geary_Item:_checkForBeltBuckle()
 	-- Clear the tooltip's content (which also clears its owner)
 	self.tooltip:ClearLines()
 	
-	-- Total sockets in THIS item is filled plus empty
+	-- Total sockets in THIS item is filled plus failed plus empty
 	-- If total is <= the count in the base item, the belt buckle is missing
-	Geary:debugLog(("buckle: filled=%i, empty=%i, base=%i"):format(#self.filledSockets,
-		#self.emptySockets, baseSocketCount), 0.5, 0.5, 0.5)
-	if #self.filledSockets + #self.emptySockets <= baseSocketCount then
+	Geary:debugLog(("buckle: filled=%i, failed=%i, empty=%i, base=%i"):format(#self.filledSockets,
+		#self.failedJewelIds, #self.emptySockets, baseSocketCount), 0.5, 0.5, 0.5)
+	if #self.filledSockets + #self.failedJewelIds + #self.emptySockets <= baseSocketCount then
 		self.missingBeltBuckle = true
 	end
 end

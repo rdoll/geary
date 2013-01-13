@@ -3,7 +3,16 @@
  -->
 
 <Bindings>
-    <Binding name="GEARY_SHOW_UI" header="GEARY_BINDINGS_HEADER">
+    <Binding name="GEARY_INSPECT_SELF" header="GEARY_BINDINGS_HEADER">
+		Geary_Inspect:inspectSelf()
+    </Binding>
+    <Binding name="GEARY_INSPECT_TARGET">
+		Geary_Inspect:inspectTarget()
+    </Binding>
+    <Binding name="GEARY_INSPECT_GROUP">
+		Geary_Inspect:inspectGroup()
+    </Binding>
+    <Binding name="GEARY_SHOW_UI">
 		Geary_Interface:Show()
     </Binding>
     <Binding name="GEARY_HIDE_UI">
@@ -21,13 +30,13 @@
     <Binding name="GEARY_TOGGLE_ICON">
 		Geary_Interface_Icon:toggle()
     </Binding>
-    <Binding name="GEARY_INSPECT_SELF">
-		Geary_Inspect:inspectSelf()
+    <Binding name="GEARY_SHOW_OPTIONS">
+		Geary_Interface_Options:Show()
     </Binding>
-    <Binding name="GEARY_INSPECT_TARGET">
-		Geary_Inspect:inspectTarget()
+    <Binding name="GEARY_HIDE_OPTIONS">
+		Geary_Interface_Options:Hide()
     </Binding>
-    <Binding name="GEARY_INSPECT_GROUP">
-		Geary_Inspect:inspectGroup()
+    <Binding name="GEARY_TOGGLE_OPTIONS">
+		Geary_Interface_Options:toggle()
     </Binding>
 </Bindings>
