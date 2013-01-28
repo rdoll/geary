@@ -32,7 +32,6 @@ local _slotDetails = {
 }
 
 -- Names of empty gem sockets in tooltips
--- TODO Make these locale specific Blizzard strings
 local _socketNames = {
 	"Meta Socket",
 	"Blue Socket",
@@ -76,17 +75,16 @@ function Geary_Item:isTwoHandWeapon()
 end
 
 function Geary_Item:iLevelWithUpgrades()
-	local upgrades = "-/-"
 	if self.upgradeMax > 0 then
+		local upgrades
 		if self.upgradeLevel < self.upgradeMax then
-			upgrades = YELLOW_FONT_COLOR_CODE .. self.upgradeLevel .. "/" .. self.upgradeMax ..
-				FONT_COLOR_CODE_CLOSE
+			upgrades = Geary.CC_UPGRADE .. self.upgradeLevel .. "/" .. self.upgradeMax .. Geary.CC_END
 		else
-			upgrades = GREEN_FONT_COLOR_CODE .. self.upgradeLevel .. "/" .. self.upgradeMax ..
-				FONT_COLOR_CODE_CLOSE
+			upgrades = Geary.CC_CORRECT .. self.upgradeLevel .. "/" .. self.upgradeMax .. Geary.CC_END
 		end
+		return tostring(self.iLevel) .. " " .. upgrades
 	end
-	return tostring(self.iLevel) .. " " .. upgrades
+	return tostring(self.iLevel)
 end
 
 function Geary_Item:new(o)
@@ -99,6 +97,7 @@ function Geary_Item:new(o)
 		iLevel = 0,
 		iType = nil,
 		subType = nil,
+		inlineTexture = nil,
 		filledSockets = {},
 		emptySockets = {},
 		failedJewelIds = {},
@@ -137,6 +136,7 @@ function Geary_Item:probe()
 	self.id = self.link:match("|Hitem:(%d+):")
 	self.canEnchant = _slotDetails[self.slot].canEnchant
 	self.name, _, self.rarity, _, _, self.iType, self.subType, _, _, _, _ = GetItemInfo(self.link)
+	self.inlineTexture = self:_getItemInlineTexture(self.link, Geary_Options:getLogFontHeight())
 
 	-- Parse data from the item's tooltip
 	self:_parseTooltip()
@@ -151,45 +151,38 @@ function Geary_Item:probe()
 	
 	-- Ensure we got the data we should have
 	if self.iLevel < 1 then
-		Geary:print(RED_FONT_COLOR_CODE .. "ERROR: No item level found in " .. self.link ..
-			FONT_COLOR_CODE_CLOSE)
+		Geary:print(Geary.CC_ERROR .. "ERROR: No item level found in " .. self.link .. Geary.CC_END)
 	end
 
 	-- Report info about the item
-	Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(), self.link, 
-		self.slot:gsub("Slot$", ""), self.iType, self.subType))
+	Geary:log(("%s %s %s %s %s %s"):format(self:iLevelWithUpgrades(), self.inlineTexture,
+		self.link, self.slot:gsub("Slot$", ""), self.iType, self.subType))
 	
 	for _, text in pairs(self.emptySockets) do
-		-- TODO Abstract colors to constants or methods
-		Geary:log("   No gem in " .. text, 1, 0, 0)
+		Geary:log(Geary.CC_MISSING .. "   No gem in " .. text .. Geary.CC_END)
 	end
 
 	for _, itemLink in pairs(self.filledSockets) do
-		local inlineGemTexture = self:_getGemInlineTexture(itemLink, Geary_Options:getLogFontHeight())
-		-- TODO Abstract colors to constants or methods
+		local inlineGemTexture = self:_getItemInlineTexture(itemLink, Geary_Options:getLogFontHeight())
 		if inlineGemTexture == nil then
-			Geary:log("   Gem " .. itemLink, 0, 1, 0)
+			Geary:log(Geary.CC_CORRECT .. "   Gem " .. itemLink .. Geary.CC_END)
 		else
-			Geary:log("   Gem " .. inlineGemTexture .. " " .. itemLink, 0, 1, 0)
+			Geary:log(Geary.CC_CORRECT .. "   Gem " .. inlineGemTexture .. " " .. itemLink .. Geary.CC_END)
 		end
 	end
 
 	for socketIndex, _ in ipairs(self.failedJewelIds) do
-		-- TODO Abstract colors to constants or methods
-		Geary:log("   Failed to get gem in socket " .. socketIndex, 1, 0, 1)
+		Geary:log(Geary.CC_MISSING .. "   Failed to get gem in socket " .. socketIndex .. Geary.CC_END)
 	end
 	
 	if self.enchantText ~= nil then
-		-- TODO Abstract colors to constants or methods
-		Geary:log("   " .. self.enchantText, 0, 1, 0)
+		Geary:log(Geary.CC_CORRECT .. "   " .. self.enchantText .. Geary.CC_END)
 	elseif self.canEnchant then
-		-- TODO Abstract colors to constants or methods
-		Geary:log("   Missing enchant!", 1, 0, 0)
+		Geary:log(Geary.CC_MISSING .. "   Missing enchant!" .. Geary.CC_END)
 	end
 	
 	if self.missingBeltBuckle then
-		-- TODO Abstract colors to constants or methods
-		Geary:log("   Missing belt buckle!", 1, 0, 0)
+		Geary:log(Geary.CC_MISSING .. "   Missing belt buckle!" .. Geary.CC_END)
 	end
 end
 
@@ -236,26 +229,22 @@ function Geary_Item:_parseTooltip()
 		(function ()  -- Function so we can use return as "continue"
 			local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
 			-- Eat any color codes (e.g. gem stats have them)
-			-- TODO Or do I want to keep those to indicate this is a gem?
 			text = text:gsub("|c%x%x%x%x%x%x%x%x(.-)|r", "%1")
 			
-			Geary:debugLog(text, 0.5, 0.5, 0.5)
+			Geary:debugLog(text)
 			
-			-- TODO Use locale appropriate Blizzard defined strings
 			local iLevel = text:match("^%s*Item Level (%d+)")
 			if iLevel then
 				self:_setItemLevel(tonumber(iLevel))
 				return  -- "continue"
 			end
 			
-			-- TODO Use locale appropriate Blizzard defined strings
 			local upgradeLevel, upgradeMax = text:match("^%s*Upgrade Level: (%d+)/(%d+)")
 			if upgradeLevel and upgradeMax then
 				self:_setUpgrades(tonumber(upgradeLevel), tonumber(upgradeMax))
 				return  -- "continue"
 			end
 			
-			-- TODO Use locale appropriate Blizzard defined strings
 			if text:match("^%s*Enchanted:") then
 				self:_setEnchantText(text)
 				return  -- "continue"
@@ -278,7 +267,7 @@ function Geary_Item:_getGems()
 	-- Get jewelIds from the item link
 	local jewelId = {}
 	jewelId[1], jewelId[2], jewelId[3], jewelId[4] =
-		self.link:match("item:%d+:%d+:(%d+):(%d+):(%d+):(%d+):")
+		self.link:match("item:.-:.-:(.-):(.-):(.-):(.-):")
 
 	-- Check all sockets for a gem
 	for socketIndex = 1, 4, 1 do
@@ -288,8 +277,7 @@ function Geary_Item:_getGems()
 				-- GetItemGem returned nil because the gem is not in the player's local cache
 				self.failedJewelIds[socketIndex] = jewelId[socketIndex]
 				Geary:debugLog(("GetItemGem(%s, %i) returned nil when link had %d"):format(
-					self.link:gsub("|", "||"), socketIndex, tonumber(jewelId[socketIndex])),
-					0.5, 0.5, 0.5)
+					self.link:gsub("|", "||"), socketIndex, tonumber(jewelId[socketIndex])))
 			end
 		else
 			tinsert(self.filledSockets, itemLink)
@@ -297,7 +285,7 @@ function Geary_Item:_getGems()
 	end
 end
 
-function Geary_Item:_getGemInlineTexture(itemLink, size)
+function Geary_Item:_getItemInlineTexture(itemLink, size)
 	local texture = select(10, GetItemInfo(itemLink))
 	if texture == nil and texture:len() == 0 then
 		return nil
@@ -312,8 +300,7 @@ end
 
 function Geary_Item:_setItemLevel(iLevel)
 	if self.iLevel > 0 then
-		Geary:print(RED_FONT_COLOR_CODE .. "ERROR: Multiple item levels found in " .. self.link ..
-			FONT_COLOR_CODE_CLOSE)
+		Geary:print(Geary.CC_ERROR .. "ERROR: Multiple item levels found on " .. self.link .. Geary.CC_END)
 	else
 		self.iLevel = iLevel
 	end
@@ -321,8 +308,8 @@ end
 
 function Geary_Item:_setUpgrades(upgradeLevel, upgradeMax)
 	if self.upgradeLevel > 0 or self.upgradeMax > 0 then
-		Geary:print(RED_FONT_COLOR_CODE .. "ERROR: Multiple upgrade levels found in " .. self.link ..
-			FONT_COLOR_CODE_CLOSE)
+		Geary:print(Geary.CC_ERROR .. "ERROR: Multiple upgrade levels found on " .. self.link ..
+			Geary.CC_END)
 	else
 		self.upgradeLevel = upgradeLevel
 		self.upgradeMax = upgradeMax
@@ -340,8 +327,7 @@ end
 
 function Geary_Item:_setEnchantText(enchantText)
 	if self.enchantText ~= nil then
-		Geary:print(RED_FONT_COLOR_CODE .. "ERROR: Multiple enchant texts found in " .. self.link ..
-			FONT_COLOR_CODE_CLOSE)
+		Geary:print(Geary.CC_ERROR .. "ERROR: Multiple enchants found on " .. self.link .. Geary.CC_END)
 	else
 		self.enchantText = enchantText
 	end
@@ -371,7 +357,7 @@ function Geary_Item:_checkForBeltBuckle()
 	for lineNum = 1, self.tooltip:NumLines(), 1 do
 		(function ()  -- Function so we can use return as "continue"
 			local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
-			Geary:debugLog("buckle: " .. text, 0.5, 0.5, 0.5)
+			Geary:debugLog("buckle:", text)
 			
 			for _, socketName in pairs(_socketNames) do
 				if text == socketName then
@@ -388,7 +374,7 @@ function Geary_Item:_checkForBeltBuckle()
 	-- Total sockets in THIS item is filled plus failed plus empty
 	-- If total is <= the count in the base item, the belt buckle is missing
 	Geary:debugLog(("buckle: filled=%i, failed=%i, empty=%i, base=%i"):format(#self.filledSockets,
-		#self.failedJewelIds, #self.emptySockets, baseSocketCount), 0.5, 0.5, 0.5)
+		#self.failedJewelIds, #self.emptySockets, baseSocketCount))
 	if #self.filledSockets + #self.failedJewelIds + #self.emptySockets <= baseSocketCount then
 		self.missingBeltBuckle = true
 	end

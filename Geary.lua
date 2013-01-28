@@ -13,7 +13,17 @@ Geary = {
 	notes = nil,
 	debugOn = false,
 	eventsFrame = nil,
-	events = {}
+	events = {},
+	-- Font Color Codes
+	CC_START = "|c",
+	CC_ERROR = RED_FONT_COLOR_CODE,
+	CC_FAILED = "|cffff00ff",
+	CC_MISSING = RED_FONT_COLOR_CODE,
+	CC_CORRECT = GREEN_FONT_COLOR_CODE,
+	CC_UPGRADE = YELLOW_FONT_COLOR_CODE,
+	CC_MILESTONE = ORANGE_FONT_COLOR_CODE,
+	CC_DEBUG = GRAY_FONT_COLOR_CODE,
+	CC_END = FONT_COLOR_CODE_CLOSE
 }
 
 -- "VERSION" gets replaced with the TOC version
@@ -32,7 +42,7 @@ function Geary:init()
 	self.version = GetAddOnMetadata("Geary", "Version")
 	self.title = GetAddOnMetadata("Geary", "Title")
 	self.notes = GetAddOnMetadata("Geary", "Notes")
-	self:print("Loaded version " .. self.version)
+	self:print("Loaded version", self.version)
 	_usage = _usage:gsub("VERSION", Geary.version, 1)
 
 	-- Key bindings
@@ -104,6 +114,7 @@ function Geary:isDebugOn()
 	return self.debugOn
 end
 
+-- Automatically adds a space between arguments and a newline at end
 function Geary:print(...)
 	print(self.title .. ":", ...)
 end
@@ -114,13 +125,28 @@ function Geary:debugPrint(...)
 	end
 end
 
+function Geary:_log(...)
+	local args = { ... }
+	for index, value in ipairs(args) do
+		Geary_Interface_Log:append(value)
+		if index < #args then
+			Geary_Interface_Log:append(" ")
+		end
+	end
+end
+
+-- Automatically adds a space between arguments and a newline at end
 function Geary:log(...)
-	Geary_Interface_Log:AddMessage(...)
+	self:_log(...)
+	Geary_Interface_Log:append("\n")
 end
 
 function Geary:debugLog(...)
 	if self.debugOn then
-		self:log(...)
+		Geary_Interface_Log:append(self.CC_DEBUG)
+		self:_log(...)
+		Geary_Interface_Log:append(self.CC_END)
+		Geary_Interface_Log:append("\n")
 	end
 end
 
@@ -192,7 +218,7 @@ local function _slashCommandDebug(rest)
 		print(_usage)
 		return
 	end
-	print("Geary debugging is " .. (Geary:isDebugOn() and "on" or "off"))
+	Geary:print("Debugging is " .. (Geary:isDebugOn() and "on" or "off"))
 end
 
 local function _slashCommandDumpItem(rest)
@@ -205,7 +231,7 @@ local function _slashCommandDumpItem(rest)
 		itemId, slotBaseName = rest:match("^(%d+)%s*(.*)$")
 		_, itemLink = GetItemInfo(tonumber(itemId))
 		if itemLink == nil then
-			Geary:print("Item ID " .. itemId .. " not in local cache.")
+			Geary:print(Geary.CC_FAILED .. "Item ID", itemId, "not in local cache." .. Geary.CC_END)
 			return
 		end
 	else
@@ -219,16 +245,17 @@ local function _slashCommandDumpItem(rest)
 		slotName = slotBaseName .. "Slot"
 	end
 	if not Geary_Item:isInvSlotName(slotName) then
-		Geary:print("Invalid slot name " .. slotBaseName)
+		Geary:print(Geary.CC_ERROR .. "Invalid slot name", slotBaseName .. Geary.CC_END)
 		return
 	end
 	
 	local oldDebug = Geary.debugOn
 	Geary.debugOn = true
 	
+	Geary_Interface_Log:clearIfTooLarge()
 	Geary_Interface:Show()
-	Geary:debugLog(" ")
-	Geary:debugLog("--- Dumping " .. slotName .. " item " .. itemLink .. " ---")
+	Geary:debugLog()
+	Geary:debugLog("--- Dumping", slotName, "item", itemLink, "---")
 	local item = Geary_Item:new{
 		slot = slotName,
 		link = itemLink

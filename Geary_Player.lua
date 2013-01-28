@@ -62,8 +62,8 @@ function Geary_Player:getColorizedClassName()
 	if RAID_CLASS_COLORS[self.classFilename] == nil then
 		return self.className
 	else
-		return "|c" .. RAID_CLASS_COLORS[self.classFilename].colorStr .. self.className ..
-			FONT_COLOR_CODE_CLOSE   
+		return Geary.CC_START .. RAID_CLASS_COLORS[self.classFilename].colorStr .. self.className ..
+			Geary.CC_END
 	end
 end
 
@@ -95,17 +95,17 @@ function Geary_Player:INSPECT_READY()
 	if self.unit == "player" then
 		local nonGlobSpecId = GetSpecialization()
 		if nonGlobSpecId == nil then
-			Geary:print("nonGlobSpecId is nil!")
+			Geary:print(Geary.CC_ERROR .. "nonGlobSpecId is nil!" .. Geary.CC_END)
 			return
 		end
 		_, specName, _, _, _, specRole = GetSpecializationInfo(nonGlobSpecId)
 	else
 		local globSpecId = GetInspectSpecialization(self.unit)
 		if globSpecId == nil then
-			Geary:print("globSpecId is nil!")
+			Geary:print(Geary.CC_ERROR .. "globSpecId is nil!" .. Geary.CC_END)
 			return
 		elseif globSpecId == 0 then
-			Geary:print("globSpecId is 0 -- server didn't send it")
+			Geary:print(Geary.CC_ERROR .. "globSpecId is 0 -- server didn't send it" .. Geary.CC_END)
 			return
 		end
 		--
@@ -119,17 +119,17 @@ function Geary_Player:INSPECT_READY()
 		--
 		specRole = GetSpecializationRoleByID(globSpecId)
 		if specRole == nil then
-			Geary:print("globSpecId " .. globSpecId .. " is invalid!")
+			Geary:print(Geary.CC_ERROR .. "globSpecId " .. globSpecId .. " is invalid!" .. Geary.CC_END)
 			return
 		end
 		_, specName, _, _, _, _, _ = GetSpecializationInfoByID(globSpecId)
 	end
 	
 	if specName == nil then
-		Geary:print("specName is nil!")
+		Geary:print(Geary.CC_ERROR .. "specName is nil!" .. Geary.CC_END)
 		return
 	elseif specRole == nil then
-		Geary:print("specRole is nil!")
+		Geary:print(Geary.CC_ERROR .. "specRole is nil!" .. Geary.CC_END)
 		return
 	end
 	

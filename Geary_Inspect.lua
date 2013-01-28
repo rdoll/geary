@@ -62,7 +62,8 @@ function Geary_Inspect:timerExpired()
 		Geary_Inspect:reinspectRequest()
 	else
 		Geary_Inspect:inspectionOver()
-		Geary:log("Inspection failed after " .. self.inspectTries .. " tries.", 1, 0, 1)
+		Geary:log(Geary.CC_FAILED .. "Inspection failed after " .. self.inspectTries .. " tries." ..
+			Geary.CC_END)
 	end
 end
 
@@ -86,7 +87,7 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	end
 
 	if self.player.guid ~= unitGuid then
-		Geary:debugLog("Skipping inspection of wrong unitGuid " .. unitGuid)
+		Geary:debugLog("Skipping inspection of wrong unitGuid", unitGuid)
 		return
 	end
 
@@ -99,10 +100,10 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 		local itemLink = GetInventoryItemLink(self.player.unit, slotNumber)
 		if itemLink == nil then
 			if slotName == "SecondaryHandSlot" and self.hasTwoHandWeapon then
-				Geary:debugLog(slotName .. " is empty, but using 2Her")
+				Geary:debugLog(slotName, "is empty, but using 2Her")
 			else
 				self.emptySlots = self.emptySlots + 1
-				Geary:log(slotName .. " is empty!", 1, 0, 0)
+				Geary:log(Geary.CC_MISSING .. slotName .. " is empty!" .. Geary.CC_END)
 			end
 		else
 			local item = Geary_Item:new{ slot = slotName, link = itemLink }
@@ -143,7 +144,7 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	if (self.failedJewelIds > 0 or self.emptySlots > 0) and	self.inspectTry < self.inspectTries then
 		-- We failed to get them gem for a jewelId or there are empty slots which the server
 		-- may not have sent to us. Since retries are left, hope one will get the missing data.
-		Geary:log("Will retry to get missing data.", 1, 0, 1)
+		Geary:log(Geary.CC_FAILED .. "Will retry to get missing data." .. Geary.CC_END)
 		return
 	end
 
@@ -156,59 +157,77 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	self.iLevelEquipped = self.iLevelTotal / self.itemCount
 	self:inspectionOver()
 
-	-- Summary
-	Geary:log(" ")
+	-- Show summary
+	self:_showSummary()
+end
+
+-- Max player level item level milestones
+-- NOTE: Must be in order from lowest iLevel to highest
+local _itemLevelMilestones = {
+	{ iLevel = 435, milestone = "LFD heroic" },
+	{ iLevel = 460, milestone = "MV LFR" },
+	{ iLevel = 470, milestone = "HoF/TES LFR" }
+}
+
+function Geary_Inspect:_showSummary()
+	Geary:log()
 	Geary:log(("--- %s %s %i %s %s ---"):format(self.player:getFactionInlineIcon(),
 		self.player:getFullNameLink(), self.player.level, self.player:getColorizedClassName(),
 		self.player:getSpecWithInlineIcon()))
+
 	Geary:log(("%.2f equipped iLevel (%i%s items with %i total)"):format(self.iLevelEquipped,
 		self.itemCount, self.hasTwoHandWeapon and " (2H)" or "", self.iLevelTotal))
+
 	if self.player:isMaxLevel() then
-		if self.iLevelEquipped >= 470 then
-			Geary:debugLog("Ready for all LFD/LFR content")
-		elseif self.iLevelEquipped >= 460 then
-			Geary:log(((470 * self.itemCount) - self.iLevelTotal) ..
-				" item levels until HoF/TES LFR ready", 1, 0.49, 0.04)
-		elseif self.iLevelEquipped >= 435 then
-			Geary:log(((460 * self.itemCount) - self.iLevelTotal) ..
-				" item levels until MV LFR ready", 1, 0.49, 0.04)
-		else
-			Geary:log(((435 * self.itemCount) - self.iLevelTotal) ..
-				" item levels until LFD heroic ready", 1, 0.49, 0.04)
+		for index, data in ipairs(_itemLevelMilestones) do
+			if (self.iLevelEquipped < data.iLevel) then
+				Geary:log(Geary.CC_MILESTONE ..((data.iLevel * self.itemCount) - self.iLevelTotal),
+					"item levels until", data.milestone, "ready" .. Geary.CC_END)
+				break
+			end
 		end
 	end
+	
 	if self.upgradeItemLevelMissing > 0 then
-		Geary:log(("%.2f max iLevel after %i upgrades (%i filled)"):format(
+		Geary:log(Geary.CC_UPGRADE .. ("%.2f max iLevel after %i upgrades (%i filled)"):format(
 			(self.iLevelTotal + self.upgradeItemLevelMissing) / self.itemCount,
-			self.upgradeMax - self.upgradeLevel, self.upgradeLevel),
-			1, 0.96, 0.41)
+			self.upgradeMax - self.upgradeLevel, self.upgradeLevel) .. Geary.CC_END)
 	elseif self.upgradeMax > 0 then
-		Geary:log("All item upgrades filled", 0, 1, 0)
+		Geary:log(Geary.CC_CORRECT .. "All item upgrades filled" .. Geary.CC_END)
 	end
+	
 	if self.emptySlots > 0 then
-		Geary:log(self.emptySlots .. " item slots are empty!", 1, 0, 0)
+		Geary:log(Geary.CC_MISSING .. self.emptySlots .. " item slots are empty!" .. Geary.CC_END)
 	end
+	
 	if self.missingBeltBuckle then
-		Geary:log("Missing belt buckle!", 1, 0, 0)
+		Geary:log(Geary.CC_MISSING .. "Missing belt buckle!" .. Geary.CC_END)
 	end
+	
 	if self.emptySockets > 0 then
-		Geary:log(self.emptySockets .. " gem sockets empty!", 1, 0, 0)
+		Geary:log(Geary.CC_MISSING .. self.emptySockets .. " gem sockets empty!" .. Geary.CC_END)
 	elseif self.filledSockets > 0 then
-		Geary:log("All sockets are filled", 0, 1, 0)
+		Geary:log(Geary.CC_CORRECT .. "All sockets are filled" .. Geary.CC_END)
 	end
+	
 	if self.failedJewelIds > 0 then
-		Geary:log(self.failedJewelIds .. " gems could not be obtained!", 1, 0, 1)
+		Geary:log(Geary.CC_FAILED .. self.failedJewelIds .. " gems could not be obtained!" .. Geary.CC_END)
 	end
+	
 	if self.unenchantedCount > 0 then
-		Geary:log(self.unenchantedCount .. " items missing enchants!", 1, 0, 0)
+		Geary:log(Geary.CC_MISSING .. self.unenchantedCount .. " items missing enchants!" .. Geary.CC_END)
 	else
-		Geary:log("All items are enchanted", 0, 1, 0)
+		Geary:log(Geary.CC_CORRECT .. "All items are enchanted" .. Geary.CC_END)
 	end
+	
 	if self.minItem ~= nil then
-		Geary:log(("Lowest %s %s"):format(self.minItem:iLevelWithUpgrades(), self.minItem.link))
+		Geary:log(("Lowest %s %s %s"):format(self.minItem:iLevelWithUpgrades(),
+			self.minItem.inlineTexture, self.minItem.link))
 	end
+	
 	if self.maxItem ~= nil then
-		Geary:log(("Highest %s %s"):format(self.maxItem:iLevelWithUpgrades(), self.maxItem.link))
+		Geary:log(("Highest %s %s %s"):format(self.maxItem:iLevelWithUpgrades(), 
+			self.maxItem.inlineTexture, self.maxItem.link))
 	end
 end
 
@@ -222,14 +241,15 @@ end
 function Geary_Inspect:inspectUnitRequest(unit)
 	-- Cannot do two inspections at once
 	if self.inProgress then
-		Geary:print(RED_FONT_COLOR_CODE .. "Cannot inspect " .. unit .. " while inspection of " ..
-			self.player:getFullNameLink() .. " still in progress." .. FONT_COLOR_CODE_CLOSE)
+		Geary:print(Geary.CC_FAILED .. "Cannot inspect", unit, "while inspection of",
+			self.player:getFullNameLink(), "still in progress." .. Geary.CC_END)
 		return
 	end
 
 	-- Reset everything and show the UI for results
 	self:resetInfo()
 	self:stopTimer()
+	Geary_Interface_Log:clearIfTooLarge()
 	Geary_Interface:Show()
 
 	-- Player info
@@ -241,14 +261,14 @@ function Geary_Inspect:inspectUnitRequest(unit)
 end
 
 function Geary_Inspect:reinspectRequest()
-	Geary:log("Inspection failed, retrying...", 1, 0, 1)
+	Geary:log(Geary.CC_FAILED .. "Inspection failed, retrying..." .. Geary.CC_END)
 	self:makeInspectRequest()
 end
 
 function Geary_Inspect:makeInspectRequest()
 	self.inProgress = true;
 	self:resetData()
-	Geary:log(" ")
+	Geary:log()
 	Geary:log(("Inspecting %s %s %s %i %s (%s)"):format(self.player.unit,
 		self.player:getFactionInlineIcon(), self.player:getFullNameLink(), self.player.level,
 		self.player:getColorizedClassName(), self.player.guid))
@@ -263,10 +283,10 @@ function Geary_Inspect:inspectUnit(unit)
 		if CheckInteractDistance(unit, 1) then
 			self:inspectUnitRequest(unit)
 		else
-			Geary:print("Can inspect, but out of range " .. unit)
+			Geary:print(Geary.CC_ERROR .. "Can inspect, but out of range", unit .. Geary.CC_END)
 		end
 	else
-		Geary:print("Cannot inspect " .. unit)
+		Geary:print(Geary.CC_ERROR .. "Cannot inspect", unit .. Geary.CC_END)
 	end
 end
 
@@ -279,5 +299,5 @@ function Geary_Inspect:inspectTarget()
 end
 
 function Geary_Inspect:inspectGroup()
-	Geary:print("Group inspection is not implemented yet.")
+	Geary:print(Geary.CC_ERROR .. "Group inspection is not implemented yet." .. Geary.CC_END)
 end

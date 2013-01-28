@@ -71,7 +71,7 @@ function Geary_Interface:_createClearButton()
 	local button = CreateFrame("Button", nil, self.mainFrame, "OptionsButtonTemplate")
 	button:SetPoint("BOTTOM", -60, 15)
 	button:SetText("Clear")
-	button:SetScript("OnClick", function (self)	Geary_Interface_Log:Clear() end)
+	button:SetScript("OnClick", function (self)	Geary_Interface_Log:clear() end)
 end
 
 function Geary_Interface:_createCloseButton()
