@@ -32,11 +32,12 @@ function Geary_Inspect:resetData()
 	self.filledSockets = 0
 	self.emptySockets = 0
 	self.failedJewelIds = 0
-	self.missingBeltBuckle = false
+	self.isMissingBeltBuckle = false
 	self.unenchantedCount = 0
 	self.upgradeLevel = 0
 	self.upgradeMax = 0
 	self.upgradeItemLevelMissing = 0
+	self.missingEotbpCount = 0
 end
 
 function Geary_Inspect:startTimer(milliseconds)
@@ -115,8 +116,11 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 			if self.maxItem == nil or item.iLevel > self.maxItem.iLevel then
 				self.maxItem = item
 			end
-			if item.missingBeltBuckle then
-				self.missingBeltBuckle = true
+			if item.isMissingBeltBuckle then
+				self.isMissingBeltBuckle = true
+			end
+			if item.isMissingEotbp then
+				self.missingEotbpCount = self.missingEotbpCount + 1
 			end
 			if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
 				self.hasTwoHandWeapon = true
@@ -200,8 +204,14 @@ function Geary_Inspect:_showSummary()
 		Geary:log(Geary.CC_MISSING .. self.emptySlots .. " item slots are empty!" .. Geary.CC_END)
 	end
 	
-	if self.missingBeltBuckle then
-		Geary:log(Geary.CC_MISSING .. "Missing belt buckle!" .. Geary.CC_END)
+	if self.isMissingBeltBuckle then
+		Geary:log(Geary.CC_MISSING .. "Missing " .. Geary_Item:getBeltBuckleItemWithTexture() ..
+			Geary.CC_END)
+	end
+	
+	if self.missingEotbpCount > 0 then
+		Geary:log(Geary.CC_MISSING .. "Missing " .. self.missingEotbpCount .. " " ..
+			Geary_Item:getEotbpItemWithTexture() .. Geary.CC_END)
 	end
 	
 	if self.emptySockets > 0 then

@@ -87,6 +87,42 @@ function Geary_Item:iLevelWithUpgrades()
 	return tostring(self.iLevel)
 end
 
+function Geary_Item:getBeltBuckleItemWithTexture()
+	return self:_getItemLinkWithTexture(90046, "Living Steel Belt Buckle")
+end
+
+function Geary_Item:getEotbpItemWithTexture()
+	return self:_getItemLinkWithTexture(93403, "Eye of the Black Prince")
+end
+
+function Geary_Item:_getItemLinkWithTexture(itemId, itemName)
+	local itemLink = select(2, GetItemInfo(itemId))
+	if itemLink == nil then
+		Geary:debugLog(itemName, "item ID", itemId, "not in local cache")
+		return itemName
+	end
+	local inlineTexture = self:_getItemInlineTexture(itemLink)
+	if inlineTexture == nil then
+		return itemLink
+	else
+		return inlineTexture .. " " .. itemLink
+	end
+end
+
+function Geary_Item:_getItemInlineTexture(itemLink)
+	local size = Geary_Options:getLogFontHeight()
+	local texture = select(10, GetItemInfo(itemLink))
+	if texture == nil or texture:len() == 0 then
+		return nil
+	end
+	local itemId = itemLink:match("item:(%d+):")
+	if itemId == nil then
+		return "|T" .. texture .. ":" .. size .. ":" .. size .. "|t"
+	else
+		return "|Hitem:" .. itemId .. "|h|T" .. texture .. ":" .. size .. ":" .. size .. "|t|h"
+	end
+end
+
 function Geary_Item:new(o)
 	local newObject = {
 		slot = nil,
@@ -101,12 +137,14 @@ function Geary_Item:new(o)
 		filledSockets = {},
 		emptySockets = {},
 		failedJewelIds = {},
-		missingBeltBuckle = false,
+		isMissingBeltBuckle = false,
 		canEnchant = false,
 		enchantText = nil,
 		upgradeLevel = 0,
 		upgradeMax = 0,
-		upgradeItemLevelMissing = 0
+		upgradeItemLevelMissing = 0,
+		isShaTouched = false,
+		isMissingEotbp = false
 	}
 	if o then
 		for name, value in pairs(o) do
@@ -136,7 +174,7 @@ function Geary_Item:probe()
 	self.id = self.link:match("|Hitem:(%d+):")
 	self.canEnchant = _slotDetails[self.slot].canEnchant
 	self.name, _, self.rarity, _, _, self.iType, self.subType, _, _, _, _ = GetItemInfo(self.link)
-	self.inlineTexture = self:_getItemInlineTexture(self.link, Geary_Options:getLogFontHeight())
+	self.inlineTexture = self:_getItemInlineTexture(self.link)
 
 	-- Parse data from the item's tooltip
 	self:_parseTooltip()
@@ -144,9 +182,12 @@ function Geary_Item:probe()
 	-- Get socketed gem information
 	self:_getGems()
 
-	-- If this is a waist item, see if the belt buckle is missing
+	-- If this item can have an extra gem in it, check for it
 	if self.slot == "WaistSlot" then
-		self:_checkForBeltBuckle()
+		self.isMissingBeltBuckle = self:_isMissingExtraGem()
+	end
+	if self.isShaTouched then
+		self.isMissingEotbp = self:_isMissingExtraGem()
 	end
 	
 	-- Ensure we got the data we should have
@@ -155,15 +196,16 @@ function Geary_Item:probe()
 	end
 
 	-- Report info about the item
-	Geary:log(("%s %s %s %s %s %s"):format(self:iLevelWithUpgrades(), self.inlineTexture,
-		self.link, self.slot:gsub("Slot$", ""), self.iType, self.subType))
+	Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(),
+		self.inlineTexture == nil and self.link or (self.inlineTexture .. " " .. self.link),
+		self.slot:gsub("Slot$", ""), self.iType, self.subType))
 	
 	for _, text in pairs(self.emptySockets) do
 		Geary:log(Geary.CC_MISSING .. "   No gem in " .. text .. Geary.CC_END)
 	end
 
 	for _, itemLink in pairs(self.filledSockets) do
-		local inlineGemTexture = self:_getItemInlineTexture(itemLink, Geary_Options:getLogFontHeight())
+		local inlineGemTexture = self:_getItemInlineTexture(itemLink)
 		if inlineGemTexture == nil then
 			Geary:log(Geary.CC_CORRECT .. "   Gem " .. itemLink .. Geary.CC_END)
 		else
@@ -172,7 +214,7 @@ function Geary_Item:probe()
 	end
 
 	for socketIndex, _ in ipairs(self.failedJewelIds) do
-		Geary:log(Geary.CC_MISSING .. "   Failed to get gem in socket " .. socketIndex .. Geary.CC_END)
+		Geary:log(Geary.CC_FAILED .. "   Failed to get gem in socket " .. socketIndex .. Geary.CC_END)
 	end
 	
 	if self.enchantText ~= nil then
@@ -181,8 +223,11 @@ function Geary_Item:probe()
 		Geary:log(Geary.CC_MISSING .. "   Missing enchant!" .. Geary.CC_END)
 	end
 	
-	if self.missingBeltBuckle then
-		Geary:log(Geary.CC_MISSING .. "   Missing belt buckle!" .. Geary.CC_END)
+	if self.isMissingBeltBuckle then
+		Geary:log(Geary.CC_MISSING .. "   Missing " .. self:getBeltBuckleItemWithTexture() .. Geary.CC_END)
+	end
+	if self.isMissingEotbp then
+		Geary:log(Geary.CC_MISSING .. "   Missing " .. self:getEotbpItemWithTexture() .. Geary.CC_END)
 	end
 end
 
@@ -225,21 +270,20 @@ function Geary_Item:_parseTooltip()
 	self.tooltip:SetHyperlink(self.link)
 
 	-- Parase the left side text (right side text isn't useful)
-	for lineNum = 1, self.tooltip:NumLines(), 1 do
+	for lineNum = 1, self.tooltip:NumLines() do
 		(function ()  -- Function so we can use return as "continue"
 			local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
 			-- Eat any color codes (e.g. gem stats have them)
 			text = text:gsub("|c%x%x%x%x%x%x%x%x(.-)|r", "%1")
-			
 			Geary:debugLog(text)
 			
-			local iLevel = text:match("^%s*Item Level (%d+)")
+			local iLevel = text:match("^%s*Item Level%s+(%d+)")
 			if iLevel then
 				self:_setItemLevel(tonumber(iLevel))
 				return  -- "continue"
 			end
 			
-			local upgradeLevel, upgradeMax = text:match("^%s*Upgrade Level: (%d+)/(%d+)")
+			local upgradeLevel, upgradeMax = text:match("^%s*Upgrade Level:%s+(%d+)/(%d+)")
 			if upgradeLevel and upgradeMax then
 				self:_setUpgrades(tonumber(upgradeLevel), tonumber(upgradeMax))
 				return  -- "continue"
@@ -250,6 +294,11 @@ function Geary_Item:_parseTooltip()
 				return  -- "continue"
 			end
 
+			if text == '"Sha-Touched"' then
+				self.isShaTouched = true
+				return  -- "continue"
+			end
+			
 			for _, socketName in pairs(_socketNames) do
 				if text == socketName then
 					tinsert(self.emptySockets, text)
@@ -270,7 +319,7 @@ function Geary_Item:_getGems()
 		self.link:match("item:.-:.-:(.-):(.-):(.-):(.-):")
 
 	-- Check all sockets for a gem
-	for socketIndex = 1, 4, 1 do
+	for socketIndex = 1, 4 do
 		local itemName, itemLink = GetItemGem(self.link, socketIndex)
 		if itemLink == nil then
 			if jewelId[socketIndex] ~= nil and tonumber(jewelId[socketIndex]) ~= 0 then
@@ -282,19 +331,6 @@ function Geary_Item:_getGems()
 		else
 			tinsert(self.filledSockets, itemLink)
 		end
-	end
-end
-
-function Geary_Item:_getItemInlineTexture(itemLink, size)
-	local texture = select(10, GetItemInfo(itemLink))
-	if texture == nil and texture:len() == 0 then
-		return nil
-	end
-	local itemId = itemLink:match("item:(%d+):")
-	if itemId == nil then
-		return "|T" .. texture .. ":" .. size .. ":" .. size .. "|t"
-	else
-		return "|Hitem:" .. itemId .. "|h|T" .. texture .. ":" .. size .. ":" .. size .. "|t|h"
 	end
 end
 
@@ -333,12 +369,12 @@ function Geary_Item:_setEnchantText(enchantText)
 	end
 end
 
--- There is no good way to check for a belt buckle.
--- What we do is count the gems in the BASE item and compare that with the number of gem's
+-- There is no good way to check for an extra gem from a belt buckle or Eye of the Black Prince.
+-- What we do is count the gems in the BASE item and compare that with the number of gems
 -- in THIS item. If THIS item doesn't have one more gem than the BASE item, it doesn't have
--- a belt buckle (or has a belt buckle with no gem in it).
+-- an extra gem (or it has a belt buckle/EotBP socket with no gem in it).
 -- Note: This is tooltip parsing similar to the full parse, but we just care about empty sockets.
-function Geary_Item:_checkForBeltBuckle()
+function Geary_Item:_isMissingExtraGem()
 
 	-- Get the base item info from this item
 	local _, baseItemLink = GetItemInfo(self.id)
@@ -354,10 +390,10 @@ function Geary_Item:_checkForBeltBuckle()
 
 	-- Parase the left side text (right side text isn't useful)
 	local baseSocketCount = 0
-	for lineNum = 1, self.tooltip:NumLines(), 1 do
+	for lineNum = 1, self.tooltip:NumLines() do
 		(function ()  -- Function so we can use return as "continue"
 			local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
-			Geary:debugLog("buckle:", text)
+			Geary:debugLog("extra gem:", text)
 			
 			for _, socketName in pairs(_socketNames) do
 				if text == socketName then
@@ -372,10 +408,12 @@ function Geary_Item:_checkForBeltBuckle()
 	self.tooltip:ClearLines()
 	
 	-- Total sockets in THIS item is filled plus failed plus empty
-	-- If total is <= the count in the base item, the belt buckle is missing
-	Geary:debugLog(("buckle: filled=%i, failed=%i, empty=%i, base=%i"):format(#self.filledSockets,
+	-- If total is <= the count in the base item, the extra gem is missing
+	Geary:debugLog(("extra gem: filled=%i, failed=%i, empty=%i, base=%i"):format(#self.filledSockets,
 		#self.failedJewelIds, #self.emptySockets, baseSocketCount))
 	if #self.filledSockets + #self.failedJewelIds + #self.emptySockets <= baseSocketCount then
-		self.missingBeltBuckle = true
+		return true
+	else
+		return false
 	end
 end
