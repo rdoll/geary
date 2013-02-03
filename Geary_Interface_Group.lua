@@ -8,8 +8,18 @@
 --]]
 
 Geary_Interface_Group = {
-	frame = nil
+	fontString = nil
 }
 
-function Geary_Interface_Group:init()
+function Geary_Interface_Group:init(parent)
+	local fontString = parent:CreateFontString("$parent_Group", "ARTWORK", "GameFontNormal")
+	fontString:Hide()
+	fontString:SetPoint("CENTER", parent, "CENTER", 0, 0)
+	fontString:SetText("Group summary is not yet implemented")
+	self.fontString = fontString
+	
+	Geary_Interface:createTab("Group",
+		function () Geary_Interface_Group.fontString:Show() end,
+		function () Geary_Interface_Group.fontString:Hide() end
+	)
 end

@@ -7,11 +7,11 @@
 	Any credits to me (FoamHead) and/or Geary would be appreciated.
 --]]
 
-Geary_Interface_Icon = {
+Geary_Icon = {
 	button = nil
 }
 
-function Geary_Interface_Icon:init()
+function Geary_Icon:init()
 	local button = CreateFrame("Button", "Geary_Ui_Icon_Button", UIParent)
 	button:SetMovable(true)
 	button:SetClampedToScreen(true)
@@ -37,7 +37,7 @@ function Geary_Interface_Icon:init()
 	button:SetScript("OnHide", button.StopMovingOrSizing)
 	button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp",
 		"Button4Up", "Button5Up")
-	button:SetScript("OnClick", function (self) Geary_Interface_Icon:OnClick(self) end)
+	button:SetScript("OnClick", function (self) Geary_Icon:OnClick(self) end)
 	if Geary_Options:isIconShown() then
 		button:Show()
 	else
@@ -46,7 +46,7 @@ function Geary_Interface_Icon:init()
 	self.button = button
 end
 
-function Geary_Interface_Icon:OnClick(button)
+function Geary_Icon:OnClick(button)
 	local mouseButton = GetMouseButtonClicked()
 	if mouseButton == "LeftButton" then
 		Geary_Inspect:inspectTarget()
@@ -55,21 +55,21 @@ function Geary_Interface_Icon:OnClick(button)
 	elseif mouseButton == "RightButton" then
 		Geary_Inspect:inspectSelf()
 	elseif mouseButton == "Button4" or mouseButton == "Button5" then
-		Geary_Interface_Options:toggle()
+		Geary_Options_Interface:toggle()
 	end
 end
 
-function Geary_Interface_Icon:Show()
+function Geary_Icon:Show()
 	self.button:Show()
 	Geary_Options:setIconShown()
 end
 
-function Geary_Interface_Icon:Hide()
+function Geary_Icon:Hide()
 	self.button:Hide()
 	Geary_Options:setIconHidden()
 end
 
-function Geary_Interface_Icon:toggle()
+function Geary_Icon:toggle()
 	if (self.button:IsShown()) then
 		self:Hide()
 	else
@@ -77,7 +77,7 @@ function Geary_Interface_Icon:toggle()
 	end
 end
 
-function Geary_Interface_Icon:setScale(scale)
+function Geary_Icon:setScale(scale)
 	self.button:SetScale(scale)
 	Geary_Options:setIconScale(scale)
 end

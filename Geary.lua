@@ -93,6 +93,8 @@ function Geary.events:ADDON_LOADED(addOnName)
 		-- Init other modules
 		Geary_Item:init()
 		Geary_Interface:init()
+		Geary_Icon:init()
+		Geary_Options_Interface:init()
 	end
 end
 
@@ -187,11 +189,11 @@ end
 
 local function _slashCommandIcon(rest)
 	if rest == "show" then
-		Geary_Interface_Icon:Show()
+		Geary_Icon:Show()
 	elseif rest == "hide" then
-		Geary_Interface_Icon:Hide()
+		Geary_Icon:Hide()
 	elseif rest == "toggle" then
-		Geary_Interface_Icon:toggle()
+		Geary_Icon:toggle()
 	else
 		print(_usage)
 	end
@@ -199,11 +201,11 @@ end
 
 local function _slashCommandOptions(rest)
 	if rest == "show" then
-		Geary_Interface_Options:Show()
+		Geary_Options_Interface:Show()
 	elseif rest == "hide" then
-		Geary_Interface_Options:Hide()
+		Geary_Options_Interface:Hide()
 	elseif rest == "toggle" then
-		Geary_Interface_Options:toggle()
+		Geary_Options_Interface:toggle()
 	else
 		print(_usage)
 	end

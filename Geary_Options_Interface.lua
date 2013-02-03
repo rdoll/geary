@@ -7,7 +7,7 @@
 	Any credits to me (FoamHead) and/or Geary would be appreciated.
 --]]
 
-Geary_Interface_Options = {
+Geary_Options_Interface = {
 	mainFrame = nil,
 	contentsCreated = false,
 	iconShownCheckbox = nil,
@@ -29,19 +29,19 @@ local _fontFilenames = {
 	}
 }
 
-function Geary_Interface_Options:init()
+function Geary_Options_Interface:init()
 	-- Add our options frame to the Interface Addon Options GUI
 	local frame = CreateFrame("Frame", "Geary_Ui_Options_Frame", UIParent)
 	frame:Hide()
 	frame.name = Geary.title
-	frame.default = function (self) Geary_Interface_Options:onDefault(self) end
-	frame.okay = function (self) Geary_Interface_Options:onOkay(self) end
-	frame:SetScript("OnShow", function (self) Geary_Interface_Options:OnShow(self) end)
+	frame.default = function (self) Geary_Options_Interface:onDefault(self) end
+	frame.okay = function (self) Geary_Options_Interface:onOkay(self) end
+	frame:SetScript("OnShow", function (self) Geary_Options_Interface:OnShow(self) end)
 	InterfaceOptions_AddCategory(frame)
 	self.mainFrame = frame
 end
 
-function Geary_Interface_Options:_createContents()
+function Geary_Options_Interface:_createContents()
 	
 	-- Title
 	local title = self.mainFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -66,7 +66,7 @@ function Geary_Interface_Options:_createContents()
 	self.contentsCreated = true
 end
 
-function Geary_Interface_Options:_createIconSection(previousItem)
+function Geary_Options_Interface:_createIconSection(previousItem)
 
 	-- Icon header
 	local iconHeader = self:_createHeader(self.mainFrame, "Geary Icon Button")
@@ -134,13 +134,13 @@ local function _logFontFilenameDropdownInitialize(self, level)
 		info.text = _fontFilenames.byFilename[filename].name
 		info.value = filename
 		info.func = function (self)
-			UIDropDownMenu_SetSelectedID(Geary_Interface_Options.logFontFilenameDropdown, self:GetID())
+			UIDropDownMenu_SetSelectedID(Geary_Options_Interface.logFontFilenameDropdown, self:GetID())
 		end
 		UIDropDownMenu_AddButton(info, level)
 	end
 end
 
-function Geary_Interface_Options:_createInterfaceSection(previousItem)
+function Geary_Options_Interface:_createInterfaceSection(previousItem)
 
 	-- Geary interface header
 	local interfaceHeader = self:_createHeader(self.mainFrame, "Geary Interface")
@@ -203,7 +203,7 @@ function Geary_Interface_Options:_createInterfaceSection(previousItem)
 	return self.logFontHeightSlider
 end
 
-function Geary_Interface_Options:_createHeader(parent, name)
+function Geary_Options_Interface:_createHeader(parent, name)
 
 	local frame = CreateFrame("Frame", nil, parent)
 	frame:SetHeight(16)
@@ -231,28 +231,31 @@ function Geary_Interface_Options:_createHeader(parent, name)
 	return frame
 end
 
-function Geary_Interface_Options:Show()
+function Geary_Options_Interface:Show()
 	 InterfaceOptionsFrame_OpenToCategory(self.mainFrame)
 end
 
-function Geary_Interface_Options:Hide()
+function Geary_Options_Interface:Hide()
 	if InterfaceOptionsFrameCancel == nil then
-		Geary:print("Cannot hide Interface options")
+		Geary:print(Geary.CC_ERROR .. "Cannot hide Interface options" .. Geary.CC_END)
 	else
-		-- Simulate a left-mouse button click on the Interface frame's cancel button
-		InterfaceOptionsFrameCancel:Click("LeftButton", true)
+		-- If the cancel button isn't visible, clicking it causes the frame to be shown
+		if InterfaceOptionsFrameCancel:IsVisible() then
+			-- Simulate a left-mouse button click on the Interface frame's cancel button
+			InterfaceOptionsFrameCancel:Click("LeftButton", true)
+		end
 	end
 end
 
-function Geary_Interface_Options:toggle()
+function Geary_Options_Interface:toggle()
 	if InterfaceOptionsFrame:IsShown() then
-		Geary_Interface_Options:Hide()
+		Geary_Options_Interface:Hide()
 	else
-		Geary_Interface_Options:Show()
+		Geary_Options_Interface:Show()
 	end
 end
 
-function Geary_Interface_Options:OnShow(frame)
+function Geary_Options_Interface:OnShow(frame)
 	-- Create options frame contents once when necessary
 	if not self.contentsCreated then
 		self:_createContents()
@@ -268,7 +271,7 @@ function Geary_Interface_Options:OnShow(frame)
 	self.logFontHeightSlider:SetValue(Geary_Options:getLogFontHeight())
 end
 
-function Geary_Interface_Options:onDefault(frame)
+function Geary_Options_Interface:onDefault(frame)
 	self.iconShownCheckbox:SetChecked(Geary_Options:getDefaultIconShown())
 	self.iconScaleSlider:SetValue(ceil(Geary_Options:getDefaultIconScale() * 100))
 	-- Note: Not sure why, but must initialize before setting a value or we get garbage text
@@ -278,13 +281,13 @@ function Geary_Interface_Options:onDefault(frame)
 	self.logFontHeightSlider:SetValue(Geary_Options:getDefaultLogFontHeight())
 end
 
-function Geary_Interface_Options:onOkay(frame)
+function Geary_Options_Interface:onOkay(frame)
 	if self.iconShownCheckbox:GetChecked() then
-		Geary_Interface_Icon:Show()
+		Geary_Icon:Show()
 	else
-		Geary_Interface_Icon:Hide()
+		Geary_Icon:Hide()
 	end
-	Geary_Interface_Icon:setScale(self.iconScaleSlider:GetValue() / 100)
+	Geary_Icon:setScale(self.iconScaleSlider:GetValue() / 100)
 	Geary_Interface_Log:setFont(
 		_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
 		self.logFontHeightSlider:GetValue())

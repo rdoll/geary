@@ -22,21 +22,21 @@
 		Geary_Interface:toggle()
     </Binding>
     <Binding name="GEARY_SHOW_ICON">
-		Geary_Interface_Icon:Show()
+		Geary_Icon:Show()
     </Binding>
     <Binding name="GEARY_HIDE_ICON">
-		Geary_Interface_Icon:Hide()
+		Geary_Icon:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_ICON">
-		Geary_Interface_Icon:toggle()
+		Geary_Icon:toggle()
     </Binding>
     <Binding name="GEARY_SHOW_OPTIONS">
-		Geary_Interface_Options:Show()
+		Geary_Options_Interface:Show()
     </Binding>
     <Binding name="GEARY_HIDE_OPTIONS">
-		Geary_Interface_Options:Hide()
+		Geary_Options_Interface:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_OPTIONS">
-		Geary_Interface_Options:toggle()
+		Geary_Options_Interface:toggle()
     </Binding>
 </Bindings>

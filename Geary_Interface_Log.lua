@@ -13,44 +13,59 @@ Geary_Interface_Log = {
 	LETTERS_MAX = 10000
 }
 
-function Geary_Interface_Log:init()
-	self.scrollFrame = CreateFrame("ScrollFrame", "Geary_Ui_Log", Geary_Interface.mainFrame,
-		"UIPanelScrollFrameTemplate")
-		--"UIPanelScrollFrameTemplate2")  Includes borders around the scrollbar
-	self.scrollFrame:SetPoint("TOPLEFT", Geary_Interface.mainFrame, "TOPLEFT", 4, -18)
-	self.scrollFrame:SetPoint("BOTTOMRIGHT", Geary_Interface.mainFrame, "BOTTOMRIGHT", -36, 44)
+function Geary_Interface_Log:init(parent)
 
-	self.editBox = CreateFrame("EditBox", "Geary_Ui_Log_EditBox", self.scrollFrame)
-	self.editBox:SetPoint("TOPLEFT", self.scrollFrame, "TOPLEFT")
-	self.editBox:SetSize(self.scrollFrame:GetWidth(), self.scrollFrame:GetHeight())
-	self.editBox:SetMultiLine(true)
-	self.editBox:SetIndentedWordWrap(true)  -- TODO This doesn't seem to be working
-	self.editBox:SetAutoFocus(false)
-	self.editBox:EnableMouse(true)
-	self.editBox:EnableMouseWheel(true)
-	self.editBox:SetHyperlinksEnabled(true)
-	self.editBox:Disable()
-	self.editBox:SetFont(Geary_Options:getLogFontFilename(), Geary_Options:getLogFontHeight())
-	self.editBox:SetScript("OnHyperlinkClick", function (self, link, text, button)
+	local frame = CreateFrame("ScrollFrame", "$parent_Log", parent, "UIPanelScrollFrameTemplate")
+		-- "UIPanelScrollFrameTemplate2")  Includes borders around the scrollbar
+	frame:Hide()
+	frame:SetPoint("TOPLEFT", parent, "TOPLEFT", -9, -2)
+	frame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -24, 1)
+	self.scrollFrame = frame
+
+	local editBox = CreateFrame("EditBox", "$parent_EditBox", self.scrollFrame)
+	editBox:SetPoint("TOPLEFT", self.scrollFrame, "TOPLEFT")
+	editBox:SetSize(self.scrollFrame:GetWidth(), self.scrollFrame:GetHeight())
+	editBox:SetMultiLine(true)
+	editBox:SetIndentedWordWrap(true)  -- TODO This doesn't seem to be working
+	editBox:SetAutoFocus(false)
+	editBox:EnableMouse(true)
+	editBox:EnableMouseWheel(true)
+	editBox:SetHyperlinksEnabled(true)
+	editBox:Disable()
+	editBox:SetFont(Geary_Options:getLogFontFilename(), Geary_Options:getLogFontHeight())
+	editBox:SetScript("OnHyperlinkClick", function (self, link, text, button)
 		SetItemRef(link, text, button)
 	end)
-	self.editBox:SetScript("OnHyperlinkEnter", function (self, link, text)
-		GameTooltip:SetOwner(self, 'ANCHOR_CURSOR')
+	editBox:SetScript("OnHyperlinkEnter", function (self, link, text)
+		GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
 		GameTooltip:SetHyperlink(link)
 		GameTooltip:Show()
 	end)
-	self.editBox:SetScript("OnHyperlinkLeave", function (self, link, text)
+	editBox:SetScript("OnHyperlinkLeave", function (self, link, text)
 		GameTooltip:Hide()
 	end)
 	-- As text is added, scroll to the bottom so the most recent lines are visible
-	self.editBox:SetScript("OnTextSet", function (self, userInput)
+	editBox:SetScript("OnTextSet", function (self, userInput)
 		Geary_Interface_Log:_setScrollBarToBottom()
 	end)
-	self.editBox:SetScript("OnTextChanged", function (self, userInput)
+	editBox:SetScript("OnTextChanged", function (self, userInput)
 		Geary_Interface_Log:_setScrollBarToBottom()
 	end)
+	self.editBox = editBox
 	
 	self.scrollFrame:SetScrollChild(self.editBox)
+
+	-- TODO Need a better place for this button and it should match the frame's theme
+	-- TODO StatTemplate looks promising, but has some default scripts specific to achievements
+	local button = CreateFrame("Button", "$parent_Clear", self.scrollFrame, "OptionsButtonTemplate")
+	button:SetPoint("BOTTOM", self.scrollFrame, "BOTTOM", 24, -22)
+	button:SetText("Clear")
+	button:SetScript("OnClick", function (self)	Geary_Interface_Log:clear() end)
+
+	Geary_Interface:createTab("Log",
+		function () Geary_Interface_Log.scrollFrame:Show() end,
+		function () Geary_Interface_Log.scrollFrame:Hide() end
+	)
 end
 
 function Geary_Interface_Log:_setScrollBarToBottom()
