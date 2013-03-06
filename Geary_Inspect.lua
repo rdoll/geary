@@ -170,7 +170,8 @@ end
 local _itemLevelMilestones = {
 	{ iLevel = 435, milestone = "LFD heroic" },
 	{ iLevel = 460, milestone = "MV LFR" },
-	{ iLevel = 470, milestone = "HoF/TES LFR" }
+	{ iLevel = 470, milestone = "HoF/TES LFR" },
+	{ iLevel = 480, milestone = "ToT LFR" }
 }
 
 function Geary_Inspect:_showSummary()
