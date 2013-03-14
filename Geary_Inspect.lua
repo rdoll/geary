@@ -96,9 +96,10 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	self.player:INSPECT_READY()
 	
 	-- Player inventory
-	for slotNumber, slotName in pairs(Geary_Item:getInvSlots()) do
+	for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
+
 		self.itemCount = self.itemCount + 1
-		local itemLink = GetInventoryItemLink(self.player.unit, slotNumber)
+		local itemLink = GetInventoryItemLink(self.player.unit, Geary_Item:getSlotNumberForName(slotName))
 		if itemLink == nil then
 			if slotName == "SecondaryHandSlot" and self.hasTwoHandWeapon then
 				Geary:debugLog(slotName, "is empty, but using 2Her")
@@ -142,6 +143,11 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 			self.upgradeLevel = self.upgradeLevel + item.upgradeLevel
 			self.upgradeMax = self.upgradeMax + item.upgradeMax
 			self.upgradeItemLevelMissing = self.upgradeItemLevelMissing + item.upgradeItemLevelMissing
+			
+			-- Add to player interface if we successfully parsed everything about the item
+			if #item.failedJewelIds == 0 then
+				Geary_Interface_Player:setItem(slotName, item)
+			end
 		end
 	end
 
@@ -247,6 +253,7 @@ function Geary_Inspect:inspectionOver()
 	self:stopTimer()
 	self.inProgress = false
 	Geary:UnregisterEvent("INSPECT_READY")
+	Geary_Interface_Player:markMissingItems()
 end
 
 function Geary_Inspect:inspectUnitRequest(unit)
@@ -266,6 +273,10 @@ function Geary_Inspect:inspectUnitRequest(unit)
 	-- Player info
 	self.player = Geary_Player:new{unit = unit}
 	self.player:probeInfo()
+
+	-- Reset the player interface for inspecting this player
+	Geary_Interface_Player:clear()
+	Geary_Interface_Player:setModel(unit)
 
 	-- Request inspection
 	self:makeInspectRequest()

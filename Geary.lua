@@ -91,7 +91,7 @@ function Geary.events:ADDON_LOADED(addOnName)
 		Geary_Database:ADDON_LOADED()
 	
 		-- Init other modules
-		Geary_Item:init()
+		Geary_Item:init()  -- Must be before Geary_Interface_Player
 		Geary_Interface:init()
 		Geary_Icon:init()
 		Geary_Options_Interface:init()

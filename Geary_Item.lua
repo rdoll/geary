@@ -13,23 +13,27 @@ Geary_Item = {
 
 -- Details of all slots and what they can contain (slotNumber filled in during init)
 local _slotDetails = {
-	HeadSlot          = { slotNumber = nil, canEnchant = false },
-	NeckSlot          = { slotNumber = nil, canEnchant = false },
-	ShoulderSlot      = { slotNumber = nil, canEnchant = true  },
-	BackSlot          = { slotNumber = nil, canEnchant = true  },
-	ChestSlot         = { slotNumber = nil, canEnchant = true  },
-	WaistSlot         = { slotNumber = nil, canEnchant = false },
-	LegsSlot          = { slotNumber = nil, canEnchant = true  },
-	FeetSlot          = { slotNumber = nil, canEnchant = true  },
-	WristSlot         = { slotNumber = nil, canEnchant = true  },
-	HandsSlot         = { slotNumber = nil, canEnchant = true  },
-	Finger0Slot       = { slotNumber = nil, canEnchant = false },
-	Finger1Slot       = { slotNumber = nil, canEnchant = false },
-	Trinket0Slot      = { slotNumber = nil, canEnchant = false },
-	Trinket1Slot      = { slotNumber = nil, canEnchant = false },
-	MainHandSlot      = { slotNumber = nil, canEnchant = true  },
-	SecondaryHandSlot = { slotNumber = nil, canEnchant = true  }
+	HeadSlot          = { order = 1,  slotNumber = nil, canEnchant = false },
+	NeckSlot          = { order = 2,  slotNumber = nil, canEnchant = false },
+	ShoulderSlot      = { order = 3,  slotNumber = nil, canEnchant = true  },
+	BackSlot          = { order = 4,  slotNumber = nil, canEnchant = true  },
+	ChestSlot         = { order = 5,  slotNumber = nil, canEnchant = true  },
+	WristSlot         = { order = 6,  slotNumber = nil, canEnchant = true  },
+	HandsSlot         = { order = 7,  slotNumber = nil, canEnchant = true  },
+	WaistSlot         = { order = 8,  slotNumber = nil, canEnchant = false },
+	LegsSlot          = { order = 9,  slotNumber = nil, canEnchant = true  },
+	FeetSlot          = { order = 10, slotNumber = nil, canEnchant = true  },
+	Finger0Slot       = { order = 11, slotNumber = nil, canEnchant = false },
+	Finger1Slot       = { order = 12, slotNumber = nil, canEnchant = false },
+	Trinket0Slot      = { order = 13, slotNumber = nil, canEnchant = false },
+	Trinket1Slot      = { order = 14, slotNumber = nil, canEnchant = false },
+	MainHandSlot      = { order = 15, slotNumber = nil, canEnchant = true  },
+	SecondaryHandSlot = { order = 16, slotNumber = nil, canEnchant = true  }
 }
+
+-- Index = order of slots, value = { slotName = "slot name", slotNumber = # }
+-- Filled in during init based on _slotDetails.*.order
+local _slotOrder = {}
 
 -- Names of empty gem sockets in tooltips
 local _socketNames = {
@@ -43,18 +47,19 @@ local _socketNames = {
 }
 
 function Geary_Item:init()
-	-- Determine inventory slot numbers from names
+	-- Determine inventory slot numbers from names and set the slot order
 	for slotName, slotData in pairs(_slotDetails) do
 		slotData.slotNumber, _ = GetInventorySlotInfo(slotName)
+		_slotOrder[slotData.order] = slotName
 	end
 end
 
-function Geary_Item:getInvSlots()
-	local slots = {}
-	for slotName, slotData in pairs(_slotDetails) do
-		slots[slotData.slotNumber] = slotName
-	end
-	return slots
+function Geary_Item:getInvSlotsInOrder()
+	return _slotOrder
+end
+
+function Geary_Item:getSlotNumberForName(slotName)
+	return _slotDetails[slotName].slotNumber
 end
 
 function Geary_Item:isInvSlotName(slotName)
@@ -129,10 +134,11 @@ function Geary_Item:new(o)
 		link = nil,
 		id = nil,
 		name = nil,
-		rarity = nil,
+		quality = nil,
 		iLevel = 0,
 		iType = nil,
 		subType = nil,
+		texture = nil,
 		inlineTexture = nil,
 		filledSockets = {},
 		emptySockets = {},
@@ -173,7 +179,7 @@ function Geary_Item:probe()
 	-- Get base item info
 	self.id = self.link:match("|Hitem:(%d+):")
 	self.canEnchant = _slotDetails[self.slot].canEnchant
-	self.name, _, self.rarity, _, _, self.iType, self.subType, _, _, _, _ = GetItemInfo(self.link)
+	self.name, _, self.quality, _, _, self.iType, self.subType, _, _, self.texture, _ = GetItemInfo(self.link)
 	self.inlineTexture = self:_getItemInlineTexture(self.link)
 
 	-- Parse data from the item's tooltip
@@ -350,7 +356,7 @@ function Geary_Item:_setUpgrades(upgradeLevel, upgradeMax)
 		self.upgradeLevel = upgradeLevel
 		self.upgradeMax = upgradeMax
 		if upgradeLevel < upgradeMax then
-			if self.rarity <= ITEM_QUALITY_RARE then
+			if self.quality <= ITEM_QUALITY_RARE then
 				-- Rare quality items use 1500 Justive Points to upgrade 8 levels
 				self.upgradeItemLevelMissing = (upgradeMax - upgradeLevel) * 8
 			else

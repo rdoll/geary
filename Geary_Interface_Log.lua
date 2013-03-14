@@ -58,7 +58,8 @@ function Geary_Interface_Log:init(parent)
 	-- TODO Need a better place for this button and it should match the frame's theme
 	-- TODO StatTemplate looks promising, but has some default scripts specific to achievements
 	local button = CreateFrame("Button", "$parent_Clear", self.scrollFrame, "OptionsButtonTemplate")
-	button:SetPoint("BOTTOM", self.scrollFrame, "BOTTOM", 24, -22)
+	button:SetSize(75, 17)
+	button:SetPoint("BOTTOM", self.scrollFrame, "BOTTOM", 24, -21)
 	button:SetText("Clear")
 	button:SetScript("OnClick", function (self)	Geary_Interface_Log:clear() end)
 
