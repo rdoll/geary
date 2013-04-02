@@ -79,17 +79,26 @@ function Geary_Item:isTwoHandWeapon()
 		self.subType == "Two-Handed Swords")
 end
 
+function Geary_Item:isMissingRequired()
+	return self.iLevel == 0 or #self.emptySockets > 0 or #self.failedJewelIds > 0 or
+		(self.canEnchant and self.enchantText == nil) or self.isMissingBeltBuckle or
+		self.isMissingEotbp
+end
+
+function Geary_Item:isMissingOptional()
+	return self.upgradeItemLevelMissing > 0
+end
+
 function Geary_Item:iLevelWithUpgrades()
+
+	local upgrades = ""
 	if self.upgradeMax > 0 then
-		local upgrades
-		if self.upgradeLevel < self.upgradeMax then
-			upgrades = Geary.CC_UPGRADE .. self.upgradeLevel .. "/" .. self.upgradeMax .. Geary.CC_END
-		else
-			upgrades = Geary.CC_CORRECT .. self.upgradeLevel .. "/" .. self.upgradeMax .. Geary.CC_END
-		end
-		return tostring(self.iLevel) .. " " .. upgrades
+		upgrades = " " .. (self.upgradeLevel < self.upgradeMax and Geary.CC_UPGRADE or Geary.CC_CORRECT) ..
+			self.upgradeLevel .. "/" .. self.upgradeMax .. Geary.CC_END
 	end
-	return tostring(self.iLevel)
+	
+	local _, _, _, colorCode = GetItemQualityColor(self.quality)
+	return Geary.CC_START .. colorCode .. tostring(self.iLevel) .. Geary.CC_END .. upgrades
 end
 
 function Geary_Item:getBeltBuckleItemWithTexture()
@@ -98,6 +107,19 @@ end
 
 function Geary_Item:getEotbpItemWithTexture()
 	return self:_getItemLinkWithTexture(93403, "Eye of the Black Prince")
+end
+
+function Geary_Item:getItemLinkWithInlineTexture()
+	return self.inlineTexture == nil and self.link or (self.inlineTexture .. " " .. self.link)
+end
+
+function Geary_Item:getGemLinkWithInlineTexture(itemLink)
+	local inlineGemTexture = self:_getItemInlineTexture(itemLink)
+	if inlineGemTexture == nil then
+		return itemLink
+	else
+		return inlineGemTexture .. " " .. itemLink
+	end
 end
 
 function Geary_Item:_getItemLinkWithTexture(itemId, itemName)
@@ -202,8 +224,7 @@ function Geary_Item:probe()
 	end
 
 	-- Report info about the item
-	Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(),
-		self.inlineTexture == nil and self.link or (self.inlineTexture .. " " .. self.link),
+	Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(), self:getItemLinkWithInlineTexture(),
 		self.slot:gsub("Slot$", ""), self.iType, self.subType))
 	
 	for _, text in pairs(self.emptySockets) do
@@ -211,12 +232,7 @@ function Geary_Item:probe()
 	end
 
 	for _, itemLink in pairs(self.filledSockets) do
-		local inlineGemTexture = self:_getItemInlineTexture(itemLink)
-		if inlineGemTexture == nil then
-			Geary:log(Geary.CC_CORRECT .. "   Gem " .. itemLink .. Geary.CC_END)
-		else
-			Geary:log(Geary.CC_CORRECT .. "   Gem " .. inlineGemTexture .. " " .. itemLink .. Geary.CC_END)
-		end
+		Geary:log(Geary.CC_CORRECT .. "   Gem " .. self:getGemLinkWithInlineTexture(itemLink) .. Geary.CC_END)
 	end
 
 	for socketIndex, _ in ipairs(self.failedJewelIds) do

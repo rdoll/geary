@@ -31,7 +31,7 @@ function Geary_Interface:init()
 
 	-- Tabs created, so initialize their state and select initial tab
 	PanelTemplates_SetNumTabs(self.mainFrame, self.tabs.count)
-    self.mainFrame.selectedTab = self.tabs.byName["Log"]
+    self.mainFrame.selectedTab = self.tabs.byName["Player"]
     PanelTemplates_UpdateTabs(self.mainFrame)
 	self:_tabOnClick(self.mainFrame.selectedTab)
 end
