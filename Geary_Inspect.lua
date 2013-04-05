@@ -23,6 +23,7 @@ end
 function Geary_Inspect:resetData()
 	self.hasTwoHandWeapon = false
 	self.emptySlots = 0
+	self.failedSlots = 0
 	self.itemCount = 0
 	self.iLevelTotal = 0
 	self.iLevelEquipped = 0.0
@@ -33,6 +34,7 @@ function Geary_Inspect:resetData()
 	self.emptySockets = 0
 	self.failedJewelIds = 0
 	self.isMissingBeltBuckle = false
+	self.enchantedCount = 0
 	self.unenchantedCount = 0
 	self.upgradeLevel = 0
 	self.upgradeMax = 0
@@ -108,55 +110,60 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 				self.emptySlots = self.emptySlots + 1
 				Geary:log(Geary.CC_MISSING .. slotName .. " is empty!" .. Geary.CC_END)
 			end
-		elseif strlen(itemLink) < 10 then
-			Geary:log(Geary.CC_FAILED .. slotName .. " item link '" .. Geary.CC_END .. itemLink ..
-				Geary.CC_FAILED .. "' is too short to be real" .. Geary.CC_END)
-			self.emptySlots = self.emptySlots + 1
 		else
 			local item = Geary_Item:new{ slot = slotName, link = itemLink }
-			item:probe()
-			self.iLevelTotal = self.iLevelTotal + item.iLevel
-			if self.minItem == nil or item.iLevel < self.minItem.iLevel then
-				self.minItem = item
-			end
-			if self.maxItem == nil or item.iLevel > self.maxItem.iLevel then
-				self.maxItem = item
-			end
-			if item.isMissingBeltBuckle then
-				self.isMissingBeltBuckle = true
-			end
-			if item.isMissingEotbp then
-				self.missingEotbpCount = self.missingEotbpCount + 1
-			end
-			if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
-				self.hasTwoHandWeapon = true
-			end
-			-- TODO: This is a poor man's way to account for Titan's Grip
-			--       The above MH check sets hasTwoHandWeapon to true, and if the player
-			--  	 has anything in their OH, we undo it presuming Titan's Grip.
-			--       Note that this requires the MH to be parsed BEFORE the OH
-			if slotName == "SecondaryHandSlot" then
-				self.hasTwoHandWeapon = false
-			end
-			self.items[slotName] = item
-			self.filledSockets = self.filledSockets + #item.filledSockets
-			self.emptySockets = self.emptySockets + #item.emptySockets
-			self.failedJewelIds = self.failedJewelIds + #item.failedJewelIds
-			if item.canEnchant and not item.enchantText then
-				self.unenchantedCount = self.unenchantedCount + 1
-			end
-			self.upgradeLevel = self.upgradeLevel + item.upgradeLevel
-			self.upgradeMax = self.upgradeMax + item.upgradeMax
-			self.upgradeItemLevelMissing = self.upgradeItemLevelMissing + item.upgradeItemLevelMissing
-			
-			-- Add to player interface if we successfully parsed everything about the item
-			if #item.failedJewelIds == 0 then
-				Geary_Interface_Player:setItem(slotName, item)
+			if item:probe() then
+				self.iLevelTotal = self.iLevelTotal + item.iLevel
+				if self.minItem == nil or item.iLevel < self.minItem.iLevel then
+					self.minItem = item
+				end
+				if self.maxItem == nil or item.iLevel > self.maxItem.iLevel then
+					self.maxItem = item
+				end
+				if item.isMissingBeltBuckle then
+					self.isMissingBeltBuckle = true
+				end
+				if item.isMissingEotbp then
+					self.missingEotbpCount = self.missingEotbpCount + 1
+				end
+				if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
+					self.hasTwoHandWeapon = true
+				end
+				-- TODO: This is a poor man's way to account for Titan's Grip
+				--       The above MH check sets hasTwoHandWeapon to true, and if the player
+				--  	 has anything in their OH, we undo it presuming Titan's Grip.
+				--       Note that this requires the MH to be parsed BEFORE the OH
+				if slotName == "SecondaryHandSlot" then
+					self.hasTwoHandWeapon = false
+				end
+				self.items[slotName] = item
+				self.filledSockets = self.filledSockets + #item.filledSockets
+				self.emptySockets = self.emptySockets + #item.emptySockets
+				self.failedJewelIds = self.failedJewelIds + #item.failedJewelIds
+				if item.canEnchant and not item.enchantText then
+					self.unenchantedCount = self.unenchantedCount + 1
+				end
+				if item.enchantText then
+					self.enchantedCount = self.enchantedCount + 1
+				end
+				self.upgradeLevel = self.upgradeLevel + item.upgradeLevel
+				self.upgradeMax = self.upgradeMax + item.upgradeMax
+				self.upgradeItemLevelMissing = self.upgradeItemLevelMissing + item.upgradeItemLevelMissing
+				
+				-- Add to player interface if we successfully parsed everything about the item
+				if #item.failedJewelIds == 0 then
+					Geary_Interface_Player:setItem(slotName, item)
+				end
+			else
+				-- Item probe failed (and logged why), so track a failed item
+				self.failedSlots = self.failedSlots + 1
 			end
 		end
 	end
 
-	if (self.failedJewelIds > 0 or self.emptySlots > 0) and	self.inspectTry < self.inspectTries then
+	if (self.failedJewelIds > 0 or self.emptySlots > 0 or self.failedSlots > 0) and
+		self.inspectTry < self.inspectTries
+	then
 		-- We failed to get them gem for a jewelId or there are empty slots which the server
 		-- may not have sent to us. Since retries are left, hope one will get the missing data.
 		Geary:log(Geary.CC_FAILED .. "Will retry to get missing data." .. Geary.CC_END)
@@ -224,6 +231,10 @@ function Geary_Inspect:_showSummary()
 		Geary:log(Geary.CC_MISSING .. self.emptySlots .. " item slots are empty!" .. Geary.CC_END)
 	end
 	
+	if self.failedSlots > 0 then
+		Geary:log(Geary.CC_FAILED .. self.failedSlots .. " item slots failed!" .. Geary.CC_END)
+	end
+	
 	if self.isMissingBeltBuckle then
 		Geary:log(Geary.CC_MISSING .. "Missing " .. Geary_Item:getBeltBuckleItemWithTexture() .. Geary.CC_END)
 	end
@@ -245,7 +256,7 @@ function Geary_Inspect:_showSummary()
 	
 	if self.unenchantedCount > 0 then
 		Geary:log(Geary.CC_MISSING .. self.unenchantedCount .. " items missing enchants!" .. Geary.CC_END)
-	else
+	elseif self.enchantedCount > 0 then
 		Geary:log(Geary.CC_CORRECT .. "All items enchanted" .. Geary.CC_END)
 	end
 	
@@ -258,8 +269,6 @@ function Geary_Inspect:_showSummary()
 		Geary:log(("Highest %s %s %s"):format(self.maxItem:iLevelWithUpgrades(), 
 			self.maxItem.inlineTexture, self.maxItem.link))
 	end
-
-	Geary_Interface_Player:inspectionEnd(self)
 end
 
 -- Disable everything after a successful or failed inspection
@@ -267,7 +276,7 @@ function Geary_Inspect:inspectionOver()
 	self:stopTimer()
 	self.inProgress = false
 	Geary:UnregisterEvent("INSPECT_READY")
-	Geary_Interface_Player:markMissingItems()
+	Geary_Interface_Player:inspectionEnd(self)
 end
 
 function Geary_Inspect:inspectUnitRequest(unit)

@@ -79,6 +79,10 @@ function Geary_Item:isTwoHandWeapon()
 		self.subType == "Two-Handed Swords")
 end
 
+function Geary_Item:canHaveEotBP()
+	return self.isShaTouched or (self.iLevel >= 502 and self.iType == "Weapon")
+end
+
 function Geary_Item:isMissingRequired()
 	return self.iLevel == 0 or #self.emptySockets > 0 or #self.failedJewelIds > 0 or
 		(self.canEnchant and self.enchantText == nil) or self.isMissingBeltBuckle or
@@ -187,12 +191,12 @@ end
 function Geary_Item:probe()
 	if self.link == nil then
 		error("Cannot probe item without link")
-		return
+		return false
 	end
 	
 	if self.slot == nil then
 		error("Cannot probe item without slot")
-		return
+		return false
 	end
 	
 	-- Workaround an item link bug with the signed suffixId being unsigned in the link
@@ -207,6 +211,14 @@ function Geary_Item:probe()
 	-- Parse data from the item's tooltip
 	self:_parseTooltip()
 	
+	-- Ensure we got the data we should have
+	-- Note that this also covers the case when the Server fails to send us any tooltip information
+	if self.iLevel < 1 then
+		Geary:log(Geary.CC_FAILED .. self.slot .. " item has no item level in " .. self.link ..
+			Geary.CC_END)
+		return false
+	end
+
 	-- Get socketed gem information
 	self:_getGems()
 
@@ -214,15 +226,10 @@ function Geary_Item:probe()
 	if self.slot == "WaistSlot" then
 		self.isMissingBeltBuckle = self:_isMissingExtraGem()
 	end
-	if self.isShaTouched then
+	if self:canHaveEotBP() then
 		self.isMissingEotbp = self:_isMissingExtraGem()
 	end
 	
-	-- Ensure we got the data we should have
-	if self.iLevel < 1 then
-		Geary:print(Geary.CC_ERROR .. "ERROR: No item level found in " .. self.link .. Geary.CC_END)
-	end
-
 	-- Report info about the item
 	Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(), self:getItemLinkWithInlineTexture(),
 		self.slot:gsub("Slot$", ""), self.iType, self.subType))
@@ -251,6 +258,8 @@ function Geary_Item:probe()
 	if self.isMissingEotbp then
 		Geary:log(Geary.CC_MISSING .. "   Missing " .. self:getEotbpItemWithTexture() .. Geary.CC_END)
 	end
+	
+	return true
 end
 
 --

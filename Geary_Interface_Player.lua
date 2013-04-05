@@ -143,15 +143,13 @@ function Geary_Interface_Player:_initSlots(parent)
 		
 		local info = CreateFrame("Frame", "$parent_" .. slotName .. "_Info", parent)
 		info:SetWidth(46)
-		--[[
 		info:SetBackdrop({
 			bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
 			tile     = true,
 			tileSize = 64,
 			insets   = { left = 0, right = 0, top = 0, bottom = 0 }
 		})
-		info:SetBackdropColor(0.5, 0.5, 0.5, 0.5)
-		--]]
+		info:SetBackdropColor(0, 0, 0, 0)  -- Default to no background
 		info:SetFrameStrata("HIGH")
 		info.side = self.paperDoll.slots[slotName].side
 		info.tooltip = slotName
@@ -182,7 +180,7 @@ function Geary_Interface_Player:_initSlots(parent)
 			lastLeft = frame
 
 			info:SetPoint("TOPLEFT", frame, "TOPRIGHT", 0, 0)
-			info:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", 0, 0)
+			info:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", 0, 2)
 			
 			info.fontString:SetJustifyH("LEFT")
 			
@@ -201,7 +199,7 @@ function Geary_Interface_Player:_initSlots(parent)
 			lastRight = frame
 
 			info:SetPoint("TOPRIGHT", frame, "TOPLEFT", 0, 0)
-			info:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", 0, 0)
+			info:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", 0, 2)
 
 			info.fontString:SetJustifyH("RIGHT")
 
@@ -217,9 +215,9 @@ function Geary_Interface_Player:_initSlots(parent)
 			-- TODO Allow setting the font type/size via options
 			if self.tooltip ~= nil then
 				if self.side == "left" then
-					GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 0, 0)
+					GameTooltip:SetOwner(self, "ANCHOR_LEFT", 0, 0)
 				elseif self.side == "right" then
-					GameTooltip:SetOwner(self, "ANCHOR_TOPRIGHT", 0, 0)
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
 				else
 					Geary:print(Geary.CC_ERROR .. "Unknown info side '" ..
 						(self.side == nil and "nil" or self.side) .. "'" .. Geary.CC_END)
@@ -290,6 +288,7 @@ function Geary_Interface_Player:clear()
 
 	for slotName, slotData in pairs(self.paperDoll.slots) do
 		slotData.item = nil
+		slotData.info:SetBackdropColor(0, 0, 0, 0)
 		slotData.info.tooltip = nil
 		slotData.info.fontString:SetText("")
 		slotData.info.enchantTexture:SetTexture(0, 0, 0, 0)
@@ -332,6 +331,8 @@ end
 
 function Geary_Interface_Player:inspectionEnd(inspect)
 
+	self:_markMissingItems()
+
 	-- TODO This is duplicated work from Geary_Inspect using private data
 
 	local milestoneLevel, milestoneName = inspect:getItemLevelMilestone()
@@ -350,16 +351,21 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 		upgrades = "\n" .. Geary.CC_CORRECT .. "All item upgrades filled" .. Geary.CC_END
 	end
 
-	local slotsStatus = ""
+	local emptySlots = ""
 	if inspect.emptySlots > 0 then
-		slotsStatus = Geary.CC_ERROR .. "Empty slots: " .. inspect.emptySlots .. Geary.CC_END
+		emptySlots = Geary.CC_ERROR .. "Empty slots: " .. inspect.emptySlots .. Geary.CC_END
+	end
+
+	local failedSlots = ""
+	if inspect.failedSlots > 0 then
+		failedSlots = Geary.CC_FAILED .. "Failed slots: " .. inspect.failedSlots .. Geary.CC_END
 	end
 
 	local enchantStatus = ""
 	if inspect.unenchantedCount > 0 then
 		enchantStatus = Geary.CC_MISSING .. "Missing enchants: " .. inspect.unenchantedCount .. " items" ..
 			Geary.CC_END
-	else
+	elseif inspect.enchantedCount > 0 then
 		enchantStatus = Geary.CC_CORRECT .. "All items enchanted" .. Geary.CC_END
 	end
 
@@ -401,7 +407,6 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 	-- TODO Hyperlinks don't seem to work here
 	self.summary.fontString:SetFormattedText(
 		"\n" ..
-		"\n" ..
 		"--- %s %s ---\n" ..  -- Player name and faction
 		"%i %s %s\n" ..  -- Level, class, and spec
 		"\n" ..
@@ -412,7 +417,8 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 		"\n" ..
 		"%s\n" ..  -- Upgrades (2 lines, if any)
 		"\n" ..
-		"%s\n" ..  -- Empty/filled slots
+		"%s\n" ..  -- Empty slots
+		"%s\n" ..  -- Failed slots
 		"\n" ..
 		"%s\n" ..  -- Missing/all enchants
 		"\n" ..
@@ -428,7 +434,8 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 		inspect.iLevelEquipped,
 		milestone,
 		upgrades,
-		slotsStatus,
+		emptySlots,
+		failedSlots,
 		enchantStatus,
 		socketStatus,
 		failedJewels,
@@ -468,6 +475,15 @@ function Geary_Interface_Player:setItem(slotName, item)
 	slotData.info.fontString:SetText(item:iLevelWithUpgrades())
 	self:_setEnchantIcon(slotData.info, item)
 	self:_setGemIcons(slotData.info, item)
+	
+	-- Set the background color based on any issues with this item
+	if item:isMissingRequired() then
+		slotData.info:SetBackdropColor(1, 0, 0, 0.5)
+	elseif item:isMissingOptional() then
+		slotData.info:SetBackdropColor(1, 1, 0, 0.5)
+	else
+		slotData.info:SetBackdropColor(0, 0, 0, 0)
+	end
 end
 
 function Geary_Interface_Player:_setEnchantIcon(info, item)
@@ -551,22 +567,16 @@ function Geary_Interface_Player:_addInfoTooltipText(info, text)
 end
 
 function Geary_Interface_Player:_setItemBorder(slotName, item)
+	-- TODO If the item's probe failed, would be nice to see CC_FAILED color on border
 	if item == nil then
 		self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(0, 0, 0, 0)
-	--[[
-	Don't like changing the item's border color
-	elseif item:isMissingRequired() then
-		self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(1, 0, 0, 1)
-	elseif item:isMissingOptional() then
-		self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(1, 1, 0, 1)
-	--]]
 	else
 		local r, g, b, _ = GetItemQualityColor(item.quality)
 		self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(r, g, b, 1)
 	end
 end
 
-function Geary_Interface_Player:markMissingItems()
+function Geary_Interface_Player:_markMissingItems()
 	local mainHandIsTwoHand = false
 	for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
 		local slotData = self.paperDoll.slots[slotName]
@@ -579,6 +589,7 @@ function Geary_Interface_Player:markMissingItems()
 				Geary:debugLog(slotName, "not missing because main hand is 2Her")
 			else
 				self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(1, 0, 0, 1)
+				self.paperDoll.slots[slotName].info:SetBackdropColor(1, 0, 0, 0.5)
 				self:_addInfoTooltipText(self.paperDoll.slots[slotName].info,
 					Geary.CC_ERROR .. slotName .. " is empty" .. Geary.CC_END)
 			end
