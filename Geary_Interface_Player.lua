@@ -10,7 +10,6 @@
 Geary_Interface_Player = {
 	mainFrame = nil,
 	summary = nil,
-	unavailFontString = nil,
 	paperDoll = {
 		frame = nil,
 		model = nil,
@@ -49,7 +48,7 @@ function Geary_Interface_Player:init(parent)
 	fontString:Hide()
 	fontString:SetPoint("CENTER", self.mainFrame, "CENTER")
 	fontString:SetText("No inspection details available")
-	self.unavailFontString = fontString
+	frame.unavailFontString = fontString
 
 	self:_initPaperDoll(self.mainFrame)
 	self:_initSummary(self.mainFrame, self.paperDoll.frame)
@@ -591,7 +590,7 @@ function Geary_Interface_Player:_markMissingItems()
 				self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(1, 0, 0, 1)
 				self.paperDoll.slots[slotName].info:SetBackdropColor(1, 0, 0, 0.5)
 				self:_addInfoTooltipText(self.paperDoll.slots[slotName].info,
-					Geary.CC_ERROR .. slotName .. " is empty" .. Geary.CC_END)
+					Geary.CC_ERROR .. slotName:gsub("Slot", "") .. " slot is empty" .. Geary.CC_END)
 			end
 		end
 	end
@@ -601,11 +600,11 @@ function Geary_Interface_Player:Show()
 	if self.paperDoll.hasPlayer then
 		self.paperDoll.frame:Show()
 		self.summary:Show()
-		self.unavailFontString:Hide()
+		self.mainFrame.unavailFontString:Hide()
 	else
 		self.paperDoll.frame:Hide()
 		self.summary:Hide()
-		self.unavailFontString:Show()
+		self.mainFrame.unavailFontString:Show()
 	end
 	self.mainFrame:Show()
 end

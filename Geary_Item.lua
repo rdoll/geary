@@ -37,13 +37,13 @@ local _slotOrder = {}
 
 -- Names of empty gem sockets in tooltips
 local _socketNames = {
-	"Meta Socket",
-	"Blue Socket",
-	"Red Socket",
-	"Yellow Socket",
-	"Prismatic Socket",
-	"Cogwheel Socket",
-	"Sha-Touched"
+	EMPTY_SOCKET_META,
+	EMPTY_SOCKET_BLUE,
+	EMPTY_SOCKET_RED,
+	EMPTY_SOCKET_YELLOW,
+	EMPTY_SOCKET_PRISMATIC,
+	EMPTY_SOCKET_COGWHEEL,
+	EMPTY_SOCKET_HYDRAULIC
 }
 
 function Geary_Item:init()
@@ -289,6 +289,16 @@ function Geary_Item:_itemLinkSuffixIdBugWorkaround(link)
 	end
 end
 
+-- Build search strings using Blizzard localized strings outside of functions so they are done once
+-- ITEM_LEVEL = "Item Level %d"
+local _itemLevelRegex = "^%s*" .. ITEM_LEVEL:gsub("%%d", "(%%d+)")
+-- ITEM_UPGRADE_TOOLTIP_FORMAT = "Upgrade Level: %d/%d"
+local _upgradeLevelRegex = "^%s*" .. ITEM_UPGRADE_TOOLTIP_FORMAT:gsub("%%d", "(%%d+)")
+-- EMPTY_SOCKET_HYDRAULIC = "Sha-Touched"
+local _shaTouchedString = '"' .. EMPTY_SOCKET_HYDRAULIC .. '"'
+-- ENCHANTED_TOOLTIP_LINE = "Enchanted: %s"
+local _enchantedRegex = "^%s*" .. ENCHANTED_TOOLTIP_LINE:gsub("%%s", "")
+
 function Geary_Item:_parseTooltip()
 
 	-- Ensure owner is set (ClearLines unsets owner)
@@ -308,24 +318,24 @@ function Geary_Item:_parseTooltip()
 			text = text:gsub("|c%x%x%x%x%x%x%x%x(.-)|r", "%1")
 			Geary:debugLog(text)
 			
-			local iLevel = text:match("^%s*Item Level%s+(%d+)")
+			local iLevel = text:match(_itemLevelRegex)
 			if iLevel then
 				self:_setItemLevel(tonumber(iLevel))
 				return  -- "continue"
 			end
 			
-			local upgradeLevel, upgradeMax = text:match("^%s*Upgrade Level:%s+(%d+)/(%d+)")
+			local upgradeLevel, upgradeMax = text:match(_upgradeLevelRegex)
 			if upgradeLevel and upgradeMax then
 				self:_setUpgrades(tonumber(upgradeLevel), tonumber(upgradeMax))
 				return  -- "continue"
 			end
 			
-			if text:match("^%s*Enchanted:") then
+			if text:match(_enchantedRegex) then
 				self:_setEnchantText(text)
 				return  -- "continue"
 			end
 
-			if text == '"Sha-Touched"' then
+			if text == _shaTouchedString then
 				self.isShaTouched = true
 				return  -- "continue"
 			end

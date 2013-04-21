@@ -151,6 +151,12 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 				self.upgradeItemLevelMissing = self.upgradeItemLevelMissing + item.upgradeItemLevelMissing
 				
 				-- Add to player interface if we successfully parsed everything about the item
+-- TODO GeechFTW's belt inspect try #2 got 1 gem and missing belt buckle
+-- TODO Inspect try #3 got all, but try #2 set the player interface data
+-- TODO Don't think we can check missing gems or missing belt buckle here since
+-- TODO that'd prevent real missing gems and belt buckle items from ever being seen
+-- TODO (unless I also checked tries...). Alt idea: change setItem to always set the item
+-- TODO doing dupe work but assuming the later ones are always more correct.
 				if #item.failedJewelIds == 0 then
 					Geary_Interface_Player:setItem(slotName, item)
 				end
