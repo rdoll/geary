@@ -84,9 +84,9 @@ function Geary_Item:canHaveEotBP()
 end
 
 function Geary_Item:isMissingRequired()
-	return self.iLevel == 0 or #self.emptySockets > 0 or #self.failedJewelIds > 0 or
-		(self.canEnchant and self.enchantText == nil) or self.isMissingBeltBuckle or
-		self.isMissingEotbp
+	return self.iLevel == 0 or not Geary:isTableEmpty(self.emptySockets) or
+		not Geary:isTableEmpty(self.failedJewelIds) or (self.canEnchant and self.enchantText == nil) or
+		self.isMissingBeltBuckle or self.isMissingEotbp
 end
 
 function Geary_Item:isMissingOptional()
@@ -360,7 +360,7 @@ function Geary_Item:_getGems()
 		self.link:match("item:.-:.-:(.-):(.-):(.-):(.-):")
 
 	-- Check all sockets for a gem
-	for socketIndex = 1, 4 do
+	for socketIndex = 1, Geary.MAX_GEMS do
 		local itemName, itemLink = GetItemGem(self.link, socketIndex)
 		if itemLink == nil then
 			if jewelId[socketIndex] ~= nil and tonumber(jewelId[socketIndex]) ~= 0 then
@@ -447,12 +447,15 @@ function Geary_Item:_isMissingExtraGem()
 
 	-- Clear the tooltip's content (which also clears its owner)
 	self.tooltip:ClearLines()
-	
+
 	-- Total sockets in THIS item is filled plus failed plus empty
 	-- If total is <= the count in the base item, the extra gem is missing
-	Geary:debugLog(("extra gem: filled=%i, failed=%i, empty=%i, base=%i"):format(#self.filledSockets,
-		#self.failedJewelIds, #self.emptySockets, baseSocketCount))
-	if #self.filledSockets + #self.failedJewelIds + #self.emptySockets <= baseSocketCount then
+	Geary:debugLog(("extra gem: filled=%i, failed=%i, empty=%i, base=%i"):format(
+		Geary:tableSize(self.filledSockets), Geary:tableSize(self.failedJewelIds),
+		Geary:tableSize(self.emptySockets), baseSocketCount))
+	if Geary:tableSize(self.filledSockets) + Geary:tableSize(self.failedJewelIds) +
+		Geary:tableSize(self.emptySockets) <= baseSocketCount
+	then
 		return true
 	else
 		return false

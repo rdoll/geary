@@ -23,7 +23,9 @@ Geary = {
 	CC_UPGRADE = YELLOW_FONT_COLOR_CODE,
 	CC_MILESTONE = ORANGE_FONT_COLOR_CODE,
 	CC_DEBUG = GRAY_FONT_COLOR_CODE,
-	CC_END = FONT_COLOR_CODE_CLOSE
+	CC_END = FONT_COLOR_CODE_CLOSE,
+	-- Inexplicably missing constants
+	MAX_GEMS = 4
 }
 
 -- "VERSION" gets replaced with the TOC version
@@ -112,6 +114,10 @@ function Geary.events:INSPECT_READY(unitGuid)
 	Geary_Inspect:INSPECT_READY(unitGuid)
 end
 
+--
+-- Debugging and logging utilities
+--
+
 function Geary:isDebugOn()
 	return self.debugOn
 end
@@ -152,6 +158,30 @@ function Geary:debugLog(...)
 	end
 end
 
+--
+-- Table utilities that LUA lacks
+--
+-- Both # and table.getn return 0 if the table doesn't contain sequential indexes starting with one,
+-- so make our own functions.
+
+function Geary:isTableEmpty(t)
+	if t ~= nil then
+		for _ in pairs(t) do
+			return false
+		end
+	end
+	return true
+end
+
+function Geary:tableSize(t)
+	local count = 0
+	if t ~= nil then
+		for _ in pairs(t) do
+			count = count + 1
+		end
+	end
+	return count
+end
 
 --
 -- Main

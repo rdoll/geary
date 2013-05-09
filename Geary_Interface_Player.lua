@@ -165,7 +165,7 @@ function Geary_Interface_Player:_initSlots(parent)
 		info.enchantTexture:SetSize(10, 10)
 		
 		info.gemTextures = {}
-		for gemIndex = 1, 4 do
+		for gemIndex = 1, Geary.MAX_GEMS do
 			info.gemTextures[gemIndex] = info:CreateTexture("$parent_Gem_Texture_" .. gemIndex, "OVERLAY")
 			info.gemTextures[gemIndex]:SetSize(10, 10)
 		end
@@ -291,7 +291,7 @@ function Geary_Interface_Player:clear()
 		slotData.info.tooltip = nil
 		slotData.info.fontString:SetText("")
 		slotData.info.enchantTexture:SetTexture(0, 0, 0, 0)
-		for gemIndex = 1, 4 do
+		for gemIndex = 1, Geary.MAX_GEMS do
 			slotData.info.gemTextures[gemIndex]:SetTexture(0, 0, 0, 0)
 		end
 		slotData.icon:Hide()
@@ -318,7 +318,7 @@ function Geary_Interface_Player:inspectionStart(inspect)
 		"%i %s %s\n" ..
 		"\n" ..
 		"\n" ..
-		"Inspection in progress...",
+		"Inspection try #" .. inspect.inspectTry .. " in progress...",
 		inspect.player:getFactionInlineIcon(), inspect.player:getFullNameLink(),
 		inspect.player.level, inspect.player:getColorizedClassName(), inspect.player:getSpecWithInlineIcon()
 	)
@@ -504,38 +504,44 @@ function Geary_Interface_Player:_setGemIcons(info, item)
 	local gemTextureIndex = 1
 	
 	-- Clear all
-	for gemNum = 1, 4 do
+	for gemNum = 1, Geary.MAX_GEMS do
 		info.gemTextures[gemTextureIndex]:SetTexture(0, 0, 0, 0)
 	end
 	
 	-- Filled gems
-	for gemNum = 1, #item.filledSockets do
-		local texture = select(10, GetItemInfo(item.filledSockets[gemNum]))
-		if texture == nil then
-			-- Generic failsafe
-			texture = "Interface\\ICONS\\INV_Misc_Gem_Variety_01"
+	for gemNum = 1, Geary.MAX_GEMS do
+		if item.filledSockets[gemNum] ~= nil then
+			local texture = select(10, GetItemInfo(item.filledSockets[gemNum]))
+			if texture == nil then
+				-- Generic failsafe
+				texture = "Interface\\ICONS\\INV_Misc_Gem_Variety_01"
+			end
+			info.gemTextures[gemTextureIndex]:SetTexture(texture)
+			self:_addInfoTooltipText(info, Geary.CC_CORRECT .. "Gem " .. Geary.CC_END ..
+				Geary_Item:getGemLinkWithInlineTexture(item.filledSockets[gemNum]))
+			gemTextureIndex = gemTextureIndex + 1
 		end
-		info.gemTextures[gemTextureIndex]:SetTexture(texture)
-		self:_addInfoTooltipText(info, Geary.CC_CORRECT .. "Gem " .. Geary.CC_END ..
-			Geary_Item:getGemLinkWithInlineTexture(item.filledSockets[gemNum]))
-		gemTextureIndex = gemTextureIndex + 1
 	end
 
 	-- Missing gems
-	for gemNum = 1, #item.emptySockets do
-		info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
-		info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-		self:_addInfoTooltipText(info, Geary.CC_ERROR .. "Empty " .. item.emptySockets[gemNum] ..
-			" socket" .. Geary.CC_END)
-		gemTextureIndex = gemTextureIndex + 1
+	for gemNum = 1, Geary.MAX_GEMS do
+		if item.emptySockets[gemNum] ~= nil then
+			info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
+			info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
+			self:_addInfoTooltipText(info, Geary.CC_ERROR .. "Empty " .. item.emptySockets[gemNum] ..
+				" socket" .. Geary.CC_END)
+			gemTextureIndex = gemTextureIndex + 1
+		end
 	end
 	
 	-- Failed gems
-	for gemNum = 1, #item.failedJewelIds do
-		info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
-		info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-		self:_addInfoTooltipText(info, Geary.CC_FAILED .. "Failed to get gem details" .. Geary.CC_END)
-		gemTextureIndex = gemTextureIndex + 1
+	for gemNum = 1, Geary.MAX_GEMS do
+		if item.failedJewelIds[gemNum] ~= nil then
+			info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
+			info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
+			self:_addInfoTooltipText(info, Geary.CC_FAILED .. "Failed to get gem details" .. Geary.CC_END)
+			gemTextureIndex = gemTextureIndex + 1
+		end
 	end
 	
 	-- Missing belt buckle
