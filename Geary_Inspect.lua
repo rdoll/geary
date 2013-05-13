@@ -101,16 +101,18 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	-- Player inventory
 	for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
 
-		self.itemCount = self.itemCount + 1
 		local itemLink = GetInventoryItemLink(self.player.unit, Geary_Item:getSlotNumberForName(slotName))
 		if itemLink == nil then
-			if slotName == "SecondaryHandSlot" and self.hasTwoHandWeapon then
-				Geary:debugLog(slotName, "is empty, but using 2Her")
+			if slotName == "SecondaryHandSlot" and self.hasTwoHandWeapon and
+				not self.player:hasTitansGrip()
+			then
+				Geary:debugLog(slotName, "is empty, but using 2Her and does not have Titan's Grip")
 			else
 				self.emptySlots = self.emptySlots + 1
 				Geary:log(Geary.CC_MISSING .. slotName .. " is empty!" .. Geary.CC_END)
 			end
 		else
+			self.itemCount = self.itemCount + 1
 			local item = Geary_Item:new{ slot = slotName, link = itemLink }
 			if item:probe() then
 				self.iLevelTotal = self.iLevelTotal + item.iLevel
@@ -128,13 +130,6 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 				end
 				if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
 					self.hasTwoHandWeapon = true
-				end
-				-- TODO: This is a poor man's way to account for Titan's Grip
-				--       The above MH check sets hasTwoHandWeapon to true, and if the player
-				--  	 has anything in their OH, we undo it presuming Titan's Grip.
-				--       Note that this requires the MH to be parsed BEFORE the OH
-				if slotName == "SecondaryHandSlot" then
-					self.hasTwoHandWeapon = false
 				end
 				self.items[slotName] = item
 				self.filledSockets = self.filledSockets + Geary:tableSize(item.filledSockets)
@@ -170,10 +165,8 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 		return
 	end
 
-	-- TODO: Need to really account for Titan's grip here (not just hacky thing above)
-	if self.hasTwoHandWeapon then
-		self.itemCount = self.itemCount - 1
-	end
+	-- Total number of slots that should have an item 
+    self.itemCount = self.itemCount + self.emptySlots
 
 	-- Inspection is over
 	self.iLevelEquipped = self.iLevelTotal / self.itemCount

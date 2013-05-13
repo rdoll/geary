@@ -230,6 +230,21 @@ function Geary_Interface_Player:_initSlots(parent)
 		
 		self.paperDoll.slots[slotName].info = info
 
+		-- When hovering over a slot, change cursor when dressing room modifer key is pressed/released
+		frame:RegisterEvent("MODIFIER_STATE_CHANGED")
+		frame:SetScript("OnEvent", function (self, event, ...)
+			if event == "MODIFIER_STATE_CHANGED" then
+				if self:IsMouseOver() then 
+					if IsModifiedClick("DRESSUP") and self.slotData.item ~= nil then
+						ShowInspectCursor()
+					else
+						ResetCursor()
+					end
+				end
+			end
+		end)
+		
+		-- When entering a slot, show item tooltip (if any) and set dressing room or regular cursor
 		frame:SetScript("OnEnter", function (self)
 			-- Anchor the tooltip to the left or right of the icon so it doesn't cover the paper doll
 			if self.paperDollSide == "left" then
@@ -241,16 +256,26 @@ function Geary_Interface_Player:_initSlots(parent)
 					(self.paperDollSide == nil and "nil" or self.paperDollSide) .. "'" .. Geary.CC_END)
 				GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
 			end
+			ResetCursor()  -- Default to normal cursor
 			if self.slotData.item == nil then
 				GameTooltip:SetText(self.emptyTooltip)
 			else
 				GameTooltip:SetHyperlink(self.slotData.item.link)
+				-- If dressing room modifier is held down, show dressing room cursor
+				if (IsModifiedClick("DRESSUP")) then
+					ShowInspectCursor()
+				end
 			end
 			GameTooltip:Show()
 		end)
+		
+		-- When leaving a slot, reset everything
 		frame:SetScript("OnLeave", function (self)
 			GameTooltip:Hide()
+			ResetCursor()
 		end)
+		
+		-- When a slot with an item is clicked, handle as the character frame does
 		frame:SetScript("OnMouseDown", function (self)
 			if self.slotData.item ~= nil then
 				HandleModifiedItemClick(self.slotData.item.link)
@@ -330,7 +355,7 @@ end
 
 function Geary_Interface_Player:inspectionEnd(inspect)
 
-	self:_markMissingItems()
+	self:_markMissingItems(inspect)
 
 	-- TODO This is duplicated work from Geary_Inspect using private data
 
@@ -581,7 +606,7 @@ function Geary_Interface_Player:_setItemBorder(slotName, item)
 	end
 end
 
-function Geary_Interface_Player:_markMissingItems()
+function Geary_Interface_Player:_markMissingItems(inspect)
 	local mainHandIsTwoHand = false
 	for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
 		local slotData = self.paperDoll.slots[slotName]
@@ -589,9 +614,10 @@ function Geary_Interface_Player:_markMissingItems()
 			mainHandIsTwoHand = slotData.item:isTwoHandWeapon()
 		end
 		if slotData.item == nil then
-			if slotName == "SecondaryHandSlot" and mainHandIsTwoHand then
-				-- Offhand is NOT considered empty because main hand is a 2Her
-				Geary:debugLog(slotName, "not missing because main hand is 2Her")
+			if slotName == "SecondaryHandSlot" and mainHandIsTwoHand and
+				not inspect.player:hasTitansGrip()
+			then
+				Geary:debugLog(slotName, "not missing because main hand is 2Her and no Titan's Grip")
 			else
 				self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(1, 0, 0, 1)
 				self.paperDoll.slots[slotName].info:SetBackdropColor(1, 0, 0, 0.5)

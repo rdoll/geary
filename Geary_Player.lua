@@ -14,6 +14,7 @@ Geary_Player = {
 	realm = nil,
 	faction = nil,
 	className = nil,
+	classId = nil,
 	classFilename = nil,
 	level = nil,
 	spec = nil
@@ -38,7 +39,7 @@ function Geary_Player:probeInfo()
 	
 	self.guid = UnitGUID(self.unit)
 	self.name, self.realm = UnitName(self.unit)
-	self.className, self.classFilename = UnitClass(self.unit)
+	self.className, self.classFilename, self.classId = UnitClass(self.unit)
 	self.level = UnitLevel(self.unit)
 	self.faction, _ = UnitFactionGroup(self.unit)
 end
@@ -77,6 +78,14 @@ function Geary_Player:getSpecWithInlineIcon()
 	end
 end
 
+-- Fury warriors level 38 and higher have Titan's grip
+-- I wish there were Blizzard constants for these dang literals :(
+function Geary_Player:hasTitansGrip()
+	return self.classId ~= nil and self.classId == 1 and
+		self.level ~= nil and self.level >= 38 and
+		self.spec ~= nil and self.spec.specId ~= nil and self.spec.specId == 72
+end
+
 local _roleInlineIcons = {
 	["TANK"]    = INLINE_TANK_ICON,
 	["HEALER"]  = INLINE_HEALER_ICON,
@@ -91,14 +100,14 @@ function Geary_Player:INSPECT_READY()
 		return
 	end
 	
-	local specName, specRole
+	local specId, specName, specRole
 	if self.unit == "player" then
 		local nonGlobSpecId = GetSpecialization()
 		if nonGlobSpecId == nil then
 			Geary:print(Geary.CC_ERROR .. "nonGlobSpecId is nil!" .. Geary.CC_END)
 			return
 		end
-		_, specName, _, _, _, specRole = GetSpecializationInfo(nonGlobSpecId)
+		specId, specName, _, _, _, specRole = GetSpecializationInfo(nonGlobSpecId)
 	else
 		local globSpecId = GetInspectSpecialization(self.unit)
 		if globSpecId == nil then
@@ -122,7 +131,7 @@ function Geary_Player:INSPECT_READY()
 			Geary:print(Geary.CC_ERROR .. "globSpecId " .. globSpecId .. " is invalid!" .. Geary.CC_END)
 			return
 		end
-		_, specName, _, _, _, _, _ = GetSpecializationInfoByID(globSpecId)
+		specId, specName, _, _, _, _, _ = GetSpecializationInfoByID(globSpecId)
 	end
 	
 	if specName == nil then
@@ -134,6 +143,7 @@ function Geary_Player:INSPECT_READY()
 	end
 	
 	self.spec = {
+		id = specId,
 		name = specName,
 		role = specRole,
 		inlineIcon = _roleInlineIcons[specRole] == nil and nil or _roleInlineIcons[specRole]
