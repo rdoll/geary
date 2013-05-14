@@ -204,7 +204,9 @@ function Geary_Inspect:_showSummary()
 		self.player:getSpecWithInlineIcon()))
 
 	Geary:log(("%.2f equipped iLevel (%i%s items with %i total)"):format(self.iLevelEquipped,
-		self.itemCount, self.hasTwoHandWeapon and " (2H)" or "", self.iLevelTotal))
+		self.itemCount,
+		self.hasTwoHandWeapon and (self.player:hasTitansGrip() and " (TG)" or " (2H)") or "",
+		self.iLevelTotal))
 
 	local milestoneLevel, milestoneName = self:getItemLevelMilestone()
 	if milestoneLevel then

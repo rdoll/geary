@@ -66,21 +66,26 @@ function Geary_Item:isInvSlotName(slotName)
 	return _slotDetails[slotName] ~= nil
 end
 
+function Geary_Item:isWeapon()
+	return self.slot == "MainHandSlot" or self.slot == "SecondaryHandSlot"
+end
+
 function Geary_Item:isTwoHandWeapon()
-	return self.iType == "Weapon" and (
-		self.subType == "Bows" or
-		self.subType == "Crossbows" or
-		self.subType == "Guns" or
-		self.subType == "Fishing Poles" or
-		self.subType == "Polearms" or
-		self.subType == "Staves" or
-		self.subType == "Two-Handed Axes" or
-		self.subType == "Two-Handed Maces" or
-		self.subType == "Two-Handed Swords")
+	return self:isWeapon() and (
+		self.invType == "INVTYPE_2HWEAPON" or
+		self.invType == "INVTYPE_RANGED" or
+		self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
 function Geary_Item:canHaveEotBP()
-	return self.isShaTouched or (self.iLevel >= 502 and self.iType == "Weapon")
+	return self.isShaTouched or
+		(self.iLevel >= 502 and self:isWeapon() and (
+			self.invType == "INVTYPE_2HWEAPON" or
+			self.invType == "INVTYPE_RANGED" or
+			self.invType == "INVTYPE_RANGEDRIGHT" or
+			self.invType == "INVTYPE_WEAPONMAINHAND" or
+			self.invType == "INVTYPE_WEAPONOFFHAND" or
+			self.invType == "INVTYPE_WEAPON"))
 end
 
 function Geary_Item:isMissingRequired()
@@ -164,6 +169,7 @@ function Geary_Item:new(o)
 		iLevel = 0,
 		iType = nil,
 		subType = nil,
+		invType = nil,
 		texture = nil,
 		inlineTexture = nil,
 		filledSockets = {},
@@ -205,7 +211,8 @@ function Geary_Item:probe()
 	-- Get base item info
 	self.id = self.link:match("|Hitem:(%d+):")
 	self.canEnchant = _slotDetails[self.slot].canEnchant
-	self.name, _, self.quality, _, _, self.iType, self.subType, _, _, self.texture, _ = GetItemInfo(self.link)
+	self.name, _, self.quality, _, _, self.iType, self.subType, _, self.invType, self.texture, _ =
+		GetItemInfo(self.link)
 	self.inlineTexture = self:_getItemInlineTexture(self.link)
 
 	-- Parse data from the item's tooltip

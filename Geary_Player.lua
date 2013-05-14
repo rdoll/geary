@@ -83,7 +83,7 @@ end
 function Geary_Player:hasTitansGrip()
 	return self.classId ~= nil and self.classId == 1 and
 		self.level ~= nil and self.level >= 38 and
-		self.spec ~= nil and self.spec.specId ~= nil and self.spec.specId == 72
+		self.spec ~= nil and self.spec.id ~= nil and self.spec.id == 72
 end
 
 local _roleInlineIcons = {
