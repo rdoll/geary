@@ -391,8 +391,8 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 	if inspect.emptySockets > 0 or inspect.failedJewelIds > 0 or inspect.filledSockets > 0 then
 		gemColor = (inspect.emptySockets > 0 or inspect.failedJewelIds > 0) and Geary.CC_MISSING or
 			Geary.CC_CORRECT
-		gemCounts = (inspect.filledSockets - inspect.emptySockets - inspect.failedJewelIds) ..
-			"/" .. inspect.filledSockets
+		gemCounts = inspect.filledSockets .. "/" ..
+			(inspect.filledSockets + inspect.emptySockets + inspect.failedJewelIds)
 	end
 
 	local eotbpColor, eotbpCounts = "", "-"
