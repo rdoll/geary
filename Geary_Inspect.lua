@@ -39,7 +39,8 @@ function Geary_Inspect:resetData()
 	self.upgradeLevel = 0
 	self.upgradeMax = 0
 	self.upgradeItemLevelMissing = 0
-	self.missingEotbpCount = 0
+	self.eotbpFilled = 0
+	self.eotbpMissing = 0
 end
 
 function Geary_Inspect:startTimer(milliseconds)
@@ -125,8 +126,11 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 				if item.isMissingBeltBuckle then
 					self.isMissingBeltBuckle = true
 				end
+				if item.hasEotbp then
+					self.eotbpFilled = self.eotbpFilled + 1
+				end
 				if item.isMissingEotbp then
-					self.missingEotbpCount = self.missingEotbpCount + 1
+					self.eotbpMissing = self.eotbpMissing + 1
 				end
 				if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
 					self.hasTwoHandWeapon = true
@@ -181,7 +185,7 @@ end
 local _itemLevelMilestones = {
 	{ iLevel = 435, milestone = "LFD heroic" },
 	{ iLevel = 460, milestone = "MV LFR" },
-	{ iLevel = 470, milestone = "HoF/TES LFR" },
+	{ iLevel = 470, milestone = "HoF/ToES LFR" },
 	{ iLevel = 480, milestone = "ToT LFR" }
 }
 
@@ -234,8 +238,8 @@ function Geary_Inspect:_showSummary()
 		Geary:log(Geary.CC_MISSING .. "Missing " .. Geary_Item:getBeltBuckleItemWithTexture() .. Geary.CC_END)
 	end
 	
-	if self.missingEotbpCount > 0 then
-		Geary:log(Geary.CC_MISSING .. "Missing " .. self.missingEotbpCount .. " " ..
+	if self.eotbpMissing > 0 then
+		Geary:log(Geary.CC_MISSING .. "Missing " .. self.eotbpMissing .. " " ..
 			Geary_Item:getEotbpItemWithTexture() .. Geary.CC_END)
 	end
 	
@@ -312,6 +316,7 @@ function Geary_Inspect:makeInspectRequest()
 		self.player:getFactionInlineIcon(), self.player:getFullNameLink(), self.player.level,
 		self.player:getColorizedClassName(), self.player.guid))
 	self.inspectTry = self.inspectTry + 1
+	Geary_Interface_Player:inspectionStart(self)
 	self:startTimer(self.inspectTimeout)
 	Geary:RegisterEvent("INSPECT_READY")
 	NotifyInspect(self.player.unit)

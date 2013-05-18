@@ -182,6 +182,7 @@ function Geary_Item:new(o)
 		upgradeMax = 0,
 		upgradeItemLevelMissing = 0,
 		isShaTouched = false,
+		hasEotbp = false,
 		isMissingEotbp = false
 	}
 	if o then
@@ -235,6 +236,7 @@ function Geary_Item:probe()
 	end
 	if self:canHaveEotBP() then
 		self.isMissingEotbp = self:_isMissingExtraGem()
+		self.hasEotbp = not self.isMissingEotbp
 	end
 	
 	-- Report info about the item
