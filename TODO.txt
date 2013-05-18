@@ -1,23 +1,27 @@
 In no particular order, here are things Geary does NOT do yet, but I am considering:
 
-- When 5.3 drops, up LFD heroic from 435 to 440
-- Geary_Inspect.itemCount and iLevelTotal for Interface_Player summary can be zero if last
+* When 5.3 drops, up LFD heroic from 435 to 440
+* Geary_Inspect.itemCount and iLevelTotal for Interface_Player summary can be zero if last
   inspection attempt fails; e.g. player logs off. So the player interface shows some items,
   but then shows equipped item level of 0.
-  + Also shows milestone of "Until LFD heroic: 0 iLevels" when it should be 6960
-- Store inspection results in a persistent database that can be viewed
-- Maybe: Working hyperlinks in player interface summary text
-- Maybe: Show empty sockets shown with their graphic in player interface
-- Maybe: In player interface item tooltips, show set pieces of the inspected character, not you
-- Maybe: Group inspection with group summary
-- Maybe: Make options take effect immediately and have cancel revert to previous values
-- Maybe: Options to configure mouse clicks for icon
-- Maybe: Resizing of Geary interface
-- Maybe: Don't allow inspection while in combat and abort inspection if combat starts
-- Maybe: Detect non-rare MoP gems and non-MoP enchants
-- Maybe: Show items with PvP stats
-- Maybe: Show items with inappropriate stats for the character's current class/spec (e.g. Prot Paladin wearing Intellect gear)
-- Maybe: Inspection results summary added to player tooltips
-- Maybe: An optional minimap button that works like the icon and can integrate with Norganna SlideBar
-- Maybe: Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
-- Maybe: Detect unspent talent points
+  - Also shows milestone of "Until LFD heroic: 0 iLevels" when it should be 6960
+
+* Store inspection results in a persistent database that can be viewed
+* List of inspection results with summary for people in your current group
+
+* //Maybe:// Inspect all members of your group with one click
+* //Maybe:// Working hyperlinks in player interface summary text
+* //Maybe:// Show empty sockets shown with their graphic in player interface
+* //Maybe:// Make options take effect immediately and have cancel revert to previous values
+* //Maybe:// Options to configure mouse clicks for icon
+* //Maybe:// Don't allow inspection while in combat and abort inspection if combat starts
+* //Maybe:// Detect non-rare MoP gems and non-MoP enchants
+* //Maybe:// Show items with PvP stats
+* //Maybe:// Show items with inappropriate stats for the character's current class/spec (e.g. Prot Paladin wearing Intellect gear)
+* //Maybe:// Inspection results added to player tooltips
+* //Maybe:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
+* //Maybe:// Detect unspent talent points
+
+* //Doubtful:// Resizing of Geary interface
+* //Doubtful:// Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
+* //Doubtful:// In player interface item tooltips, show set pieces of the inspected character, not you
