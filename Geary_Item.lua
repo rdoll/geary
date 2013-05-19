@@ -77,22 +77,33 @@ function Geary_Item:isTwoHandWeapon()
 		self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
-function Geary_Item:canHaveEotBP()
-	return self.isShaTouched or
-		(self.iLevel >= 502 and self:isWeapon() and (
-			self.invType == "INVTYPE_2HWEAPON" or
-			self.invType == "INVTYPE_RANGED" or
-			self.invType == "INVTYPE_RANGEDRIGHT" or
-			self.invType == "INVTYPE_WEAPONMAINHAND" or
-			self.invType == "INVTYPE_WEAPONOFFHAND" or
-			self.invType == "INVTYPE_WEAPON"))
+-- Player can do legendary quest and has a Sha-Touched or 502+ iLevel weapon
+function Geary_Item:canHaveEotbp(player)
+	return player.level >= 90 and
+		(self.isShaTouched or
+			(self.iLevel >= 502 and self:isWeapon() and (
+				self.invType == "INVTYPE_2HWEAPON" or
+				self.invType == "INVTYPE_RANGED" or
+				self.invType == "INVTYPE_RANGEDRIGHT" or
+				self.invType == "INVTYPE_WEAPONMAINHAND" or
+				self.invType == "INVTYPE_WEAPONOFFHAND" or
+				self.invType == "INVTYPE_WEAPON")
+			)
+		)
+end
+
+-- Player can do legendary quest and has a head item with sockets
+function Geary_Item:canHaveCohMeta(player)
+	return player.level >= 90 and self.slot == "HeadSlot" and
+		(not Geary:isTableEmpty(self.filledSockets) or
+			 not Geary:isTableEmpty(self.emptySockets) or not Geary:isTableEmpty(self.failedJewelIds)
+		)
 end
 
 function Geary_Item:isMissingRequired()
 	return self.iLevel == 0 or not Geary:isTableEmpty(self.emptySockets) or
 		not Geary:isTableEmpty(self.failedJewelIds) or (self.canEnchant and self.enchantText == nil) or
-		self.isMissingBeltBuckle or self.isMissingEotbp or
-		(self.slot == "HeadSlot" and self.isMissingCohMeta)
+		self.isMissingBeltBuckle or self.isMissingEotbp or self.isMissingCohMeta
 end
 
 function Geary_Item:isMissingOptional()
@@ -100,7 +111,6 @@ function Geary_Item:isMissingOptional()
 end
 
 function Geary_Item:iLevelWithUpgrades()
-
 	local upgrades = ""
 	if self.upgradeMax > 0 then
 		upgrades = " " .. (self.upgradeLevel < self.upgradeMax and Geary.CC_UPGRADE or Geary.CC_CORRECT) ..
@@ -198,7 +208,7 @@ function Geary_Item:new(o)
 	return newObject
 end
 
-function Geary_Item:probe()
+function Geary_Item:probe(player)
 	if self.link == nil then
 		error("Cannot probe item without link")
 		return false
@@ -232,23 +242,21 @@ function Geary_Item:probe()
 
 	-- Get socketed gem information
 	self:_getGems(self.slot)
-	
-	-- If it's a head item with any gems or sockets, it must have a meta socket and therefore a Leg gem
-	if self.slot == "HeadSlot" and (not Geary:isTableEmpty(self.filledSockets) or
-		 not Geary:isTableEmpty(self.emptySockets) or not Geary:isTableEmpty(self.failedJewelIds))
-	then
-		self.isMissingCohMeta = not self.hasCohMeta
-	end
 
-	-- If this item can have an extra gem in it, check for it
+	-- Check for special cases wrt gems
 	if self.slot == "WaistSlot" then
 		self.isMissingBeltBuckle = self:_isMissingExtraGem()
 	end
-	if self:canHaveEotBP() then
+
+	if self:canHaveEotbp(player) then
 		self.isMissingEotbp = self:_isMissingExtraGem()
 		self.hasEotbp = not self.isMissingEotbp
 	end
-	
+
+	if self:canHaveCohMeta(player) then
+		self.isMissingCohMeta = not self.hasCohMeta
+	end
+
 	-- Report info about the item
 	Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(), self:getItemLinkWithInlineTexture(),
 		self.slot:gsub("Slot$", ""), self.iType, self.subType))

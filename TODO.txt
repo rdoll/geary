@@ -9,7 +9,7 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
 * Store inspection results in a persistent database that can be viewed
 ** Option for storing only level 90
 ** Option for automatically pruning entries older than x days
-** //Maybe:// Sync database entries with party, guild, or specific player
+** //Maybe:// Sync database entries with group, guild members, or specific players
 * List of inspection results with summary for people in your current group
 * //Maybe:// Inspect all members of your group with one click
 * Player interface improvements:

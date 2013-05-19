@@ -152,7 +152,7 @@ end
 function Geary_Inspect:_processFilledSlot(slotName, itemLink)
 
 	local item = Geary_Item:new{ slot = slotName, link = itemLink }
-	if not item:probe() then
+	if not item:probe(self.player) then
 		-- Item probe failed (and logged why), so track a failed item
 		self.failedSlots = self.failedSlots + 1
 		return
@@ -172,16 +172,20 @@ function Geary_Inspect:_processFilledSlot(slotName, itemLink)
 	if item.isMissingBeltBuckle then
 		self.isMissingBeltBuckle = true
 	end
-	if item.hasEotbp then
-		self.eotbpFilled = self.eotbpFilled + 1
-	end
-	if item.isMissingEotbp then
-		self.eotbpMissing = self.eotbpMissing + 1
-	end
+	
+	-- Can only have EotBP or CoH Meta if max level
+	if self.player:isMaxLevel() then
+		if item.hasEotbp then
+			self.eotbpFilled = self.eotbpFilled + 1
+		end
+		if item.isMissingEotbp then
+			self.eotbpMissing = self.eotbpMissing + 1
+		end
 
-	if slotName == "HeadSlot" then
-		self.hasCohMeta = item.hasCohMeta
-		self.isMissingCohMeta = item.isMissingCohMeta
+		if slotName == "HeadSlot" then
+			self.hasCohMeta = item.hasCohMeta
+			self.isMissingCohMeta = item.isMissingCohMeta
+		end
 	end
 	
 	if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
