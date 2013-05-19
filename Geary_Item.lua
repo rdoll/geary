@@ -91,7 +91,8 @@ end
 function Geary_Item:isMissingRequired()
 	return self.iLevel == 0 or not Geary:isTableEmpty(self.emptySockets) or
 		not Geary:isTableEmpty(self.failedJewelIds) or (self.canEnchant and self.enchantText == nil) or
-		self.isMissingBeltBuckle or self.isMissingEotbp
+		self.isMissingBeltBuckle or self.isMissingEotbp or
+		(self.slot == "HeadSlot" and self.isMissingCohMeta)
 end
 
 function Geary_Item:isMissingOptional()
@@ -183,7 +184,9 @@ function Geary_Item:new(o)
 		upgradeItemLevelMissing = 0,
 		isShaTouched = false,
 		hasEotbp = false,
-		isMissingEotbp = false
+		isMissingEotbp = false,
+		hasCohMeta = false,
+		isMissingCohMeta = false
 	}
 	if o then
 		for name, value in pairs(o) do
@@ -228,7 +231,14 @@ function Geary_Item:probe()
 	end
 
 	-- Get socketed gem information
-	self:_getGems()
+	self:_getGems(self.slot)
+	
+	-- If it's a head item with any gems or sockets, it must have a meta socket and therefore a Leg gem
+	if self.slot == "HeadSlot" and (not Geary:isTableEmpty(self.filledSockets) or
+		 not Geary:isTableEmpty(self.emptySockets) or not Geary:isTableEmpty(self.failedJewelIds))
+	then
+		self.isMissingCohMeta = not self.hasCohMeta
+	end
 
 	-- If this item can have an extra gem in it, check for it
 	if self.slot == "WaistSlot" then
@@ -266,6 +276,10 @@ function Geary_Item:probe()
 	end
 	if self.isMissingEotbp then
 		Geary:log(Geary.CC_MISSING .. "   Missing " .. self:getEotbpItemWithTexture() .. Geary.CC_END)
+	end
+	if self.isMissingCohMeta then
+		Geary:log(Geary.CC_MISSING .. "   Missing Crown of Heaven legendary meta gem" ..
+			Geary.CC_END)
 	end
 	
 	return true
@@ -362,7 +376,7 @@ function Geary_Item:_parseTooltip()
 	self.tooltip:ClearLines()
 end
 
-function Geary_Item:_getGems()
+function Geary_Item:_getGems(slot)
 	-- Get jewelIds from the item link
 	local jewelId = {}
 	jewelId[1], jewelId[2], jewelId[3], jewelId[4] =
@@ -379,7 +393,23 @@ function Geary_Item:_getGems()
 					self.link:gsub("|", "||"), socketIndex, tonumber(jewelId[socketIndex])))
 			end
 		else
-			tinsert(self.filledSockets, itemLink)
+			if slot == "HeadSlot" then
+				-- Head slot item, so look for the legendary meta gem
+				local gemQuality = select(3, GetItemInfo(itemLink))
+				if gemQuality == nil then
+					-- Not sure this is possible, but check it to be safe
+					-- We failed to get the gem's quality from its link, so count it as failed
+					self.failedJewelIds[socketIndex] = jewelId[socketIndex]
+					Geary:debugLog("Failed to get item quality from gem", itemLink)
+				else
+					if gemQuality == ITEM_QUALITY_LEGENDARY then
+						self.hasCohMeta = true
+					end
+					tinsert(self.filledSockets, itemLink)
+				end
+			else
+				tinsert(self.filledSockets, itemLink)
+			end
 		end
 	end
 end

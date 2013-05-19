@@ -22,6 +22,7 @@ end
 
 function Geary_Inspect:resetData()
 	self.hasTwoHandWeapon = false
+	self.filledSlots = 0
 	self.emptySlots = 0
 	self.failedSlots = 0
 	self.itemCount = 0
@@ -41,6 +42,8 @@ function Geary_Inspect:resetData()
 	self.upgradeItemLevelMissing = 0
 	self.eotbpFilled = 0
 	self.eotbpMissing = 0
+	self.hasCohMeta = false
+	self.isMissingCohMeta = false
 end
 
 function Geary_Inspect:startTimer(milliseconds)
@@ -100,63 +103,13 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	Geary_Interface_Player:inspectionStart(self)
 	
 	-- Player inventory
+	local itemLink
 	for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
-
-		local itemLink = GetInventoryItemLink(self.player.unit, Geary_Item:getSlotNumberForName(slotName))
+		itemLink = GetInventoryItemLink(self.player.unit, Geary_Item:getSlotNumberForName(slotName))
 		if itemLink == nil then
-			if slotName == "SecondaryHandSlot" and self.hasTwoHandWeapon and
-				not self.player:hasTitansGrip()
-			then
-				Geary:debugLog(slotName, "is empty, but using 2Her and does not have Titan's Grip")
-			else
-				self.emptySlots = self.emptySlots + 1
-				Geary:log(Geary.CC_MISSING .. slotName .. " is empty!" .. Geary.CC_END)
-			end
+			self:_processEmptySlot(slotName)
 		else
-			self.itemCount = self.itemCount + 1
-			local item = Geary_Item:new{ slot = slotName, link = itemLink }
-			if item:probe() then
-				self.iLevelTotal = self.iLevelTotal + item.iLevel
-				if self.minItem == nil or item.iLevel < self.minItem.iLevel then
-					self.minItem = item
-				end
-				if self.maxItem == nil or item.iLevel > self.maxItem.iLevel then
-					self.maxItem = item
-				end
-				if item.isMissingBeltBuckle then
-					self.isMissingBeltBuckle = true
-				end
-				if item.hasEotbp then
-					self.eotbpFilled = self.eotbpFilled + 1
-				end
-				if item.isMissingEotbp then
-					self.eotbpMissing = self.eotbpMissing + 1
-				end
-				if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
-					self.hasTwoHandWeapon = true
-				end
-				self.items[slotName] = item
-				self.filledSockets = self.filledSockets + Geary:tableSize(item.filledSockets)
-				self.emptySockets = self.emptySockets + Geary:tableSize(item.emptySockets)
-				self.failedJewelIds = self.failedJewelIds + Geary:tableSize(item.failedJewelIds)
-				if item.canEnchant and not item.enchantText then
-					self.unenchantedCount = self.unenchantedCount + 1
-				end
-				if item.enchantText then
-					self.enchantedCount = self.enchantedCount + 1
-				end
-				self.upgradeLevel = self.upgradeLevel + item.upgradeLevel
-				self.upgradeMax = self.upgradeMax + item.upgradeMax
-				self.upgradeItemLevelMissing = self.upgradeItemLevelMissing + item.upgradeItemLevelMissing
-				
-				-- Add to player interface if we successfully parsed everything about the item
-				if Geary:isTableEmpty(item.failedJewelIds) then
-					Geary_Interface_Player:setItem(slotName, item)
-				end
-			else
-				-- Item probe failed (and logged why), so track a failed item
-				self.failedSlots = self.failedSlots + 1
-			end
+			self:_processFilledSlot(slotName, itemLink)
 		end
 	end
 
@@ -170,7 +123,7 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	end
 
 	-- Total number of slots that should have an item 
-    self.itemCount = self.itemCount + self.emptySlots
+    self.itemCount = self.filledSlots + self.emptySlots + self.failedSlots
 
 	-- Inspection is over
 	self.iLevelEquipped = self.iLevelTotal / self.itemCount
@@ -178,6 +131,82 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 
 	-- Show summary
 	self:_showSummary()
+end
+
+function Geary_Inspect:_processEmptySlot(slotName)
+
+	-- Increase empty slot count if appropriate
+	if slotName == "SecondaryHandSlot" and self.hasTwoHandWeapon and not self.player:hasTitansGrip() then
+		Geary:debugLog(slotName, "is empty, but using 2Her and does not have Titan's Grip")
+	else
+		self.emptySlots = self.emptySlots + 1
+		Geary:log(Geary.CC_MISSING .. slotName .. " is empty!" .. Geary.CC_END)
+	end
+	
+	-- Mark missing belt buckle if waist item
+	if slotName == "WaistSlot" then
+		self.isMissingBeltBuckle = true
+	end
+end
+
+function Geary_Inspect:_processFilledSlot(slotName, itemLink)
+
+	local item = Geary_Item:new{ slot = slotName, link = itemLink }
+	if not item:probe() then
+		-- Item probe failed (and logged why), so track a failed item
+		self.failedSlots = self.failedSlots + 1
+		return
+	end
+	
+	self.items[slotName] = item
+	self.filledSlots = self.filledSlots + 1
+
+	self.iLevelTotal = self.iLevelTotal + item.iLevel
+	if self.minItem == nil or item.iLevel < self.minItem.iLevel then
+		self.minItem = item
+	end
+	if self.maxItem == nil or item.iLevel > self.maxItem.iLevel then
+		self.maxItem = item
+	end
+	
+	if item.isMissingBeltBuckle then
+		self.isMissingBeltBuckle = true
+	end
+	if item.hasEotbp then
+		self.eotbpFilled = self.eotbpFilled + 1
+	end
+	if item.isMissingEotbp then
+		self.eotbpMissing = self.eotbpMissing + 1
+	end
+
+	if slotName == "HeadSlot" then
+		self.hasCohMeta = item.hasCohMeta
+		self.isMissingCohMeta = item.isMissingCohMeta
+	end
+	
+	if slotName == "MainHandSlot" and item:isTwoHandWeapon() then
+		self.hasTwoHandWeapon = true
+	end
+	
+	self.filledSockets = self.filledSockets + Geary:tableSize(item.filledSockets)
+	self.emptySockets = self.emptySockets + Geary:tableSize(item.emptySockets)
+	self.failedJewelIds = self.failedJewelIds + Geary:tableSize(item.failedJewelIds)
+
+	if item.canEnchant and not item.enchantText then
+		self.unenchantedCount = self.unenchantedCount + 1
+	end
+	if item.enchantText then
+		self.enchantedCount = self.enchantedCount + 1
+	end
+
+	self.upgradeLevel = self.upgradeLevel + item.upgradeLevel
+	self.upgradeMax = self.upgradeMax + item.upgradeMax
+	self.upgradeItemLevelMissing = self.upgradeItemLevelMissing + item.upgradeItemLevelMissing
+	
+	-- Add to player interface if we successfully parsed everything about the item
+	if Geary:isTableEmpty(item.failedJewelIds) then
+		Geary_Interface_Player:setItem(slotName, item)
+	end
 end
 
 -- Max player level item level milestones
@@ -242,7 +271,11 @@ function Geary_Inspect:_showSummary()
 		Geary:log(Geary.CC_MISSING .. "Missing " .. self.eotbpMissing .. " " ..
 			Geary_Item:getEotbpItemWithTexture() .. Geary.CC_END)
 	end
-	
+	if self.isMissingCohMeta then
+		Geary:log(Geary.CC_MISSING .. "Missing Crown of Heaven legendary meta gem" ..
+			Geary.CC_END)
+	end
+
 	if self.emptySockets > 0 then
 		Geary:log(Geary.CC_MISSING .. self.emptySockets .. " gem sockets empty!" .. Geary.CC_END)
 	elseif self.filledSockets > 0 then

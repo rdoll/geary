@@ -149,7 +149,8 @@ function Geary_Interface_Player:_initSlots(parent)
 			insets   = { left = 0, right = 0, top = 0, bottom = 0 }
 		})
 		info:SetBackdropColor(0, 0, 0, 0)  -- Default to no background
-		info:SetFrameStrata("HIGH")
+		info:SetFrameStrata("MEDIUM")
+		info:SetFrameLevel(127)  -- Might need to set this to self.paperDoll.model + x when shown
 		info.side = self.paperDoll.slots[slotName].side
 		info.tooltip = slotName
 		
@@ -301,13 +302,29 @@ function Geary_Interface_Player:_initSummary(parent, paperDollFrame)
 	fontString:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, -65)
 	frame.playerFontString = fontString
 
-	fontString = frame:CreateFontString("$parent_StatsFontString", "ARTWORK")
-	fontString:SetFont("Fonts\\FRIZQT__.TTF", 10)
-	fontString:SetJustifyV("TOP")
-	fontString:SetJustifyH("LEFT")
-	fontString:SetPoint("TOPLEFT", frame.playerFontString, "BOTTOMLEFT", 10, 0)
-	fontString:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
-	frame.statsFontString = fontString
+	local editBox = CreateFrame("EditBox", "$parent_StatsEditBox", frame)
+	editBox:SetFont("Fonts\\FRIZQT__.TTF", 10)
+	editBox:SetPoint("TOPLEFT", frame.playerFontString, "BOTTOMLEFT", 10, 0)
+	editBox:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+	editBox:SetMultiLine(true)
+	editBox:SetIndentedWordWrap(false)
+	editBox:SetAutoFocus(false)
+	editBox:EnableMouse(true)
+	editBox:EnableMouseWheel(false)
+	editBox:SetHyperlinksEnabled(true)
+	editBox:Disable()
+	editBox:SetScript("OnHyperlinkClick", function (self, link, text, button)
+		SetItemRef(link, text, button)
+	end)
+	editBox:SetScript("OnHyperlinkEnter", function (self, link, text)
+		GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+		GameTooltip:SetHyperlink(link)
+		GameTooltip:Show()
+	end)
+	editBox:SetScript("OnHyperlinkLeave", function (self, link, text)
+		GameTooltip:Hide()
+	end)
+	frame.statsEditBox = editBox
 
 	self.summary = frame
 end
@@ -317,7 +334,7 @@ function Geary_Interface_Player:clear()
 	self.paperDoll.hasPlayer = false
 	self.paperDoll.model:ClearModel()
 	self.summary.playerFontString:SetText("")
-	self.summary.statsFontString:SetText("")
+	self.summary.statsEditBox:SetText("")
 
 	for slotName, slotData in pairs(self.paperDoll.slots) do
 		slotData.item = nil
@@ -355,7 +372,7 @@ function Geary_Interface_Player:inspectionStart(inspect)
 	self.paperDoll.model:SetUnit(inspect.player.unit)
 
 	self:_setPlayerSummaryText(inspect)
-	self.summary.statsFontString:SetText("         Inspection try #" .. inspect.inspectTry .. "...")
+	self.summary.statsEditBox:SetText("         Inspection try #" .. inspect.inspectTry .. "...")
 
 	if self.mainFrame:IsVisible() then
 		self:Show()
@@ -372,22 +389,31 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 
 	local itemColor, itemCounts, itemTwoHand
 	itemColor = (inspect.emptySlots > 0 or inspect.failedSlots > 0) and Geary.CC_MISSING or Geary.CC_CORRECT
-	itemCounts = (inspect.itemCount - inspect.emptySlots - inspect.failedSlots) .. "/" .. inspect.itemCount
+	itemCounts = inspect.filledSlots .. "/" .. inspect.itemCount
 	itemTwoHand = inspect.hasTwoHandWeapon and (inspect.player:hasTitansGrip() and " (TG)" or " (2H)") or ""
 
-	local upgradeColor, upgradeCounts = "", "-"
+	local upgradeColor, upgradeCounts = Geary.CC_NA, "-"
 	if inspect.upgradeMax > 0 then
 		upgradeColor = inspect.upgradeItemLevelMissing > 0 and Geary.CC_UPGRADE or Geary.CC_CORRECT
 		upgradeCounts = inspect.upgradeLevel .. "/" .. inspect.upgradeMax
 	end
 
-	local enchantColor, enchantCounts = "", "-"
+	local enchantColor, enchantCounts = Geary.CC_NA, "-"
 	if inspect.enchantedCount > 0 or inspect.unenchantedCount > 0 then
 		enchantColor = inspect.unenchantedCount > 0 and Geary.CC_MISSING or Geary.CC_CORRECT
 		enchantCounts =  inspect.enchantedCount .. "/" .. (inspect.enchantedCount + inspect.unenchantedCount)
 	end
 	
-	local gemColor, gemCounts = "", "-"
+	local beltColor, beltString
+	if inspect.isMissingBeltBuckle then
+		beltColor = Geary.CC_MISSING
+		beltString = "No"
+	else
+		beltColor = Geary.CC_CORRECT
+		beltString = "Yes"
+	end
+
+	local gemColor, gemCounts = Geary.CC_NA, "-"
 	if inspect.emptySockets > 0 or inspect.failedJewelIds > 0 or inspect.filledSockets > 0 then
 		gemColor = (inspect.emptySockets > 0 or inspect.failedJewelIds > 0) and Geary.CC_MISSING or
 			Geary.CC_CORRECT
@@ -395,68 +421,70 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 			(inspect.filledSockets + inspect.emptySockets + inspect.failedJewelIds)
 	end
 
-	local eotbpColor, eotbpCounts = "", "-"
+	local eotbpColor, eotbpCounts = Geary.CC_NA, "-"
 	if inspect.eotbpFilled > 0 or inspect.eotbpMissing > 0 then
 		eotbpColor = inspect.eotbpMissing > 0 and Geary.CC_MISSING or Geary.CC_CORRECT
 		eotbpCounts = inspect.eotbpFilled .. "/" .. (inspect.eotbpFilled + inspect.eotbpMissing)
 	end
+	
+	local cohColor, cohString = Geary.CC_NA, "-"
+	if inspect.hasCohMeta or inspect.isMissingCohMeta then
+		if inspect.hasCohMeta then
+			cohColor = Geary.CC_CORRECT
+			cohString = "Yes"
+		else
+			cohColor = Geary.CC_MISSING
+			cohString = "No"
+		end
+	end
 
-	local upgradedILevelColor, upgradedILevel = "", "-"
+	local upgradedColor, upgradedILevel = Geary.CC_NA, "-"
 	if inspect.upgradeItemLevelMissing > 0 then
-		upgradedILevelColor = Geary.CC_UPGRADE
+		upgradedColor = Geary.CC_UPGRADE
 		upgradedILevel = 
 			("%.2f"):format((inspect.iLevelTotal + inspect.upgradeItemLevelMissing) / inspect.itemCount)
 	end
 
 	local milestoneLevel, milestoneName = inspect:getItemLevelMilestone()
-	local milestoneColor, milestone = "", "-"
+	local milestoneColor, milestoneString = Geary.CC_NA, "-"
 	if milestoneLevel ~= nil then
 		milestoneColor = Geary.CC_MILESTONE
-		milestone = milestoneLevel .. " to " .. milestoneName
+		milestoneString = milestoneLevel .. " to " .. milestoneName
+	end
+
+	local minItemColor, minItemString = Geary.CC_NA, "-"
+	if inspect.minItem ~= nil then
+		minItemColor = ""
+		minItemString = inspect.minItem.link:gsub("[|]h.-[|]h",
+			"|h" ..	inspect.minItem:iLevelWithUpgrades() .. " " .. inspect.minItem.inlineTexture .. "|h")
 	end
 	
-	self.summary.statsFontString:SetFormattedText(
-		"%sItems: %s%s%s\n" ..
-		"%sUpgrades: %s%s\n" ..
-		"\n" ..
-		"%sEnchants: %s%s\n" ..
-		"%sBelt Buckle: %s%s\n" ..
-		"\n" ..
-		"%sGems: %s%s\n" ..
-		"%sEotBP: %s%s\n" ..
-		"\n" ..
-		"Equipped iLevel: %.2f\n" ..
-		"%sUpgraded iLevel: %s%s\n" ..
-		"\n" ..
-		"%sNext: %s%s\n" ..
-		"\n" ..
-		"Lowest Item: %s\n" ..
-		"Highest Item: %s",
-		-- Items
-		itemColor, itemCounts, itemTwoHand, strlen(itemColor) and Geary.CC_END or "",
-		upgradeColor, upgradeCounts, strlen(upgradeColor) and Geary.CC_END or "",
-		-- Enchants
-		enchantColor, enchantCounts, strlen(enchantColor) and Geary.CC_END or "",
-		inspect.isMissingBeltBuckle and Geary.CC_MISSING or Geary.CC_CORRECT,
-			inspect.isMissingBeltBuckle and "No" or "Yes", Geary.CC_END,
-		-- Gems
-		gemColor, gemCounts, strlen(gemColor) and Geary.CC_END or "",
-		eotbpColor, eotbpCounts, strlen(eotbpColor) and Geary.CC_END or "",
-		-- Item Level
-		inspect.iLevelEquipped,
-		upgradedILevelColor, upgradedILevel, strlen(upgradedILevelColor) and Geary.CC_END or "",
-		-- Milestone
-		milestoneColor, milestone, strlen(milestoneColor) and Geary.CC_END or "",
-		-- High/Low Items
-		inspect.minItem == nil and "-" or
-			(inspect.minItem:iLevelWithUpgrades() .. " " .. inspect.minItem.inlineTexture),
-		inspect.maxItem == nil and "-" or
-			(inspect.maxItem:iLevelWithUpgrades() .. " " .. inspect.maxItem.inlineTexture)
-	)
+	local maxItemColor, maxItemString = Geary.CC_NA, "-"
+	if inspect.maxItem ~= nil then
+		maxItemColor = ""
+		maxItemString = inspect.maxItem.link:gsub("[|]h.-[|]h",
+			"|h" ..	inspect.maxItem:iLevelWithUpgrades() .. " " .. inspect.maxItem.inlineTexture .. "|h")
+	end
 
-	-- I believe this makes a link with the ilevel and texture, but links don't work in the fontString
-	-- inspect.minItem.link:gsub("[|]h.-[|]h", "|h" .. inspect.minItem:iLevelWithUpgrades() .. " " ..
-	--			inspect.minItem.inlineTexture .. "|h")
+	self.summary.statsEditBox:SetText(
+		itemColor .. "Items: " .. itemCounts .. itemTwoHand .. Geary.CC_END .. "\n" ..
+		upgradeColor .. "Upgrades: " .. upgradeCounts .. Geary.CC_END .. "\n" ..
+		"\n" ..
+		enchantColor .. "Enchants: " .. enchantCounts .. Geary.CC_END .. "\n" ..
+		beltColor .. "Belt Buckle: " .. beltString .. Geary.CC_END .. "\n" ..
+		"\n" ..
+		gemColor .. "Gems: " .. gemCounts .. Geary.CC_END .. "\n" ..
+		eotbpColor .. "EotBP: " .. eotbpCounts .. Geary.CC_END .. "\n" ..
+		cohColor .. "CoH Meta: " .. cohString .. Geary.CC_END .. "\n" ..
+		"\n" ..
+		"Equipped iLevel: " .. ("%.2f"):format(inspect.iLevelEquipped) .. "\n" ..
+		upgradedColor .. "Upgraded iLevel: " .. upgradedILevel .. Geary.CC_END .. "\n" ..
+		"\n" ..
+		milestoneColor .. "Next: " .. milestoneString .. Geary.CC_END .. "\n" ..
+		"\n" ..
+		minItemColor .. "Lowest Item: " .. minItemString .. Geary.CC_END .. "\n" ..
+		maxItemColor .. "Highest Item: " .. maxItemString .. Geary.CC_END
+	)
 end
 
 function Geary_Interface_Player:setItem(slotName, item)
@@ -484,6 +512,11 @@ function Geary_Interface_Player:setItem(slotName, item)
 	slotData.info.fontString:SetText(item:iLevelWithUpgrades())
 	self:_setEnchantIcon(slotData.info, item)
 	self:_setGemIcons(slotData.info, item)
+	
+	if item.isMissingCohMeta then
+		self:_addInfoTooltipText(slotData.info,
+			Geary.CC_ERROR .. "Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
+	end
 	
 	-- Set the background color based on any issues with this item
 	if item:isMissingRequired() then
