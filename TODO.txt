@@ -6,16 +6,56 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
   but then shows equipped item level of 0.
 ** Also shows milestone of "Until LFD heroic: 0 iLevels" when it should be 6960
 
-* Store inspection results in a persistent database that can be viewed
-** Option for storing only level 90
+                           _ Tooltip shows class and spec name
+                          |
+Fac Name              Lv Spe Rol iLevel Items       Date Time                (trash can? red (X)?)
+(H) Foamulon-Doomham  90 (B) (R) 123.45 Missing ##  05/12/13 16:32  (X)  <-- Poup confirms deletion
+    ^                             ^      ^
+	|_ Trimmed & in class color   |      |_ Tooltip shows summary of what's missing
+                                  |
+                                  |_ Tooltip shows item count and total ilevels
+
+gid = {
+	player = {
+		name = "",
+		realm = "",
+		factionId = #,
+		classId = #,
+		specId = #
+	},
+	itemCount = #,
+	iLevelTotal = #,
+	missing = {
+		items = #,  -- empty + failed
+		gems = #,  -- missing + failed
+		enchants = #,
+		beltBuckle = t/f,
+		eotbp = #,
+		coh = t/f
+	},
+	inspectedAt = #
+}
+	
+* Database:
+** Store inspection results for viewing and used for out-of-game parsing
+** Delete All button
+** Option for storing only level 90 results
 ** Option for automatically pruning entries older than x days
+** Sort by clicking on column headers
+** Filter results by Faction, Class, and Level
+** //Maybe:// Show date/time in locale specific format
+** //Maybe:// Store results for multiple specs
 ** //Maybe:// Sync database entries with group, guild members, or specific players
-* List of inspection results with summary for people in your current group
-* //Maybe:// Inspect all members of your group with one click
-* Player interface improvements:
+* Group:
+** List of inspection results with summary for people in your current group
+** Sort by clicking on column headers
+** //Maybe:// Show date/time in locale specific format
+** //Maybe:// Inspect all members of your group with one click
+* Player:
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text
 ** //Maybe:// Add options to control the font of the summary text
 ** //Maybe:// Show empty sockets shown with their graphic
+** //Doubtful:// In item tooltips, show set pieces of the inspected character instead of you
 * Options:
 ** //Maybe:// Make options take effect immediately and have cancel revert to previous values
 ** //Maybe:// Options to configure mouse clicks for icon
@@ -24,9 +64,9 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
 ** //Maybe:// Show items with PvP stats
 ** //Maybe:// Show items with inappropriate stats (e.g. Prot Paladin wearing Intellect gear)
 ** //Maybe:// Detect unspent talent points
+** //Maybe:// Don't allow inspection while in combat and abort inspection if combat starts
 ** //Doubtful:// Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
-* //Maybe:// Don't allow inspection while in combat and abort inspection if combat starts
-* //Maybe:// Inspection results added to player tooltips
-* //Maybe:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
-* //Doubtful:// Resizing of Geary interface
-* //Doubtful:// In player interface item tooltips, show set pieces of the inspected character, not you
+* UI
+** //Maybe:// Inspection results added to player tooltips
+** //Maybe:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
+** //Doubtful:// Resizing of Geary interface
