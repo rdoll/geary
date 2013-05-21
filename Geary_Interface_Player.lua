@@ -299,7 +299,7 @@ function Geary_Interface_Player:_initSummary(parent, paperDollFrame)
 	fontString:SetJustifyV("TOP")
 	fontString:SetJustifyH("CENTER")
 	fontString:SetPoint("TOPLEFT", frame, "TOPLEFT")
-	fontString:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, -65)
+	fontString:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, -60)
 	frame.playerFontString = fontString
 
 	local editBox = CreateFrame("EditBox", "$parent_StatsEditBox", frame)
@@ -423,7 +423,7 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 
 	local eotbpColor, eotbpCounts = Geary.CC_NA, "-"
 	if inspect.eotbpFilled > 0 or inspect.eotbpMissing > 0 then
-		eotbpColor = inspect.eotbpMissing > 0 and Geary.CC_MISSING or Geary.CC_CORRECT
+		eotbpColor = inspect.eotbpMissing > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT
 		eotbpCounts = inspect.eotbpFilled .. "/" .. (inspect.eotbpFilled + inspect.eotbpMissing)
 	end
 	
@@ -433,7 +433,7 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 			cohColor = Geary.CC_CORRECT
 			cohString = "Yes"
 		else
-			cohColor = Geary.CC_MISSING
+			cohColor = Geary.CC_OPTIONAL
 			cohString = "No"
 		end
 	end
@@ -474,6 +474,7 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 		beltColor .. "Belt Buckle: " .. beltString .. Geary.CC_END .. "\n" ..
 		"\n" ..
 		gemColor .. "Gems: " .. gemCounts .. Geary.CC_END .. "\n" ..
+		"\n" ..
 		eotbpColor .. "EotBP: " .. eotbpCounts .. Geary.CC_END .. "\n" ..
 		cohColor .. "CoH Meta: " .. cohString .. Geary.CC_END .. "\n" ..
 		"\n" ..
@@ -515,7 +516,7 @@ function Geary_Interface_Player:setItem(slotName, item)
 	
 	if item.isMissingCohMeta then
 		self:_addInfoTooltipText(slotData.info,
-			Geary.CC_ERROR .. "Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
+			Geary.CC_OPTIONAL .. "Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
 	end
 	
 	-- Set the background color based on any issues with this item
@@ -598,9 +599,9 @@ function Geary_Interface_Player:_setGemIcons(info, item)
 	
 	-- Missing Eye of the Black Prince
 	if item.isMissingEotbp then
-		info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
+		info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Yellow")
 		info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-		self:_addInfoTooltipText(info, Geary.CC_ERROR .. "Missing " ..
+		self:_addInfoTooltipText(info, Geary.CC_OPTIONAL .. "Missing " ..
 			Geary_Item:getEotbpItemWithTexture() .. Geary.CC_END)
 		gemTextureIndex = gemTextureIndex + 1
 	end

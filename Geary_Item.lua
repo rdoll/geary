@@ -103,11 +103,11 @@ end
 function Geary_Item:isMissingRequired()
 	return self.iLevel == 0 or not Geary:isTableEmpty(self.emptySockets) or
 		not Geary:isTableEmpty(self.failedJewelIds) or (self.canEnchant and self.enchantText == nil) or
-		self.isMissingBeltBuckle or self.isMissingEotbp or self.isMissingCohMeta
+		self.isMissingBeltBuckle
 end
 
 function Geary_Item:isMissingOptional()
-	return self.upgradeItemLevelMissing > 0
+	return self.upgradeItemLevelMissing > 0  or self.isMissingEotbp or self.isMissingCohMeta
 end
 
 function Geary_Item:iLevelWithUpgrades()
@@ -283,10 +283,10 @@ function Geary_Item:probe(player)
 		Geary:log(Geary.CC_MISSING .. "   Missing " .. self:getBeltBuckleItemWithTexture() .. Geary.CC_END)
 	end
 	if self.isMissingEotbp then
-		Geary:log(Geary.CC_MISSING .. "   Missing " .. self:getEotbpItemWithTexture() .. Geary.CC_END)
+		Geary:log(Geary.CC_OPTIONAL .. "   Missing " .. self:getEotbpItemWithTexture() .. Geary.CC_END)
 	end
 	if self.isMissingCohMeta then
-		Geary:log(Geary.CC_MISSING .. "   Missing Crown of Heaven legendary meta gem" ..
+		Geary:log(Geary.CC_OPTIONAL .. "   Missing Crown of Heaven legendary meta gem" ..
 			Geary.CC_END)
 	end
 	

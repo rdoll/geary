@@ -272,11 +272,11 @@ function Geary_Inspect:_showSummary()
 	end
 	
 	if self.eotbpMissing > 0 then
-		Geary:log(Geary.CC_MISSING .. "Missing " .. self.eotbpMissing .. " " ..
+		Geary:log(Geary.CC_OPTIONAL .. "Missing " .. self.eotbpMissing .. " " ..
 			Geary_Item:getEotbpItemWithTexture() .. Geary.CC_END)
 	end
 	if self.isMissingCohMeta then
-		Geary:log(Geary.CC_MISSING .. "Missing Crown of Heaven legendary meta gem" ..
+		Geary:log(Geary.CC_OPTIONAL .. "Missing Crown of Heaven legendary meta gem" ..
 			Geary.CC_END)
 	end
 
