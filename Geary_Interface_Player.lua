@@ -521,9 +521,9 @@ function Geary_Interface_Player:setItem(slotName, item)
 	
 	-- Set the background color based on any issues with this item
 	if item:isMissingRequired() then
-		slotData.info:SetBackdropColor(1, 0, 0, 0.5)
+		slotData.info:SetBackdropColor(1, 0, 0, 0.44)
 	elseif item:isMissingOptional() then
-		slotData.info:SetBackdropColor(1, 1, 0, 0.5)
+		slotData.info:SetBackdropColor(1, 1, 0, 0.33)
 	else
 		slotData.info:SetBackdropColor(0, 0, 0, 0)
 	end

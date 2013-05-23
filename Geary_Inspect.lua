@@ -216,7 +216,7 @@ end
 -- Max player level item level milestones
 -- NOTE: Must be in order from lowest iLevel to highest
 local _itemLevelMilestones = {
-	{ iLevel = 435, milestone = "LFD heroic" },
+	{ iLevel = 440, milestone = "LFD heroic" },
 	{ iLevel = 460, milestone = "MV LFR" },
 	{ iLevel = 470, milestone = "HoF/ToES LFR" },
 	{ iLevel = 480, milestone = "ToT LFR" }

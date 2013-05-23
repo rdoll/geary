@@ -1,11 +1,15 @@
 In no particular order, here are things Geary does NOT do yet, but I am considering:
 
-* When 5.3 drops, up LFD heroic from 435 to 440
-* In 5.3, add Cloak of Virtue detection
 * Geary_Inspect.itemCount and iLevelTotal for Interface_Player summary can be zero if last
   inspection attempt fails; e.g. player logs off. So the player interface shows some items,
   but then shows equipped item level of 0.
 ** Also shows milestone of "Until LFD heroic: 0 iLevels" when it should be 6960
+* If you switch your current target while inspecting your target, the remaining inspection tries
+  fail and wait for the timeout. Coupled with above, you get no useful data.
+** Be nice if Geary detected target changed and aborted the inspection
+
+
+Database example:
 
                            _ Tooltip shows class and spec name
                           |
@@ -16,6 +20,11 @@ Fac Name              Lv Spe Rol iLevel Items       Date Time                (tr
                                   |
                                   |_ Tooltip shows item count and total ilevels
 
+Group would be the same except:
+- Instead of (X) to delete, have [Inspect] button to reinspect
+- Show all members of the group. If no inspect data, show -'s for missing items and Date/Time as "Never"
+- Show group summary
+								  
 gid = {
 	player = {
 		name = "",
@@ -36,7 +45,8 @@ gid = {
 	},
 	inspectedAt = #
 }
-	
+
+* Add Cloak of Virtue detection
 * Database:
 ** Store inspection results for viewing and used for out-of-game parsing
 ** Delete All button
