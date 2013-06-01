@@ -8,7 +8,6 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
   fail and wait for the timeout. Coupled with above, you get no useful data.
 ** Be nice if Geary detected target changed and aborted the inspection
 
-
 Database example:
 
                            _ Tooltip shows class and spec name
@@ -16,35 +15,36 @@ Database example:
 Fac Name              Lv Spe Rol iLevel Items       Date Time                (trash can? red (X)?)
 (H) Foamulon-Doomham  90 (B) (R) 123.45 Missing ##  05/12/13 16:32  (X)  <-- Poup confirms deletion
     ^                             ^      ^
-	|_ Trimmed & in class color   |      |_ Tooltip shows summary of what's missing
-                                  |
+    |_ Trimmed & in class color   |      |_ Tooltip shows summary of what's missing
+       Char name is max 12 chars  |
                                   |_ Tooltip shows item count and total ilevels
 
 Group would be the same except:
 - Instead of (X) to delete, have [Inspect] button to reinspect
 - Show all members of the group. If no inspect data, show -'s for missing items and Date/Time as "Never"
 - Show group summary
-								  
+                                  
 gid = {
-	player = {
-		name = "",
-		realm = "",
-		factionId = #,
-		classId = #,
-		specId = #
-	},
-	itemCount = #,
-	iLevelTotal = #,
-	missing = {
-		items = #,  -- empty + failed
-		gems = #,  -- missing + failed
-		enchants = #,
-		beltBuckle = t/f,
-		eotbp = #,
-		coh = t/f
-	},
-	inspectedAt = #
+    player = {
+        name = "",
+        realm = "",
+        factionId = #,
+        classId = #,
+        specId = #
+    },
+    itemCount = #,
+    iLevelTotal = #,
+    missing = {
+        items = #,  -- empty + failed
+        gems = #,  -- missing + failed
+        enchants = #,
+        beltBuckle = t/f,
+        eotbp = #,
+        coh = t/f
+    },
+    inspectedAt = #
 }
+
 
 * Add Cloak of Virtue detection
 * Database:
@@ -66,7 +66,7 @@ gid = {
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text
 ** //Maybe:// Add options to control the font of the summary text
 ** //Maybe:// Show empty sockets shown with their graphic
-** //Doubtful:// In item tooltips, show set pieces of the inspected character instead of you
+** //Doubtful:// In item tooltips, show set pieces worn and empty extra sockets of the inspected character
 * Options:
 ** //Maybe:// Make options take effect immediately and have cancel revert to previous values
 ** //Maybe:// Options to configure mouse clicks for icon
@@ -81,3 +81,36 @@ gid = {
 ** //Maybe:// Inspection results added to player tooltips
 ** //Maybe:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
 ** //Doubtful:// Resizing of Geary interface
+** //Doubtful:// Detecting empty extra sockets from a belt buckle/EotBP instead of extra gems
+
+
+Detecting extra sockets without gems
+------------------------------------
+Per http://wow.curseforge.com/addons/geary/tickets/1-does-not-detect-belt-buckle-if-no-gem-is-in-it/
+I think Geary should detect the belt buckle and EotBP _socket_ and not the presence of an extra gem.
+For reasons passing understanding, an item link withOUT the extra socket and with an empty extra
+socket is the same. For example:
+
+This is the base item's link with no gems and no belt buckle extra socket
+|cffa335ee|Hitem:86903:0:0:0:0:0:0:0:90:0:445|h|[Protector's Girdle of Endless Spring]|h|r
+
+This is the link for a belt with a belt buckle applied, but no gem in the empty Prismatic Socket
+|cffa335ee|Hitem:86903:0:4607:0:0:0:0:0:90:0:445|h|[Protector's Girdle of Endless Spring]|h|r
+
+And this is the same item WITH a gem in the belt buckle's socket
+|cffa335ee|Hitem:86903:0:4607:4585:0:0:0:0:90:0:445|h|[Protector's Girdle of Endless Spring]|h|r
+
+The only difference between these three links are the jewelIds when a gem is placed into a socket.
+
+So then how does the Blizzard default inspect UI show the empty Prismatic Socket?
+Magic! ... Well, almost. It uses GameTooltip:SetInventoryItem(unit, slotNumber).
+SetInventoryItem has some special access to information beyond the item's link. It shows
+the set pieces worn by the target as well as the extra empty sockets.
+
+At this time, I don't want to convert Geary to use SetInventoryItem for tooltip parsing.
+The biggest concern is that the item tooltips in the Log and Player tabs of the Geary
+interface can only use SetInventoryItem if the their current target is still the target
+they inspected and that target is in range. In this case, either all data for that player
+would have to be removed (like the way the Blizzard inspection UI just vanishes) or Geary
+could report an item is missing a gem (in an extra socket) but the tooltip wouldn't show it
+(because it has to revert to SetHyperlink which doesn't show the extra socket).

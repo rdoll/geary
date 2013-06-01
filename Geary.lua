@@ -287,6 +287,7 @@ local function _slashCommandDumpItem(rest)
 	Geary.debugOn = true
 	
 	Geary_Interface_Log:clearIfTooLarge()
+	Geary_Interface:selectTab("Log")
 	Geary_Interface:Show()
 	Geary:debugLog()
 	Geary:debugLog("--- Dumping", slotName, "item", itemLink, "---")
@@ -294,7 +295,9 @@ local function _slashCommandDumpItem(rest)
 		slot = slotName,
 		link = itemLink
 	}
-	item:probe()
+	local player = Geary_Player:new{unit = "player"}  -- Use only guaranteed player we can get at
+	player:probeInfo()
+	item:probe(player)
 	
 	if not DevTools_Dump then
 		LoadAddOn("Blizzard_DebugTools")

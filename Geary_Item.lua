@@ -457,10 +457,10 @@ function Geary_Item:_setEnchantText(enchantText)
 	end
 end
 
--- There is no good way to check for an extra gem from a belt buckle or Eye of the Black Prince.
--- What we do is count the gems in the BASE item and compare that with the number of gems
--- in THIS item. If THIS item doesn't have one more gem than the BASE item, it doesn't have
--- an extra gem (or it has a belt buckle/EotBP socket with no gem in it).
+-- Per http://wow.curseforge.com/addons/geary/tickets/1-does-not-detect-belt-buckle-if-no-gem-is-in-it/
+-- there is no good way to check for an extra socket from a belt buckle or Eye of the Black Prince,
+-- so instead we look for gems in the extra socket. By comparing the number of sockets in the BASE item
+-- versus the number of gems and sockets in THIS item, we can tell if there is an extra gem.
 -- Note: This is tooltip parsing similar to the full parse, but we just care about empty sockets.
 function Geary_Item:_isMissingExtraGem()
 
@@ -468,7 +468,7 @@ function Geary_Item:_isMissingExtraGem()
 	local _, baseItemLink = GetItemInfo(self.id)
 
 	-- Ensure owner is set (ClearLines unsets owner)
-	-- ANCHOR_NONE without setting any points means it's never rendered)
+	-- ANCHOR_NONE without setting any points means it's never rendered
 	self.tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 
 	-- Build tooltip for item
@@ -476,7 +476,7 @@ function Geary_Item:_isMissingExtraGem()
 	-- which deletes its content; so we ClearLines when done
 	self.tooltip:SetHyperlink(baseItemLink)
 
-	-- Parase the left side text (right side text isn't useful)
+	-- Parse the left side text (right side text isn't useful)
 	local baseSocketCount = 0
 	for lineNum = 1, self.tooltip:NumLines() do
 		(function ()  -- Function so we can use return as "continue"

@@ -505,6 +505,7 @@ function Geary_Interface_Player:setItem(slotName, item)
 	slotData.item = item
 	
 	slotData.icon:SetTexture(item.texture)
+	slotData.icon:SetTexCoord(0, 1, 0, 1)  -- Must reset in case icon was previously missing item texture
 	slotData.icon:Show()
 	self:_setItemBorder(slotName, item)
 	
@@ -573,7 +574,7 @@ function Geary_Interface_Player:_setGemIcons(info, item)
 			info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
 			info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
 			self:_addInfoTooltipText(info, Geary.CC_ERROR .. "Empty " .. item.emptySockets[gemNum] ..
-				" socket" .. Geary.CC_END)
+				Geary.CC_END)
 			gemTextureIndex = gemTextureIndex + 1
 		end
 	end
@@ -633,15 +634,19 @@ function Geary_Interface_Player:_markMissingItems(inspect)
 			mainHandIsTwoHand = slotData.item:isTwoHandWeapon()
 		end
 		if slotData.item == nil then
-			if slotName == "SecondaryHandSlot" and mainHandIsTwoHand and
-				not inspect.player:hasTitansGrip()
+			if slotName == "SecondaryHandSlot" and mainHandIsTwoHand and not inspect.player:hasTitansGrip()
 			then
 				Geary:debugLog(slotName, "not missing because main hand is 2Her and no Titan's Grip")
 			else
-				self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(1, 0, 0, 1)
-				self.paperDoll.slots[slotName].info:SetBackdropColor(1, 0, 0, 0.5)
-				self:_addInfoTooltipText(self.paperDoll.slots[slotName].info,
-					Geary.CC_ERROR .. slotName:gsub("Slot", "") .. " slot is empty" .. Geary.CC_END)
+				-- A red circle with slash through it
+				slotData.icon:SetTexture("Interface\\Transmogrify\\Textures.png")
+				slotData.icon:SetTexCoord(0.28906250, 0.55468750, 0.51171875, 0.57812500)
+				slotData.icon:Show()
+				
+				slotData.frame:SetBackdropBorderColor(1, 0, 0, 1)
+				slotData.info:SetBackdropColor(1, 0, 0, 0.5)
+				self:_addInfoTooltipText(slotData.info,
+					Geary.CC_ERROR .. TRANSMOGRIFY_INVALID_REASON1 .. Geary.CC_END)
 			end
 		end
 	end
