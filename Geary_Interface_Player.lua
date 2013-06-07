@@ -437,6 +437,17 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 			cohString = "No"
 		end
 	end
+	
+	local covColor, covString = Geary.CC_NA, "-"
+	if inspect.hasCov or inspect.isMissingCov then
+		if inspect.hasCov then
+			covColor = Geary.CC_CORRECT
+			covString = "Yes"
+		else
+			covColor = Geary.CC_OPTIONAL
+			covString = "No"
+		end
+	end
 
 	local upgradedColor, upgradedILevel = Geary.CC_NA, "-"
 	if inspect.upgradeItemLevelMissing > 0 then
@@ -477,6 +488,7 @@ function Geary_Interface_Player:inspectionEnd(inspect)
 		"\n" ..
 		eotbpColor .. "EotBP: " .. eotbpCounts .. Geary.CC_END .. "\n" ..
 		cohColor .. "CoH Meta: " .. cohString .. Geary.CC_END .. "\n" ..
+		covColor .. "CoV: " .. covString .. Geary.CC_END .. "\n" ..
 		"\n" ..
 		"Equipped iLevel: " .. ("%.2f"):format(inspect.iLevelEquipped) .. "\n" ..
 		upgradedColor .. "Upgraded iLevel: " .. upgradedILevel .. Geary.CC_END .. "\n" ..
@@ -518,6 +530,11 @@ function Geary_Interface_Player:setItem(slotName, item)
 	if item.isMissingCohMeta then
 		self:_addInfoTooltipText(slotData.info,
 			Geary.CC_OPTIONAL .. "Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
+	end
+	
+	if item.isMissingCov then
+		self:_addInfoTooltipText(slotData.info,
+			Geary.CC_OPTIONAL .. "Missing Cloak of Virtue" .. Geary.CC_END)
 	end
 	
 	-- Set the background color based on any issues with this item

@@ -4,9 +4,18 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
   inspection attempt fails; e.g. player logs off. So the player interface shows some items,
   but then shows equipped item level of 0.
 ** Also shows milestone of "Until LFD heroic: 0 iLevels" when it should be 6960
+
 * If you switch your current target while inspecting your target, the remaining inspection tries
   fail and wait for the timeout. Coupled with above, you get no useful data.
 ** Be nice if Geary detected target changed and aborted the inspection
+
+* Change next milestone in interface from "Next: 70 to HoF/ToES LFR" to "Next: 70 until 470"
+  with a tooltip that shows all milestones and how long until reaching them.
+** Show "-" and tooltip of "must be level 90" if too low.
+** What would be shown in log?
+** What would be shown if passed all milestones?
+** Could split HoF/ToES LFR into separate milestones and add heroic scenario milestone
+
 
 Database example:
 
@@ -24,7 +33,7 @@ Group would be the same except:
 - Show all members of the group. If no inspect data, show -'s for missing items and Date/Time as "Never"
 - Show group summary
                                   
-gid = {
+guid = {
     player = {
         name = "",
         realm = "",
@@ -40,13 +49,13 @@ gid = {
         enchants = #,
         beltBuckle = t/f,
         eotbp = #,
-        coh = t/f
+        coh = t/f,
+        cov = t/f
     },
     inspectedAt = #
 }
 
 
-* Add Cloak of Virtue detection
 * Database:
 ** Store inspection results for viewing and used for out-of-game parsing
 ** Delete All button

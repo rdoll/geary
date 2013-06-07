@@ -79,7 +79,7 @@ end
 
 -- Player can do legendary quest and has a Sha-Touched or 502+ iLevel weapon
 function Geary_Item:canHaveEotbp(player)
-	return player.level >= 90 and
+	return player:isMaxLevel() and
 		(self.isShaTouched or
 			(self.iLevel >= 502 and self:isWeapon() and (
 				self.invType == "INVTYPE_2HWEAPON" or
@@ -94,10 +94,27 @@ end
 
 -- Player can do legendary quest and has a head item with sockets
 function Geary_Item:canHaveCohMeta(player)
-	return player.level >= 90 and self.slot == "HeadSlot" and
+	return player:isMaxLevel() and self.slot == "HeadSlot" and
 		(not Geary:isTableEmpty(self.filledSockets) or
 			 not Geary:isTableEmpty(self.emptySockets) or not Geary:isTableEmpty(self.failedJewelIds)
 		)
+end
+
+-- Player can do legendary quest
+function Geary_Item:canHaveCov(player)
+	return player:isMaxLevel()
+end
+
+-- Determines if the item is a cloak with an item ID of the 6 Cloaks of Virtue
+-- NOTE: Must use item IDs to be locale independent
+function Geary_Item:isCov()
+	return
+		self.id == 98146 or  -- Oxhorn Bladebreaker
+		self.id == 98147 or  -- Tigerclaw Cape
+		self.id == 98148 or  -- Tigerfang Wrap
+		self.id == 98149 or  -- Cranewing Cloak
+		self.id == 98150 or  -- Jadefire Drape
+		self.id == 98335     -- Oxhoof Greatcloak
 end
 
 function Geary_Item:isMissingRequired()
@@ -107,7 +124,8 @@ function Geary_Item:isMissingRequired()
 end
 
 function Geary_Item:isMissingOptional()
-	return self.upgradeItemLevelMissing > 0  or self.isMissingEotbp or self.isMissingCohMeta
+	return self.upgradeItemLevelMissing > 0  or self.isMissingEotbp or self.isMissingCohMeta or
+		self.isMissingCov
 end
 
 function Geary_Item:iLevelWithUpgrades()
@@ -196,7 +214,9 @@ function Geary_Item:new(o)
 		hasEotbp = false,
 		isMissingEotbp = false,
 		hasCohMeta = false,
-		isMissingCohMeta = false
+		isMissingCohMeta = false,
+		hasCov = false,
+		isMissingCov = false
 	}
 	if o then
 		for name, value in pairs(o) do
@@ -223,7 +243,7 @@ function Geary_Item:probe(player)
 	self.link = self:_itemLinkSuffixIdBugWorkaround(self.link)
 	
 	-- Get base item info
-	self.id = self.link:match("|Hitem:(%d+):")
+	self.id = tonumber(self.link:match("|Hitem:(%d+):"))
 	self.canEnchant = _slotDetails[self.slot].canEnchant
 	self.name, _, self.quality, _, _, self.iType, self.subType, _, self.invType, self.texture, _ =
 		GetItemInfo(self.link)
@@ -255,6 +275,11 @@ function Geary_Item:probe(player)
 
 	if self:canHaveCohMeta(player) then
 		self.isMissingCohMeta = not self.hasCohMeta
+	end
+	
+	if self.slot == "BackSlot" and self:canHaveCov(player) then
+		self.hasCov = self:isCov()
+		self.isMissingCov = not self.hasCov
 	end
 
 	-- Report info about the item
@@ -288,6 +313,9 @@ function Geary_Item:probe(player)
 	if self.isMissingCohMeta then
 		Geary:log(Geary.CC_OPTIONAL .. "   Missing Crown of Heaven legendary meta gem" ..
 			Geary.CC_END)
+	end
+	if self.isMissingCov then
+		Geary:log(Geary.CC_OPTIONAL .. "   Missing Cloak of Virtue" .. Geary.CC_END)
 	end
 	
 	return true

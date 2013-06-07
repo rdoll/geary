@@ -44,6 +44,8 @@ function Geary_Inspect:resetData()
 	self.eotbpMissing = 0
 	self.hasCohMeta = false
 	self.isMissingCohMeta = false
+	self.hasCov = false
+	self.isMissingCov = false
 end
 
 function Geary_Inspect:startTimer(milliseconds)
@@ -173,7 +175,7 @@ function Geary_Inspect:_processFilledSlot(slotName, itemLink)
 		self.isMissingBeltBuckle = true
 	end
 	
-	-- Can only have EotBP or CoH Meta if max level
+	-- Can only have legendary questline items if max level
 	if self.player:isMaxLevel() then
 		if item.hasEotbp then
 			self.eotbpFilled = self.eotbpFilled + 1
@@ -185,6 +187,11 @@ function Geary_Inspect:_processFilledSlot(slotName, itemLink)
 		if slotName == "HeadSlot" then
 			self.hasCohMeta = item.hasCohMeta
 			self.isMissingCohMeta = item.isMissingCohMeta
+		end
+		
+		if slotName == "BackSlot" then
+			self.hasCov = item.hasCov
+			self.isMissingCov = item.isMissingCov
 		end
 	end
 	
@@ -278,6 +285,9 @@ function Geary_Inspect:_showSummary()
 	if self.isMissingCohMeta then
 		Geary:log(Geary.CC_OPTIONAL .. "Missing Crown of Heaven legendary meta gem" ..
 			Geary.CC_END)
+	end
+	if self.isMissingCov then
+		Geary:log(Geary.CC_OPTIONAL .. "Missing Cloak of Virtue" .. Geary.CC_END)
 	end
 
 	if self.emptySockets > 0 then
