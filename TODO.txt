@@ -1,20 +1,12 @@
 In no particular order, here are things Geary does NOT do yet, but I am considering:
 
-* Geary_Inspect.itemCount and iLevelTotal for Interface_Player summary can be zero if last
-  inspection attempt fails; e.g. player logs off. So the player interface shows some items,
-  but then shows equipped item level of 0.
-** Also shows milestone of "Until LFD heroic: 0 iLevels" when it should be 6960
-
-* If you switch your current target while inspecting your target, the remaining inspection tries
-  fail and wait for the timeout. Coupled with above, you get no useful data.
-** Be nice if Geary detected target changed and aborted the inspection
-
 * Change next milestone in interface from "Next: 70 to HoF/ToES LFR" to "Next: 70 until 470"
   with a tooltip that shows all milestones and how long until reaching them.
 ** Show "-" and tooltip of "must be level 90" if too low.
 ** What would be shown in log?
 ** What would be shown if passed all milestones?
 ** Could split HoF/ToES LFR into separate milestones and add heroic scenario milestone
+** Note: Not sure if this inside can be done inside an EditBox
 
 
 Database example:

@@ -379,11 +379,16 @@ function Geary_Interface_Player:inspectionStart(inspect)
 	end
 end
 
+function Geary_Interface_Player:inspectionFailed(inspect)
+	self:_markMissingItems(inspect)
+	self:_setPlayerSummaryText(inspect)
+	self.summary.statsEditBox:SetText(Geary.CC_FAILED .. "          Inspection failed" .. Geary.CC_END)
+end
+
 function Geary_Interface_Player:inspectionEnd(inspect)
 
-	self:_markMissingItems(inspect)
-
 	self:_setPlayerSummaryText(inspect)
+	self:_markMissingItems(inspect)
 
 	-- TODO This is duplicated work from Geary_Inspect using private data
 

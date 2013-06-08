@@ -70,7 +70,7 @@ function Geary_Inspect:timerExpired()
 	if self.inspectTry < self.inspectTries then
 		Geary_Inspect:reinspectRequest()
 	else
-		Geary_Inspect:inspectionOver()
+		Geary_Inspect:inspectionFailed()
 		Geary:log(Geary.CC_FAILED .. "Inspection failed after " .. self.inspectTries .. " tries." ..
 			Geary.CC_END)
 	end
@@ -78,8 +78,7 @@ end
 
 function Geary_Inspect:PLAYER_LOGOUT()
 	if self.inProgress then
-		self:inspectionOver()
-		ClearInspectPlayer()
+		self:_inspectionOver()
 	end
 end
 
@@ -95,8 +94,8 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 		return
 	end
 
-	if self.player.guid ~= unitGuid then
-		Geary:debugLog("Skipping inspection of wrong unitGuid", unitGuid)
+	if not self.player:isUnitStillSamePlayer() then
+		self:inspectionTargetChanged()
 		return
 	end
 
@@ -127,9 +126,9 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 	-- Total number of slots that should have an item 
     self.itemCount = self.filledSlots + self.emptySlots + self.failedSlots
 
-	-- Inspection is over
+	-- Inspection is complete
 	self.iLevelEquipped = self.iLevelTotal / self.itemCount
-	self:inspectionOver()
+	self:inspectionPassed()
 
 	-- Show summary
 	self:_showSummary()
@@ -317,11 +316,28 @@ function Geary_Inspect:_showSummary()
 	end
 end
 
--- Disable everything after a successful or failed inspection
-function Geary_Inspect:inspectionOver()
+function Geary_Inspect:_inspectionOver()
 	self:stopTimer()
 	self.inProgress = false
 	Geary:UnregisterEvent("INSPECT_READY")
+	ClearInspectPlayer()
+end
+
+function Geary_Inspect:inspectionTargetChanged()
+	local message = Geary.CC_FAILED .. "Unit " .. self.player.unit ..
+		" changed, aborting inspection of " .. self.player:getFullNameLink() .. Geary.CC_END
+	Geary:print(message)
+	Geary:log(message)
+	self:inspectionFailed()
+end
+
+function Geary_Inspect:inspectionFailed()
+	self:_inspectionOver()
+	Geary_Interface_Player:inspectionFailed(self)
+end
+
+function Geary_Inspect:inspectionPassed()
+	self:_inspectionOver()
 	Geary_Interface_Player:inspectionEnd(self)
 end
 
@@ -351,8 +367,12 @@ function Geary_Inspect:inspectUnitRequest(unit)
 end
 
 function Geary_Inspect:reinspectRequest()
-	Geary:log(Geary.CC_FAILED .. "Inspection failed, retrying..." .. Geary.CC_END)
-	self:makeInspectRequest()
+	if self.player:isUnitStillSamePlayer() then
+		Geary:log(Geary.CC_FAILED .. "Inspection failed, retrying..." .. Geary.CC_END)
+		self:makeInspectRequest()
+	else
+		self:inspectionTargetChanged()
+	end
 end
 
 function Geary_Inspect:makeInspectRequest()
