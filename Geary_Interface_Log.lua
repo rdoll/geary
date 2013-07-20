@@ -18,7 +18,7 @@ function Geary_Interface_Log:init(parent)
 	local frame = CreateFrame("ScrollFrame", "$parent_Log", parent, "UIPanelScrollFrameTemplate")
 		-- "UIPanelScrollFrameTemplate2")  Includes borders around the scrollbar
 	frame:Hide()
-	frame:SetPoint("TOPLEFT", parent, "TOPLEFT", -9, -2)
+	frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 2, -2)
 	frame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -24, 1)
 	self.scrollFrame = frame
 
@@ -26,7 +26,8 @@ function Geary_Interface_Log:init(parent)
 	editBox:SetPoint("TOPLEFT", self.scrollFrame, "TOPLEFT")
 	editBox:SetSize(self.scrollFrame:GetWidth(), self.scrollFrame:GetHeight())
 	editBox:SetMultiLine(true)
-	editBox:SetIndentedWordWrap(true)  -- TODO This doesn't seem to be working
+	-- TODO I would like to make this true, but \nfoo indents foo :(
+	editBox:SetIndentedWordWrap(false)
 	editBox:SetAutoFocus(false)
 	editBox:EnableMouse(true)
 	editBox:EnableMouseWheel(true)

@@ -8,9 +8,9 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
 ** Could split HoF/ToES LFR into separate milestones and add heroic scenario milestone
 ** Note: Not sure if this inside can be done inside an EditBox
 
+* Geary options: If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
 
 Database example:
-
                            _ Tooltip shows class and spec name
                           |
 Fac Name              Lv Spe Rol iLevel Items       Date Time                (trash can? red (X)?)
@@ -21,40 +21,17 @@ Fac Name              Lv Spe Rol iLevel Items       Date Time                (tr
                                   |_ Tooltip shows item count and total ilevels
 
 Group would be the same except:
-- Instead of (X) to delete, have [Inspect] button to reinspect
+- Instead of (or in addition to?) (X) to delete, have [Inspect] button to reinspect
 - Show all members of the group. If no inspect data, show -'s for missing items and Date/Time as "Never"
 - Show group summary
-                                  
-guid = {
-    player = {
-        name = "",
-        realm = "",
-        factionId = #,
-        classId = #,
-        specId = #
-    },
-    itemCount = #,
-    iLevelTotal = #,
-    missing = {
-        items = #,  -- empty + failed
-        gems = #,  -- missing + failed
-        enchants = #,
-        beltBuckle = t/f,
-        eotbp = #,
-        coh = t/f,
-        cov = t/f
-    },
-    inspectedAt = #
-}
-
+                
 
 * Database:
-** Store inspection results for viewing and used for out-of-game parsing
-** Delete All button
-** Option for storing only level 90 results
+** If database is disabled, show that in interface
+** Change inspected at to be x days, x hours, x minutes, and "just now" instead of full date/time
 ** Option for automatically pruning entries older than x days
 ** Sort by clicking on column headers
-** Filter results by Faction, Class, and Level
+** Filter results by Faction, Class, Level, etc
 ** //Maybe:// Show date/time in locale specific format
 ** //Maybe:// Store results for multiple specs
 ** //Maybe:// Sync database entries with group, guild members, or specific players
@@ -72,6 +49,7 @@ guid = {
 ** //Maybe:// Make options take effect immediately and have cancel revert to previous values
 ** //Maybe:// Options to configure mouse clicks for icon
 * Detection:
+** //Maybe:// When item level is scaled down, show true max as well as current scaled down
 ** //Maybe:// Detect non-rare MoP gems and non-MoP enchants
 ** //Maybe:// Show items with PvP stats
 ** //Maybe:// Show items with inappropriate stats (e.g. Prot Paladin wearing Intellect gear)
@@ -79,6 +57,8 @@ guid = {
 ** //Maybe:// Don't allow inspection while in combat and abort inspection if combat starts
 ** //Doubtful:// Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
 * UI
+** //Maybe:// Store window locations in options so addon load failures don't force you to reposition them
+** //Maybe:// Add non-English client support via localizations
 ** //Maybe:// Inspection results added to player tooltips
 ** //Maybe:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
 ** //Doubtful:// Resizing of Geary interface

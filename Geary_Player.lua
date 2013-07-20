@@ -15,9 +15,12 @@ Geary_Player = {
 	faction = nil,
 	className = nil,
 	classId = nil,
-	classFilename = nil,
+	classTag = nil,
 	level = nil,
-	spec = nil
+	spec = nil,
+	
+	-- Why oh why isn't there a constant for this?
+	MAX_LEVEL = 90
 }
 
 function Geary_Player:new(o)
@@ -28,7 +31,7 @@ function Geary_Player:new(o)
 end
 
 function Geary_Player:isMaxLevel()
-	return self.level == 90
+	return self.level == self.MAX_LEVEL
 end
 
 function Geary_Player:probeInfo()
@@ -39,7 +42,10 @@ function Geary_Player:probeInfo()
 	
 	self.guid = UnitGUID(self.unit)
 	self.name, self.realm = UnitName(self.unit)
-	self.className, self.classFilename, self.classId = UnitClass(self.unit)
+	if self.realm == nil then
+		self.realm = Geary.homeRealmName  -- No realm means home realm
+	end
+	self.className, self.classTag, self.classId = UnitClass(self.unit)
 	self.level = UnitLevel(self.unit)
 	self.faction, _ = UnitFactionGroup(self.unit)
 end
@@ -50,7 +56,7 @@ end
 
 function Geary_Player:getFullNameLink()
 	return format(TEXT_MODE_A_STRING_DEST_UNIT, "", self.guid, self.name,
-		self.name .. (((self.realm == nil) or (self.realm == "")) and "" or ("-" .. self.realm)))
+		self.name .. (self.realm == Geary.homeRealmName and "" or ("-" .. self.realm)))
 end
 
 function Geary_Player:getFactionInlineIcon()
@@ -64,10 +70,10 @@ function Geary_Player:getFactionInlineIcon()
 end
 
 function Geary_Player:getColorizedClassName()
-	if RAID_CLASS_COLORS[self.classFilename] == nil then
+	if RAID_CLASS_COLORS[self.classTag] == nil then
 		return self.className
 	else
-		return Geary.CC_START .. RAID_CLASS_COLORS[self.classFilename].colorStr .. self.className ..
+		return Geary.CC_START .. RAID_CLASS_COLORS[self.classTag].colorStr .. self.className ..
 			Geary.CC_END
 	end
 end

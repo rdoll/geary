@@ -11,7 +11,9 @@ Geary_Options_Interface = {
 	mainFrame = nil,
 	contentsCreated = false,
 	iconShownCheckbox = nil,
-	iconScaleSlider = nil
+	iconScaleSlider = nil,
+	databaseEnabledCheckbox = nil,
+	databaseMinLevelSlider = nil
 }
 
 local _fontFilenames = {
@@ -61,6 +63,7 @@ function Geary_Options_Interface:_createContents()
 	-- Create sections
 	local section = self:_createIconSection(subtitle)
 	section = self:_createInterfaceSection(section)
+	section = self:_createDatabaseSection(section)
 	
 	-- Mark created so we don't recreate everything
 	self.contentsCreated = true
@@ -76,7 +79,7 @@ function Geary_Options_Interface:_createIconSection(previousItem)
 	-- Icon shown
 	local checkbox = CreateFrame("CheckButton", "$parent_Icon_Shown_Checkbox", self.mainFrame,
 		"InterfaceOptionsCheckButtonTemplate")
-	checkbox:SetPoint("TOPLEFT", iconHeader, "BOTTOMLEFT", -2, -5)
+	checkbox:SetPoint("TOPLEFT", iconHeader, "BOTTOMLEFT", 0, -5)
 	checkbox.Label = _G[checkbox:GetName() .. "Text"]
 	checkbox.Label:SetText("Show Icon Button")
 	checkbox:SetScript("OnEnter", function (self)
@@ -200,7 +203,68 @@ function Geary_Options_Interface:_createInterfaceSection(previousItem)
 	-- Save it
 	self.logFontHeightSlider = slider
 
-	return self.logFontHeightSlider
+	return label
+end
+
+function Geary_Options_Interface:_createDatabaseSection(previousItem)
+
+	-- Geary database header
+	local interfaceHeader = self:_createHeader(self.mainFrame, "Geary Database")
+	interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
+	interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -5, -45)
+
+	-- Database enabled
+	local checkbox = CreateFrame("CheckButton", "$parent_Database_Enabled_Checkbox", self.mainFrame,
+		"InterfaceOptionsCheckButtonTemplate")
+	checkbox:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 0, -5)
+	checkbox.Label = _G[checkbox:GetName() .. "Text"]
+	checkbox.Label:SetText("Database Enabled")
+	checkbox:SetScript("OnEnter", function (self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
+		GameTooltip:SetText("Enable Database storage of character inspections")
+	end)
+	checkbox:SetScript("OnLeave", function (self) GameTooltip:Hide() end)
+	BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
+	self.databaseEnabledCheckbox = checkbox
+	
+	-- Database storage character minimum level slider
+	local slider = CreateFrame("Slider", "$parent_Database_Min_Level_Slider", self.mainFrame,
+		"OptionsSliderTemplate")
+	slider:SetWidth(190)
+	slider:SetHeight(14)
+	slider:SetMinMaxValues(1, Geary_Player.MAX_LEVEL)
+	slider:SetValueStep(1)
+	slider:SetOrientation("HORIZONTAL")
+	slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOM", 0, -30)
+	slider:Enable()
+	-- Label above
+	slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+	slider.Label:SetPoint("TOPLEFT", -5, 18)
+	slider.Label:SetText("Min Level for Storage:")
+	-- Lowest value label
+	slider.Low = _G[slider:GetName() .. "Low"]
+	slider.Low:SetText("1")
+	-- Highest value label
+	slider.High = _G[slider:GetName() .. "High"]
+	slider.High:SetText(Geary_Player.MAX_LEVEL)
+	-- Current value label
+	slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
+	slider.Value:SetPoint("BOTTOM", 0, -10)
+	slider.Value:SetWidth(50)
+	-- Handlers
+	slider:SetScript("OnValueChanged", function (self, value)
+		self.Value:SetText(value)
+	end)
+	slider:SetScript("OnEnter", function (self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
+		GameTooltip:SetText("Minimum character level stored in the database")
+	end)
+	slider:SetScript("OnLeave", function (self) GameTooltip:Hide() end)
+	BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
+	-- Save it
+	self.databaseMinLevelSlider = slider
+
+	return self.databaseMinLevelSlider
 end
 
 function Geary_Options_Interface:_createHeader(parent, name)
@@ -232,6 +296,9 @@ function Geary_Options_Interface:_createHeader(parent, name)
 end
 
 function Geary_Options_Interface:Show()
+	 InterfaceOptionsFrame_OpenToCategory(self.mainFrame)
+	 -- Per http://www.wowpedia.org/Patch_5.3.0/API_changes
+	 -- We need to call this twice if the user has never opened the addon panel before
 	 InterfaceOptionsFrame_OpenToCategory(self.mainFrame)
 end
 
@@ -269,6 +336,8 @@ function Geary_Options_Interface:OnShow(frame)
 	UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
 		_fontFilenames.byFilename[Geary_Options:getLogFontFilename()].id)
 	self.logFontHeightSlider:SetValue(Geary_Options:getLogFontHeight())
+	self.databaseEnabledCheckbox:SetChecked(Geary_Options:isDatabaseEnabled())
+	self.databaseMinLevelSlider:SetValue(Geary_Options:getDatabaseMinLevel())
 end
 
 function Geary_Options_Interface:onDefault(frame)
@@ -279,6 +348,8 @@ function Geary_Options_Interface:onDefault(frame)
 	UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
 		_fontFilenames.byFilename[Geary_Options:getDefaultLogFontFilename()].id)
 	self.logFontHeightSlider:SetValue(Geary_Options:getDefaultLogFontHeight())
+	self.databaseEnabledCheckbox:SetChecked(Geary_Options:getDefaultDatabaseEnabled())
+	self.databaseMinLevelSlider:SetValue(Geary_Options:getDefaultDatabaseMinLevel())
 end
 
 function Geary_Options_Interface:onOkay(frame)
@@ -291,4 +362,10 @@ function Geary_Options_Interface:onOkay(frame)
 	Geary_Interface_Log:setFont(
 		_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
 		self.logFontHeightSlider:GetValue())
+	if self.databaseEnabledCheckbox:GetChecked() then
+		Geary_Database:enable()
+	else
+		Geary_Database:disable()
+	end
+	Geary_Database:setMinLevel(self.databaseMinLevelSlider:GetValue())
 end

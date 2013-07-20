@@ -339,6 +339,7 @@ end
 function Geary_Inspect:inspectionPassed()
 	self:_inspectionOver()
 	Geary_Interface_Player:inspectionEnd(self)
+	Geary_Database:storeInspection(self)
 end
 
 function Geary_Inspect:inspectUnitRequest(unit)

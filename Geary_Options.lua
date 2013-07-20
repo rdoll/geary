@@ -12,7 +12,9 @@ Geary_Options = {
 		iconShown = true,
 		iconScale = 1.0,
 		logFontFilename = "Fonts\\FRIZQT__.TTF",
-		logFontHeight = 10
+		logFontHeight = 10,
+		databaseEnabled = true,
+		databaseMinLevel = Geary_Player.MAX_LEVEL
 	}
 }
 
@@ -26,11 +28,15 @@ function Geary_Options:ADDON_LOADED()
 	
 	-- If a version exists, see if we need to upgrade it
 	if Geary_Saved_Options.version ~= nil then
-		if Geary_Saved_Options.version < Geary.version then
+		local verComp = Geary:versionCompare(Geary.version, Geary_Saved_Options.version)
+		if verComp == -1 then
 			Geary:print("Upgrading options from " .. Geary_Saved_Options.version .. " to " ..
 				Geary.version)
+		elseif verComp == 1 then
+			Geary:print(Geary.CC_ERROR .. "Options version " .. Geary_Saved_Options.version ..
+				" is newer than Geary version " .. Geary.version .. ". Errors may occur!" .. Geary.CC_END)
 		end
-		if Geary_Saved_Options.version < "5.1.17-beta" then
+		if Geary:versionCompare("5.1.17-beta", Geary_Saved_Options.version) == -1 then
 			self:_upgradeTo5_1_17_beta()
 		end
 		-- Add future upgrades here
@@ -130,4 +136,40 @@ end
 
 function Geary_Options:setLogFontHeight(fontHeight)
 	Geary_Saved_Options.logFontHeight = fontHeight
+end
+
+--
+-- Database enabled
+--
+
+function Geary_Options:getDefaultDatabaseEnabled()
+	return self.default.databaseEnabled
+end
+
+function Geary_Options:isDatabaseEnabled()
+	return Geary_Saved_Options.databaseEnabled
+end
+
+function Geary_Options:setDatabaseEnabled()
+	Geary_Saved_Options.databaseEnabled = true
+end
+
+function Geary_Options:setDatabaseDisabled()
+	Geary_Saved_Options.databaseEnabled = false
+end
+
+--
+-- Database minimum character level to store
+--
+
+function Geary_Options:getDefaultDatabaseMinLevel()
+	return self.default.databaseMinLevel
+end
+
+function Geary_Options:getDatabaseMinLevel()
+	return Geary_Saved_Options.databaseMinLevel
+end
+
+function Geary_Options:setDatabaseMinLevel(minLevel)
+	Geary_Saved_Options.databaseMinLevel = minLevel
 end

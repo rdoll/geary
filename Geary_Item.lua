@@ -467,10 +467,10 @@ function Geary_Item:_setUpgrades(upgradeLevel, upgradeMax)
 		self.upgradeMax = upgradeMax
 		if upgradeLevel < upgradeMax then
 			if self.quality <= ITEM_QUALITY_RARE then
-				-- Rare quality items use 1500 Justive Points to upgrade 8 levels
+				-- Rare quality items use 750 Justive Points to upgrade 8 levels
 				self.upgradeItemLevelMissing = (upgradeMax - upgradeLevel) * 8
 			else
-				-- Epic quality items use 750 Valor Points to upgrade 4 levels
+				-- Epic quality items use 250 Valor Points to upgrade 4 levels
 				self.upgradeItemLevelMissing = (upgradeMax - upgradeLevel) * 4			
 			end
 		end
