@@ -10,6 +10,8 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
 
 * Geary options: If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
 
+* Geary icon needs a tooltip
+
 Database example:
                            _ Tooltip shows class and spec name
                           |
@@ -35,7 +37,6 @@ Group would be the same except:
 ** //Maybe:// Sync database entries with group, guild members, or specific players
 ** //Doubtful:// Store results for multiple specs
 * Group:
-** List of inspection results with summary for people in your current group
 ** Sort by clicking on column headers
 ** //Maybe:// Inspect all members of your group with one click
 * Player:

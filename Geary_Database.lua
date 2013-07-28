@@ -76,6 +76,16 @@ function Geary_Database:addEntry(entry)
 	Geary_Interface_Database:onChanged()
 end
 
+function Geary_Database:getEntry(guid)
+	local entry = Geary_Saved_Database.results[guid]
+	if entry ~= nil then
+		self:_makeObjects()
+		return entry
+	else
+		return nil
+	end
+end
+
 function Geary_Database:deleteEntry(guid)
 	Geary_Saved_Database.results[guid] = nil
 	Geary_Interface_Database:onChanged()

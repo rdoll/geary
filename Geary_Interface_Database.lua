@@ -25,26 +25,13 @@ function Geary_Interface_Database:init(parent)
 	editBox:SetPoint("TOPLEFT", self.scrollFrame, "TOPLEFT")
 	editBox:SetSize(self.scrollFrame:GetWidth(), self.scrollFrame:GetHeight())
 	editBox:SetMultiLine(true)
-	-- TODO I would like to make this true, but \nfoo indents foo :(
 	editBox:SetIndentedWordWrap(false)
 	editBox:SetAutoFocus(false)
 	editBox:EnableMouse(true)
 	editBox:EnableMouseWheel(true)
-	editBox:SetHyperlinksEnabled(true)
 	editBox:Disable()
-	-- TODO Using Log's font settings atm
-	editBox:SetFont(Geary_Options:getLogFontFilename(), Geary_Options:getLogFontHeight())
-	editBox:SetScript("OnHyperlinkClick", function (self, link, text, button)
-		SetItemRef(link, text, button)
-	end)
-	editBox:SetScript("OnHyperlinkEnter", function (self, link, text)
-		GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
-		GameTooltip:SetHyperlink(link)
-		GameTooltip:Show()
-	end)
-	editBox:SetScript("OnHyperlinkLeave", function (self, link, text)
-		GameTooltip:Hide()
-	end)
+	-- TODO Add options to control this
+	editBox:SetFont("Fonts\\FRIZQT__.TTF", 10)
 	self.editBox = editBox
 	
 	self.scrollFrame:SetScrollChild(self.editBox)
@@ -110,8 +97,8 @@ function Geary_Interface_Database:renderEntries()
 					Geary.CC_END,
 				(missingOptional > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT) .. missingOptional ..
 					Geary.CC_END,
-				Geary.CC_DEBUG .. entry:getInspectedAt() .. Geary.CC_END))
+				Geary.CC_NA .. entry:getInspectedAt() .. Geary.CC_END))
 	end
 	self.editBox:Insert(Geary.CC_FAILED .. "\n -- " .. Geary_Database:getNumberEntries() ..
-		" inspection results reocrded (misaligned columns are just for this beta) --" .. Geary.CC_END)
+		" inspection results stored (misaligned columns are temporary) --" .. Geary.CC_END)
 end

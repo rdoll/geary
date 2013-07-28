@@ -42,7 +42,8 @@ function Geary_Player:probeInfo()
 	
 	self.guid = UnitGUID(self.unit)
 	self.name, self.realm = UnitName(self.unit)
-	if self.realm == nil then
+	-- realm is nil when on home realm, but empty string when player is on home realm and DCed
+	if self.realm == nil or strlen(self.realm) == 0 then
 		self.realm = Geary.homeRealmName  -- No realm means home realm
 	end
 	self.className, self.classTag, self.classId = UnitClass(self.unit)

@@ -26,7 +26,7 @@ function Geary_Interface_Log:init(parent)
 	editBox:SetPoint("TOPLEFT", self.scrollFrame, "TOPLEFT")
 	editBox:SetSize(self.scrollFrame:GetWidth(), self.scrollFrame:GetHeight())
 	editBox:SetMultiLine(true)
-	-- TODO I would like to make this true, but \nfoo indents foo :(
+	-- NOTE I would like to make this true, but \nfoo indents foo :(
 	editBox:SetIndentedWordWrap(false)
 	editBox:SetAutoFocus(false)
 	editBox:EnableMouse(true)
