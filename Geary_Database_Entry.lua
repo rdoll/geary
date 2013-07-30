@@ -159,7 +159,3 @@ function Geary_Database_Entry:getMissingOptionalCount()
 	return self.missingUpgrades + self.missingEotbp + (self.missingCoh and 1 or 0) +
 		(self.missingCov and 1 or 0)
 end
-
-function Geary_Database_Entry:getInspectedAt()
-	return date(nil, self.inspectedAt)
-end

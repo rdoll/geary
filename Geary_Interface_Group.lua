@@ -128,7 +128,7 @@ end
 function Geary_Interface_Group:renderEntries()
 
 	self.editBox:SetText(Geary.CC_FAILED ..
-		"Fac  Cls  Spe  Rol  Lvl  iLevel    Name                     Missing    Inspected At\n" ..
+		"Fac  Cls  Spe  Rol  Lvl  iLevel    Name                     Missing       Inspected At\n" ..
 		Geary.CC_END)
 	
 	local inspectedCount, groupItemCount, groupILevelTotal = 0, 0, 0
@@ -136,7 +136,7 @@ function Geary_Interface_Group:renderEntries()
 	for guid, entry in pairs(self.groupEntries) do
 		if entry.neverInspected then
 			self.editBox:Insert(
-				("%s  -      -      -      -     %s   ---.--%s     %s    %s- / -    Never%s\n"):format(
+				("%s  -      -      -      -     %s   ---.--%s     %s    %s- / -       never%s\n"):format(
 					Geary.CC_NA,
 					entry.level and entry.level or " -  ",
 					Geary.CC_END,
@@ -150,7 +150,7 @@ function Geary_Interface_Group:renderEntries()
 			missingRequired = entry:getMissingRequiredCount()
 			missingOptional = entry:getMissingOptionalCount()
 			self.editBox:Insert(
-				(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s    %s\n"):format(
+				(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s       %s\n"):format(
 					entry:getFactionInlineIcon(),
 					entry:getClassInlineIcon(),
 					entry:getSpecInlineIcon(),
@@ -162,7 +162,7 @@ function Geary_Interface_Group:renderEntries()
 						Geary.CC_END,
 					(missingOptional > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT) .. missingOptional ..
 						Geary.CC_END,
-					Geary.CC_NA .. entry:getInspectedAt() .. Geary.CC_END))
+					Geary:colorizedRelativeDateTime(entry.inspectedAt)))
 		end
 	end
 	

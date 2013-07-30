@@ -12,6 +12,8 @@ Geary = {
 	version = nil,
 	title = nil,
 	notes = nil,
+	
+	-- Login session info
 	homeRealmName = nil,
 	
 	-- Debug settings
@@ -262,6 +264,40 @@ function Geary:_versionPartCompare(v1Part, v2Part)
 		return 1  -- v2 is the greater string
 	end
 end
+
+
+--
+-- Date/time utilities
+--
+
+function Geary:colorizedRelativeDateTime(timestamp)
+
+	if timestamp == nil or timestamp < 1 then
+		return self.CC_NA .. "never" .. self.CC_END
+	end
+	
+	local timeDiff = time() - timestamp
+	if timeDiff < 5 * 60 then
+		-- Less than 5 minutes
+		return GREEN_FONT_COLOR_CODE .. "< 5 minutes ago" .. self.CC_END
+	elseif timeDiff < 60 * 60 then
+		-- 2 to 59 minutes
+		return "|cff20bb20" .. floor(timeDiff / 60) .. " minutes ago" .. self.CC_END
+	elseif timeDiff < 7 * 60 * 60 then
+		-- 1 to 6 hours
+		return "|cff20bbbb" .. floor(timeDiff / (60 * 60)) .. " hours ago" .. self.CC_END
+	elseif timeDiff < 24 * 60 * 60 then
+		-- 6 to 23 hours
+		return YELLOW_FONT_COLOR_CODE .. floor(timeDiff / (60 * 60)) .. " hours ago" .. self.CC_END
+	elseif timeDiff < 7 * 24 * 60 * 60 then
+		-- 1 to 7 days
+		return ORANGE_FONT_COLOR_CODE .. floor(timeDiff / (24 * 60 * 60)) .. " days ago" .. self.CC_END
+	else
+		-- More than 7 days
+		return RED_FONT_COLOR_CODE .. floor(timeDiff / (24 * 60 * 60)) .. " days ago" .. self.CC_END
+	end
+end
+
 
 --
 -- Main

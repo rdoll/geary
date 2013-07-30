@@ -60,6 +60,8 @@ end
 
 function Geary_Database:deleteAll()
 	wipe(Geary_Saved_Database.results)
+	Geary_Interface_Database:onChanged()
+	Geary_Interface_Group:onChanged()
 end
 
 function Geary_Database:storeInspection(inspect)
@@ -74,6 +76,7 @@ end
 function Geary_Database:addEntry(entry)
 	Geary_Saved_Database.results[entry.playerGuid] = entry
 	Geary_Interface_Database:onChanged()
+	Geary_Interface_Group:onChanged()
 end
 
 function Geary_Database:getEntry(guid)
@@ -89,6 +92,7 @@ end
 function Geary_Database:deleteEntry(guid)
 	Geary_Saved_Database.results[guid] = nil
 	Geary_Interface_Database:onChanged()
+	Geary_Interface_Group:onChanged()
 end
 
 function Geary_Database:enable()

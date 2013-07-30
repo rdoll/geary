@@ -68,7 +68,6 @@ end
 
 function Geary_Interface_Database:deleteAll()
 	Geary_Database:deleteAll()
-	self:renderEntries()
 end
 
 -- TODO Temp to help with column alignment
@@ -79,13 +78,13 @@ end
 function Geary_Interface_Database:renderEntries()
 	self.editBox:SetText(Geary.CC_FAILED ..
 		"Fac  Cls  Spe  Rol  Lvl  iLevel    Name                     " .. 
-		"Missing    Inspected At" .. Geary.CC_END .. "\n")
+		"Missing       Inspected At" .. Geary.CC_END .. "\n")
 	local missingRequired, missingOptional
 	for _, entry in pairs(Geary_Database:getAllEntries()) do
 		missingRequired = entry:getMissingRequiredCount()
 		missingOptional = entry:getMissingOptionalCount()
 		self.editBox:Insert(
-			(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s    %s\n"):format(
+			(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s       %s\n"):format(
 				entry:getFactionInlineIcon(),
 				entry:getClassInlineIcon(),
 				entry:getSpecInlineIcon(),
@@ -97,7 +96,7 @@ function Geary_Interface_Database:renderEntries()
 					Geary.CC_END,
 				(missingOptional > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT) .. missingOptional ..
 					Geary.CC_END,
-				Geary.CC_NA .. entry:getInspectedAt() .. Geary.CC_END))
+				Geary:colorizedRelativeDateTime(entry.inspectedAt)))
 	end
 	self.editBox:Insert(Geary.CC_FAILED .. "\n -- " .. Geary_Database:getNumberEntries() ..
 		" inspection results stored (misaligned columns are temporary) --" .. Geary.CC_END)

@@ -12,6 +12,12 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
 
 * Geary icon needs a tooltip
 
+* When entire interface is shown/hidden, need to refresh Group and Database tab if they are active
+** Should probably make the interface show/hide call show on the active tab
+
+* Store interface and icon positions so failures put the windows back in the same spot
+** Need to watch for being off the screen and reset to the center of the screen
+
 Database example:
                            _ Tooltip shows class and spec name
                           |
