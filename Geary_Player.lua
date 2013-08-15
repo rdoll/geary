@@ -79,13 +79,19 @@ function Geary_Player:getColorizedClassName()
 	end
 end
 
+local _roleInlineIcons = {
+	["TANK"]    = INLINE_TANK_ICON,
+	["HEALER"]  = INLINE_HEALER_ICON,
+	["DAMAGER"] = INLINE_DAMAGER_ICON
+}
+
 function Geary_Player:getSpecWithInlineIcon()
 	if self.spec == nil then
 		return "NoSpec"
-	elseif self.spec.inlineIcon == nil then
-		return self.spec.name
+	elseif self.spec.role ~= nil and _roleInlineIcons[self.spec.role] ~= nil then
+		return self.spec.name .. " " .. _roleInlineIcons[self.spec.role]
 	else
-		return self.spec.name .. " " .. self.spec.inlineIcon
+		return self.spec.name
 	end
 end
 
@@ -97,12 +103,6 @@ function Geary_Player:hasTitansGrip()
 		self.spec ~= nil and self.spec.id ~= nil and self.spec.id == 72
 end
 
-local _roleInlineIcons = {
-	["TANK"]    = INLINE_TANK_ICON,
-	["HEALER"]  = INLINE_HEALER_ICON,
-	["DAMAGER"] = INLINE_DAMAGER_ICON
-}
-
 function Geary_Player:INSPECT_READY()
 
 	-- This can be called multiple times if inspection retries are necessary,
@@ -111,14 +111,14 @@ function Geary_Player:INSPECT_READY()
 		return
 	end
 	
-	local specId, specName, specRole
+	local specId, specName, roleTag
 	if self.unit == "player" then
 		local nonGlobSpecId = GetSpecialization()
 		if nonGlobSpecId == nil then
 			Geary:print(Geary.CC_ERROR .. "nonGlobSpecId is nil!" .. Geary.CC_END)
 			return
 		end
-		specId, specName, _, _, _, specRole = GetSpecializationInfo(nonGlobSpecId)
+		specId, specName, _, _, _, roleTag = GetSpecializationInfo(nonGlobSpecId)
 	else
 		local globSpecId = GetInspectSpecialization(self.unit)
 		if globSpecId == nil then
@@ -137,8 +137,8 @@ function Geary_Player:INSPECT_READY()
 		-- 'validating' the value by calling GetSpecializationRoleByID(), and only
 		-- if that returns a non-nil value, it decodes the number with GetSpecializationInfoByID().
 		--
-		specRole = GetSpecializationRoleByID(globSpecId)
-		if specRole == nil then
+		roleTag = GetSpecializationRoleByID(globSpecId)
+		if roleTag == nil then
 			Geary:print(Geary.CC_ERROR .. "globSpecId " .. globSpecId .. " is invalid!" .. Geary.CC_END)
 			return
 		end
@@ -148,15 +148,14 @@ function Geary_Player:INSPECT_READY()
 	if specName == nil then
 		Geary:print(Geary.CC_ERROR .. "specName is nil!" .. Geary.CC_END)
 		return
-	elseif specRole == nil then
-		Geary:print(Geary.CC_ERROR .. "specRole is nil!" .. Geary.CC_END)
+	elseif roleTag == nil then
+		Geary:print(Geary.CC_ERROR .. "roleTag is nil!" .. Geary.CC_END)
 		return
 	end
 	
 	self.spec = {
 		id = specId,
 		name = specName,
-		role = specRole,
-		inlineIcon = _roleInlineIcons[specRole] == nil and nil or _roleInlineIcons[specRole]
+		role = roleTag
 	}
 end

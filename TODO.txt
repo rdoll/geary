@@ -18,6 +18,9 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
 * Store interface and icon positions so failures put the windows back in the same spot
 ** Need to watch for being off the screen and reset to the center of the screen
 
+* Add Median, Min, and Max ilevel to group summary?
+** Maybe also show ilevel above, below median next to ilevel column? a ^ - v arrow to indicate above/below
+
 Database example:
                            _ Tooltip shows class and spec name
                           |
