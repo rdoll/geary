@@ -95,6 +95,14 @@ function Geary_Interface_SummaryRow:getFrame()
 	return self.rowFrame
 end
 
+local _unknownTextureFilename = "Interface\\ICONS\\INV_Misc_QuestionMark" 
+local _unknownTextureInline = "|T" .. _unknownTextureFilename .. ":0|t"
+
+function Geary_Interface_SummaryRow:_setUnknownIconTexture(texture)
+	texture:SetTexture(_unknownTextureFilename)
+	texture:SetTexCoord(0, 1, 0, 1)
+end
+
 function Geary_Interface_SummaryRow:setFaction(factionName)
 	if factionName == "Horde" then
 		self.factionTexture:SetTexture("Interface\\PVPFrame\\PVP-Currency-Horde")
@@ -103,21 +111,14 @@ function Geary_Interface_SummaryRow:setFaction(factionName)
 		self.factionTexture:SetTexture("Interface\\PVPFrame\\PVP-Currency-Alliance")
 		self.factionTexture:SetTexCoord(4/32, 28/32, 2/32, 30/32)
 	else
---		TODO Why don't the micro menu buttons look good?
---		self.factionTexture:SetTexture("Interface\\BUTTONS\\UI-MicroButton-Help-Disabled")
---		self.factionTexture:SetTexture("Interface\\BUTTONS\\UI-MicroButton-Help-Up")
---		self.factionTexture:SetTexture("Interface\\BUTTONS\\UI-MicroButton-Help-Down")
-		self.factionTexture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
-		self.factionTexture:SetTexCoord(0, 1, 0, 1)
+		self:_setUnknownIconTexture(self.factionTexture)
 	end
 end
 
 function Geary_Interface_SummaryRow:setClass(classId)
 	local _, classTag, _ = GetClassInfo(classId or 0)  -- translate nil to 0
 	if CLASS_ICON_TCOORDS[classTag] == nil then
-		-- TODO Make this a constant if its getting used in multiple places
-		self.classTexture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
-		self.classTexture:SetTexCoord(0, 1, 0, 1)
+		self:_setUnknownIconTexture(self.classTexture)
 	else
 		self.classTexture:SetTexture("Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES")
 		self.classTexture:SetTexCoord(unpack(CLASS_ICON_TCOORDS[classTag]))
@@ -127,9 +128,7 @@ end
 function Geary_Interface_SummaryRow:setSpec(specId)
 	local _, _, _, icon = GetSpecializationInfoByID(specId or 0)  -- translate nil to 0
 	if icon == nil then
-		-- TODO Make this a constant if its getting used in multiple places
-		self.specTexture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
-		self.specTexture:SetTexCoord(0, 1, 0, 1)
+		self:_setUnknownIconTexture(self.specTexture)
 	else
 		self.specTexture:SetTexture(icon)
 	end
@@ -144,9 +143,7 @@ local _roleIconTexCoords = {
 function Geary_Interface_SummaryRow:setRole(specId)
 	local roleTag = GetSpecializationRoleByID(specId or 0)  -- translate nil to 0
 	if roleTag == nil then
-		-- TODO Make this a constant if its getting used in multiple places
-		self.roleTexture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
-		self.roleTexture:SetTexCoord(0, 1, 0, 1)
+		self:_setUnknownIconTexture(self.roleTexture)
 	else
 		self.roleTexture:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
 		self.roleTexture:SetTexCoord(unpack(_roleIconTexCoords[roleTag]))
@@ -154,19 +151,22 @@ function Geary_Interface_SummaryRow:setRole(specId)
 end
 
 function Geary_Interface_SummaryRow:setLevel(level)
-	self.levelFontString:SetText(level or "?")
+	self.levelFontString:SetText(level or _unknownTextureInline)
 end
 
 function Geary_Interface_SummaryRow:setILevel(itemCount, iLevelTotal)
-	self.iLevelFontString:SetText(iLevelTotal and ("%6.2f"):format(itemCount / iLevelTotal) or "0.0")
+	self.iLevelFontString:SetText(
+		iLevelTotal and ("%6.2f"):format(itemCount / iLevelTotal) or _unknownTextureInline)
 end
 
 function Geary_Interface_SummaryRow:setName(name, realm)
-	self.nameFontString:SetText((name or "?") .. (realm and ("-" .. realm) or ""))
+	self.nameFontString:SetText((name or _unknownTextureInline) .. (realm and ("-" .. realm) or ""))
 end
 
 function Geary_Interface_SummaryRow:setMissing(required, optional)
-	self.missingFontString:SetText((required or "-") .. " / " .. (optional or "-"))
+	self.missingFontString:SetText(
+		(required ~= nil and required or _unknownTextureInline) .. " / " ..
+		(optional ~= nil and optional or _unknownTextureInline))
 end
 
 function Geary_Interface_SummaryRow:setInspected(inspected)

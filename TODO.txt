@@ -39,7 +39,6 @@ Group would be the same except:
 
 * Database:
 ** If database is disabled, show that in interface
-** Change inspected at to be x days, x hours, x minutes, and "just now" instead of full date/time
 ** Option for automatically pruning entries older than x days
 ** Sort by clicking on column headers
 ** Filter results by Faction, Class, Level, etc

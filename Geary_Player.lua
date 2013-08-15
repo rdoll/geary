@@ -15,7 +15,6 @@ Geary_Player = {
 	faction = nil,
 	className = nil,
 	classId = nil,
-	classTag = nil,
 	level = nil,
 	spec = nil,
 	
@@ -28,6 +27,16 @@ function Geary_Player:new(o)
 	setmetatable(o, self)
 	self.__index = self
 	return o
+end
+
+function Geary_Player:classColorize(classId, text)
+	local _, classTag, _ = GetClassInfo(classId or 0)  -- translate nil to zero to prevent errors
+	text = text or ""
+	if RAID_CLASS_COLORS[classTag] == nil then
+		return text
+	else
+		return Geary.CC_START .. RAID_CLASS_COLORS[classTag].colorStr .. text .. Geary.CC_END
+	end
 end
 
 function Geary_Player:isMaxLevel()
@@ -46,7 +55,7 @@ function Geary_Player:probeInfo()
 	if self.realm == nil or strlen(self.realm) == 0 then
 		self.realm = Geary.homeRealmName  -- No realm means home realm
 	end
-	self.className, self.classTag, self.classId = UnitClass(self.unit)
+	self.className, _, self.classId = UnitClass(self.unit)
 	self.level = UnitLevel(self.unit)
 	self.faction, _ = UnitFactionGroup(self.unit)
 end
@@ -71,12 +80,7 @@ function Geary_Player:getFactionInlineIcon()
 end
 
 function Geary_Player:getColorizedClassName()
-	if RAID_CLASS_COLORS[self.classTag] == nil then
-		return self.className
-	else
-		return Geary.CC_START .. RAID_CLASS_COLORS[self.classTag].colorStr .. self.className ..
-			Geary.CC_END
-	end
+	return self:classColorize(self.classId, self.className)
 end
 
 local _roleInlineIcons = {

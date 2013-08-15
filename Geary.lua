@@ -176,6 +176,7 @@ end
 --
 -- Both # and table.getn return 0 if the table doesn't contain sequential indexes starting with one,
 -- so make our own functions.
+--
 
 function Geary:isTableEmpty(t)
 	if t ~= nil then
@@ -298,12 +299,11 @@ function Geary:colorizedRelativeDateTime(timestamp)
 	end
 end
 
-
 --
 -- Main
 --
-Geary:init()
 
+Geary:init()
 
 --
 -- Slash commands

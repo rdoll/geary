@@ -94,12 +94,12 @@ end
 -- TODO Need a better solution than this
 function Geary_Interface_Group:makeFakeEntry(unit, guid)
 	local name, realm = UnitName(unit)
-	local _, classTag, _ = UnitClass(unit)
+	local _, _, classId = UnitClass(unit)
 	local entry = {
 		neverInspected = true,
 		fullName =  name .. ((realm and strlen(realm) > 0) and ("-" .. realm) or ""),
-		classColor = Geary.CC_START .. RAID_CLASS_COLORS[classTag].colorStr,
-		level = UnitLevel(unit)
+		playerClassId = classId,
+		playerLevel = UnitLevel(unit)
 	}
 	return entry
 end
@@ -183,11 +183,12 @@ function Geary_Interface_Group:renderEntries()
 		if entry.neverInspected then
 			row = self:getRow(rowNumber)
 			row.fontString:SetText(
-				("%s  -      -      -      -     %s   ---.--%s     %s    %s- / -       never%s\n"):format(
+				("%s  -      -      -      -     %s   ---.--%s     %s    %s- / -       never%s"):format(
 					Geary.CC_NA,
-					entry.level and entry.level or " -  ",
+					entry.playerLevel and entry.playerLevel or " -  ",
 					Geary.CC_END,
-					entry.classColor .. self:strpad2(strsub(entry.fullName, 1, 16), 16) .. Geary.CC_END,
+					Geary_Player:classColorize(
+						entry.playerClassId, self:strpad2(strsub(entry.fullName, 1, 16), 16)),
 					Geary.CC_NA,
 					Geary.CC_END))
 		else
@@ -198,14 +199,15 @@ function Geary_Interface_Group:renderEntries()
 			missingOptional = entry:getMissingOptionalCount()
 			row = self:getRow(rowNumber)
 			row.fontString:SetText(
-				(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s       %s\n"):format(
+				(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s       %s"):format(
 					entry:getFactionInlineIcon(),
 					entry:getClassInlineIcon(),
 					entry:getSpecInlineIcon(),
 					entry:getRoleInlineIcon(),
 					entry.playerLevel,
 					entry:getEquippedItemLevel(),
-					entry:classColorize(self:strpad2(strsub(entry:getPlayerFullName(), 1, 16), 16)),
+					Geary_Player:classColorize(entry.playerClassId,
+						self:strpad2(strsub(entry:getPlayerFullName(), 1, 16), 16)),
 					(missingRequired > 0 and Geary.CC_MISSING or Geary.CC_CORRECT) .. missingRequired ..
 						Geary.CC_END,
 					(missingOptional > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT) .. missingOptional ..

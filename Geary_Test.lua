@@ -24,6 +24,7 @@ function Geary_Test:all()
 	self:dates()
 	self:tables()
 	self:versions()
+	self:classColors()
 end
 
 function Geary_Test:dates()
@@ -114,6 +115,16 @@ function Geary_Test:versions()
 	print("\"5.3.7-release\" v \"5.3.7-beta\"", Geary:versionCompare("5.3.7-release", "5.3.7-beta"))
 end
 
+function Geary_Test:classColors()
+	self:header("classColors")
+	print(nil, "\"\"", "=", Geary_Player:classColorize(nil, ""))
+	print(0, "unknown", "=", Geary_Player:classColorize(0, "unknown"))
+	for classId = 1, GetNumClasses() + 1 do
+		local className = GetClassInfo(classId)
+		print(classId, className, "=", Geary_Player:classColorize(classId, className))
+	end
+end
+
 function Geary_Test:tab()
 
 	local parent = _G["Geary_Ui_Main_Content"]
@@ -156,8 +167,8 @@ function Geary_Test:tab()
 	
 	-- Test summary rows
 	local row1 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
-	row1:getFrame():SetPoint("TOPLEFT", rowsFrame, "TOPLEFT")
-	row1:getFrame():SetPoint("TOPRIGHT", rowsFrame, "TOPRIGHT")
+	row1:getFrame():SetPoint("TOPLEFT", rowsFrame, "TOPLEFT", 0, -1)
+	row1:getFrame():SetPoint("TOPRIGHT", rowsFrame, "TOPRIGHT", 0, -1)
 	row1:setFaction("Horde")
 	row1:setClass(1)
 	row1:setSpec(71)
@@ -169,8 +180,8 @@ function Geary_Test:tab()
 	row1:setInspected(time())
 
 	local row2 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
-	row2:getFrame():SetPoint("TOPLEFT", row1:getFrame(), "BOTTOMLEFT")
-	row2:getFrame():SetPoint("TOPRIGHT", row1:getFrame(), "BOTTOMRIGHT")
+	row2:getFrame():SetPoint("TOPLEFT", row1:getFrame(), "BOTTOMLEFT", 0, -1)
+	row2:getFrame():SetPoint("TOPRIGHT", row1:getFrame(), "BOTTOMRIGHT", 0, -1)
 	row2:setFaction("Alliance")
 	row2:setClass(11)
 	row2:setSpec(250)
@@ -182,8 +193,8 @@ function Geary_Test:tab()
 	row2:setInspected(time() - (60 * 60))
 
 	local row3 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
-	row3:getFrame():SetPoint("TOPLEFT", row2:getFrame(), "BOTTOMLEFT")
-	row3:getFrame():SetPoint("TOPRIGHT", row2:getFrame(), "BOTTOMRIGHT")
+	row3:getFrame():SetPoint("TOPLEFT", row2:getFrame(), "BOTTOMLEFT", 0, -1)
+	row3:getFrame():SetPoint("TOPRIGHT", row2:getFrame(), "BOTTOMRIGHT", 0, -1)
 	row3:setFaction(nil)
 	row3:setClass(nil)
 	row3:setSpec(nil)
