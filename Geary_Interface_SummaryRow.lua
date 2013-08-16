@@ -30,11 +30,31 @@ end
 
 function Geary_Interface_SummaryRow:createFrames(parent)
 
+	-- Increment static unique row number (cannot use self -- that's an instance)
+	Geary_Interface_SummaryRow.summaryRowNumber = Geary_Interface_SummaryRow.summaryRowNumber + 1
+
 	-- Outermost container for row (points set by caller)
-	self.summaryRowNumber = self.summaryRowNumber + 1
-	self.rowFrame = CreateFrame("Frame", "$parent_SummaryRow_" .. self.summaryRowNumber, parent)
+	self.rowFrame = CreateFrame("Frame",
+		"$parent_SummaryRow_" .. Geary_Interface_SummaryRow.summaryRowNumber, parent)
 	self.rowFrame:SetHeight(12)
 	
+	-- Start with the backdrop hidden and show/hide it on enter/leave
+	self.rowFrame:SetBackdrop({
+		bgFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Background",
+		tile = true,
+		tileSize = 32
+	})
+	self.rowFrame:SetBackdropColor(0, 0, 0, 0)
+	self.rowFrame:SetScript("OnEnter", function (frame, motion)
+		frame:SetBackdropColor(1, 1, 1, 1)
+	end)
+	self.rowFrame:SetScript("OnLeave", function (frame, motion)
+		frame:SetBackdropColor(0, 0, 0, 0)
+	end)
+	self.rowFrame:SetScript("OnHide", function (frame, motion)
+		frame:SetBackdropColor(0, 0, 0, 0)
+	end)
+
 	-- Faction texture
 	self.factionTexture = self.rowFrame:CreateTexture("$parent_Faction", "OVERLAY")
 	self.factionTexture:SetPoint("TOPLEFT", self.rowFrame, "TOPLEFT", 2, 0)
@@ -155,12 +175,15 @@ function Geary_Interface_SummaryRow:setLevel(level)
 end
 
 function Geary_Interface_SummaryRow:setILevel(itemCount, iLevelTotal)
-	self.iLevelFontString:SetText(
-		iLevelTotal and ("%6.2f"):format(itemCount / iLevelTotal) or _unknownTextureInline)
+	if itemCount and itemCount > 0 then
+		self.iLevelFontString:SetFormattedText("%6.2f", iLevelTotal / itemCount)
+	else
+		self.iLevelFontString:SetText(_unknownTextureInline)
+	end
 end
 
 function Geary_Interface_SummaryRow:setName(name, realm)
-	self.nameFontString:SetText((name or _unknownTextureInline) .. (realm and ("-" .. realm) or ""))
+	self.nameFontString:SetText(Geary_Player:fullPlayerName(name, realm) or _unknownTextureInline)
 end
 
 function Geary_Interface_SummaryRow:setMissing(required, optional)
@@ -170,5 +193,5 @@ function Geary_Interface_SummaryRow:setMissing(required, optional)
 end
 
 function Geary_Interface_SummaryRow:setInspected(inspected)
-	self.inspectedFontString:SetText(inspected or "never")
+	self.inspectedFontString:SetText(Geary:colorizedRelativeDateTime(inspected))
 end

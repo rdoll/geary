@@ -39,6 +39,17 @@ function Geary_Player:classColorize(classId, text)
 	end
 end
 
+function Geary_Player:fullPlayerName(name, realm)
+	if name == nil then
+		return nil
+	end
+	if realm == nil or strlen(realm) == 0 or realm == Geary.homeRealmName then
+		return name
+	else
+		return name .. "-" .. realm
+	end
+end
+
 function Geary_Player:isMaxLevel()
 	return self.level == self.MAX_LEVEL
 end
@@ -66,7 +77,7 @@ end
 
 function Geary_Player:getFullNameLink()
 	return format(TEXT_MODE_A_STRING_DEST_UNIT, "", self.guid, self.name,
-		self.name .. (self.realm == Geary.homeRealmName and "" or ("-" .. self.realm)))
+		self:fullPlayerName(self.name, self.realm))
 end
 
 function Geary_Player:getFactionInlineIcon()

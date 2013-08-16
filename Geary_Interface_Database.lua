@@ -140,13 +140,13 @@ function Geary_Interface_Database:renderEntries()
 		missingOptional = entry:getMissingOptionalCount()
 		row = self:getRow(rowNumber)
 		row.fontString:SetText(
-			(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s       %s"):format(
+			(" %s    %s    %s    %s   %2d  %s  %s    %s / %s       %s"):format(
 				entry:getFactionInlineIcon(),
 				entry:getClassInlineIcon(),
 				entry:getSpecInlineIcon(),
 				entry:getRoleInlineIcon(),
 				entry.playerLevel,
-				entry:getEquippedItemLevel(),
+				entry:getEquippedItemLevelString(),
 				Geary_Player:classColorize(entry.playerClassId,
 					self:strpad2(strsub(entry:getPlayerFullName(), 1, 16), 16)),
 				(missingRequired > 0 and Geary.CC_MISSING or Geary.CC_CORRECT) .. missingRequired ..

@@ -178,6 +178,7 @@ function Geary_Test:tab()
 	row1:setName("name1", "Thrall")
 	row1:setMissing(6, 32)
 	row1:setInspected(time())
+	self.row1 = row1
 
 	local row2 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
 	row2:getFrame():SetPoint("TOPLEFT", row1:getFrame(), "BOTTOMLEFT", 0, -1)
@@ -191,6 +192,7 @@ function Geary_Test:tab()
 	row2:setName("testnametwo", "islongerthanspace")
 	row2:setMissing(0, 0)
 	row2:setInspected(time() - (60 * 60))
+	self.row2 = row2
 
 	local row3 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
 	row3:getFrame():SetPoint("TOPLEFT", row2:getFrame(), "BOTTOMLEFT", 0, -1)
@@ -204,12 +206,17 @@ function Geary_Test:tab()
 	row3:setName(nil, nil)
 	row3:setMissing(nil, nil)
 	row3:setInspected(nil)
+	self.row3 = row3
 
 	-- Create tab
 	Geary_Interface:createTab("Test",
 		function () contentsFrame:Show() end,
 		function () contentsFrame:Hide() end
 	)
+
+	-- Show the newly created tab
+	Geary_Interface:Show()
+	Geary_Interface:selectTab("Test")
 end
 
 --[ [

@@ -70,9 +70,19 @@ function Geary_Database_Entry:createFromInspection(inspect)
 	}
 end
 
+function Geary_Database_Entry:createFromUnit(unit)
+	local name, realm = UnitName(unit)
+	local _, _, classId = UnitClass(unit)
+	return self:new{
+		playerName    = name,
+		playerRealm   = realm,
+		playerClassId = classId,
+		playerLevel   = UnitLevel(unit)
+	}
+end
+
 function Geary_Database_Entry:getPlayerFullName()
-	return self.playerName ..
-		(self.playerRealm == Geary.homeRealmName and "" or ("-" .. self.playerRealm))
+	return Geary_Player:fullPlayerName(self.playerName, self.playerRealm)
 end
 
 function Geary_Database_Entry:getFactionInlineIcon()
@@ -89,8 +99,19 @@ function Geary_Database_Entry:getFactionInlineIcon()
 	end
 end
 
-function Geary_Database_Entry:getEquippedItemLevel()
-	return self.iLevelTotal / self.itemCount
+-- TODO Temp to help with column alignment
+function Geary_Database_Entry:strpad2prefix(str, len)
+	return ("%" .. (strlen(str) + ((len - strlen(str)) * 2)) .. "s"):format(str)
+end
+
+function Geary_Database_Entry:getEquippedItemLevelString()
+	local iLevelString
+	if self.itemCount and self.itemCount > 0 then
+		iLevelString = ("%6.2f"):format(self.iLevelTotal / self.itemCount)
+	else
+		iLevelString = "?"
+	end
+	return self:strpad2prefix(iLevelString, 6)
 end
 
 function Geary_Database_Entry:getClassInlineIcon()

@@ -91,19 +91,6 @@ function Geary_Interface_Group:onChanged()
 	end
 end
 
--- TODO Need a better solution than this
-function Geary_Interface_Group:makeFakeEntry(unit, guid)
-	local name, realm = UnitName(unit)
-	local _, _, classId = UnitClass(unit)
-	local entry = {
-		neverInspected = true,
-		fullName =  name .. ((realm and strlen(realm) > 0) and ("-" .. realm) or ""),
-		playerClassId = classId,
-		playerLevel = UnitLevel(unit)
-	}
-	return entry
-end
-
 function Geary_Interface_Group:updateGroupEntries()
 
 	wipe(self.groupEntries)
@@ -117,7 +104,7 @@ function Geary_Interface_Group:updateGroupEntries()
 		-- Player is not included in party units
 		guid = UnitGUID("player")
 		local entry = Geary_Database:getEntry(guid)
-		self.groupEntries[guid] = entry and entry or self:makeFakeEntry("player", guid)
+		self.groupEntries[guid] = entry and entry or Geary_Database_Entry:createFromUnit("player")
 		unitPrefix = "party"
 		unitLimit = 4
 	else
@@ -130,7 +117,7 @@ function Geary_Interface_Group:updateGroupEntries()
 		guid = UnitGUID(unit)
 		if guid then
 			entry = Geary_Database:getEntry(guid)
-			self.groupEntries[guid] = entry and entry or self:makeFakeEntry(unit, guid)
+			self.groupEntries[guid] = entry and entry or Geary_Database_Entry:createFromUnit(unit)
 		end
 	end
 end
@@ -180,40 +167,31 @@ function Geary_Interface_Group:renderEntries()
 	local missingRequired, missingOptional, row
 	local rowNumber = 1
 	for guid, entry in pairs(self.groupEntries) do
-		if entry.neverInspected then
-			row = self:getRow(rowNumber)
-			row.fontString:SetText(
-				("%s  -      -      -      -     %s   ---.--%s     %s    %s- / -       never%s"):format(
-					Geary.CC_NA,
-					entry.playerLevel and entry.playerLevel or " -  ",
-					Geary.CC_END,
-					Geary_Player:classColorize(
-						entry.playerClassId, self:strpad2(strsub(entry.fullName, 1, 16), 16)),
-					Geary.CC_NA,
-					Geary.CC_END))
-		else
+		if entry.inspectedAt ~= nil then
 			inspectedCount = inspectedCount + 1
 			groupItemCount = groupItemCount + entry.itemCount
 			groupILevelTotal = groupILevelTotal + entry.iLevelTotal
-			missingRequired = entry:getMissingRequiredCount()
-			missingOptional = entry:getMissingOptionalCount()
-			row = self:getRow(rowNumber)
-			row.fontString:SetText(
-				(" %s    %s    %s    %s   %2d  %6.2f  %s    %s / %s       %s"):format(
-					entry:getFactionInlineIcon(),
-					entry:getClassInlineIcon(),
-					entry:getSpecInlineIcon(),
-					entry:getRoleInlineIcon(),
-					entry.playerLevel,
-					entry:getEquippedItemLevel(),
-					Geary_Player:classColorize(entry.playerClassId,
-						self:strpad2(strsub(entry:getPlayerFullName(), 1, 16), 16)),
-					(missingRequired > 0 and Geary.CC_MISSING or Geary.CC_CORRECT) .. missingRequired ..
-						Geary.CC_END,
-					(missingOptional > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT) .. missingOptional ..
-						Geary.CC_END,
-					Geary:colorizedRelativeDateTime(entry.inspectedAt)))
 		end
+
+		missingRequired = entry:getMissingRequiredCount()
+		missingOptional = entry:getMissingOptionalCount()
+		row = self:getRow(rowNumber)
+		row.fontString:SetText(
+			(" %s    %s    %s    %s   %2d  %s  %s    %s / %s       %s"):format(
+				entry:getFactionInlineIcon(),
+				entry:getClassInlineIcon(),
+				entry:getSpecInlineIcon(),
+				entry:getRoleInlineIcon(),
+				entry.playerLevel,
+				entry:getEquippedItemLevelString(),
+				Geary_Player:classColorize(entry.playerClassId,
+					self:strpad2(strsub(entry:getPlayerFullName(), 1, 16), 16)),
+				(missingRequired > 0 and Geary.CC_MISSING or Geary.CC_CORRECT) .. missingRequired ..
+					Geary.CC_END,
+				(missingOptional > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT) .. missingOptional ..
+					Geary.CC_END,
+				Geary:colorizedRelativeDateTime(entry.inspectedAt)))
+
 		rowNumber = rowNumber + 1
 	end
 	
@@ -221,7 +199,7 @@ function Geary_Interface_Group:renderEntries()
 		row = self:getRow(rowNumber)
 		row.fontString:SetText(Geary.CC_FAILED .. 
 			" -- Group average iLevel is " .. Geary.CC_END ..
-			("%6.2f"):format(groupILevelTotal / groupItemCount) .. Geary.CC_END .. 
+			(groupItemCount > 0 and ("%6.2f"):format(groupILevelTotal / groupItemCount) or "?") .. 
 			Geary.CC_FAILED .. " --" .. Geary.CC_END)
 		rowNumber = rowNumber + 1
 	end
