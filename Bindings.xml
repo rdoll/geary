@@ -1,42 +1,47 @@
 <!--
- 
+    Geary input bindings
+
+    LICENSE
+    Geary is in the Public Domain as a thanks for the efforts of other AddOn
+    developers that have made my WoW experience better for many years.
+    Any credits to me (FoamHead) and/or Geary would be appreciated.
  -->
 
 <Bindings>
     <Binding name="GEARY_INSPECT_SELF" header="GEARY_BINDINGS_HEADER">
-		Geary_Inspect:inspectSelf()
+        Geary_Inspect:inspectSelf()
     </Binding>
     <Binding name="GEARY_INSPECT_TARGET">
-		Geary_Inspect:inspectTarget()
+        Geary_Inspect:inspectTarget()
     </Binding>
     <Binding name="GEARY_INSPECT_GROUP">
-		Geary_Inspect:inspectGroup()
+        Geary_Inspect:inspectGroup()
     </Binding>
     <Binding name="GEARY_SHOW_UI">
-		Geary_Interface:Show()
+        Geary_Interface:Show()
     </Binding>
     <Binding name="GEARY_HIDE_UI">
-		Geary_Interface:Hide()
+        Geary_Interface:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_UI">
-		Geary_Interface:toggle()
+        Geary_Interface:toggle()
     </Binding>
     <Binding name="GEARY_SHOW_ICON">
-		Geary_Icon:Show()
+        Geary_Icon:Show()
     </Binding>
     <Binding name="GEARY_HIDE_ICON">
-		Geary_Icon:Hide()
+        Geary_Icon:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_ICON">
-		Geary_Icon:toggle()
+        Geary_Icon:toggle()
     </Binding>
     <Binding name="GEARY_SHOW_OPTIONS">
-		Geary_Options_Interface:Show()
+        Geary_Options_Interface:Show()
     </Binding>
     <Binding name="GEARY_HIDE_OPTIONS">
-		Geary_Options_Interface:Hide()
+        Geary_Options_Interface:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_OPTIONS">
-		Geary_Options_Interface:toggle()
+        Geary_Options_Interface:toggle()
     </Binding>
 </Bindings>
