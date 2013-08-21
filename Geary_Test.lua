@@ -124,86 +124,52 @@ function Geary_Test:tab()
     local parent = _G["Geary_Ui_Main_Content"]
 
     -- Main container for tab
-    local contentsFrame = CreateFrame("Frame", "$parent_Test", parent)
-    contentsFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 2, -2)
-    contentsFrame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -24, 1)
-    contentsFrame:Hide()
+    self.contentsFrame = CreateFrame("Frame", "$parent_Test", parent)
+    self.contentsFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", 2, -2)
+    self.contentsFrame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -24, 1)
+    self.contentsFrame:Hide()
 
-    -- Table header row frame
-    local headerFrame = CreateFrame("Frame", "$parent_Header", contentsFrame)
-    headerFrame:SetPoint("TOPLEFT", contentsFrame, "TOPLEFT")
-    headerFrame:SetPoint("TOPRIGHT", contentsFrame, "TOPRIGHT")
-
-    -- Table header row frame contents
-    local headerFontString = headerFrame:CreateFontString("$parent_FontString")
-    headerFontString:SetFont("Fonts\\FRIZQT__.TTF", 10)
-    headerFontString:SetPoint("TOPLEFT", headerFrame, "TOPLEFT")
-    headerFontString:SetText(Geary.CC_FAILED ..
-        "Fac  Cls  Spe  Rol  Lvl  iLevel    Name                     Missing       Inspected" .. Geary.CC_END)
-
-    -- Set table header row frame's height to fit contents
-    headerFrame:SetHeight(headerFontString:GetHeight())
-
-    -- Table body scroll frame
-    local scrollFrame = CreateFrame("ScrollFrame", "$parent_ScrollFrame", contentsFrame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", headerFrame, "BOTTOMLEFT")
-    scrollFrame:SetPoint("BOTTOMRIGHT", contentsFrame, "BOTTOMRIGHT")
-
-    -- Table body scroll frame container for rows
-    local rowsFrame = CreateFrame("Frame", "$parent_Rows", scrollFrame)
-    rowsFrame:SetPoint("TOPLEFT", scrollFrame, "TOPLEFT")
-    rowsFrame:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
-
-    -- Tie rows container frame to scroll frame
-    scrollFrame:SetScrollChild(rowsFrame)
+    -- Summary table
+    self.summaryTable = Geary_Interface_Summary_Table:new({parent = self.contentsFrame})
 
     -- Test summary rows
-    local row1 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
-    row1:getFrame():SetPoint("TOPLEFT", rowsFrame, "TOPLEFT", 0, -1)
-    row1:getFrame():SetPoint("TOPRIGHT", rowsFrame, "TOPRIGHT", 0, -1)
+    local row1 = self.summaryTable:getRow(1)
     row1:setFaction("Horde")
     row1:setClass(1)
     row1:setSpec(71)
     row1:setRole(71)
     row1:setLevel(1)
     row1:setILevel(16, 8)
-    row1:setName("name1", "Thrall")
-    row1:setMissing(6, 32)
+    row1:setName("Ll", "Thrall", 1)
+    row1:setMissing(16, 32)
     row1:setInspected(time())
-    self.row1 = row1
 
-    local row2 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
-    row2:getFrame():SetPoint("TOPLEFT", row1:getFrame(), "BOTTOMLEFT", 0, -1)
-    row2:getFrame():SetPoint("TOPRIGHT", row1:getFrame(), "BOTTOMRIGHT", 0, -1)
+    local row2 = self.summaryTable:getRow(2)
     row2:setFaction("Alliance")
     row2:setClass(11)
     row2:setSpec(250)
     row2:setRole(250)
     row2:setLevel(90)
     row2:setILevel(15, 15 * 500)
-    row2:setName("testnametwo", "islongerthanspace")
+    row2:setName("Testnametwo", "Islongerthanspace", 11)
     row2:setMissing(0, 0)
     row2:setInspected(time() - (60 * 60))
-    self.row2 = row2
 
-    local row3 = Geary_Interface_SummaryRow:new{ parent = rowsFrame }
-    row3:getFrame():SetPoint("TOPLEFT", row2:getFrame(), "BOTTOMLEFT", 0, -1)
-    row3:getFrame():SetPoint("TOPRIGHT", row2:getFrame(), "BOTTOMRIGHT", 0, -1)
+    local row3 = self.summaryTable:getRow(3)
     row3:setFaction(nil)
     row3:setClass(nil)
     row3:setSpec(nil)
     row3:setRole(nil)
     row3:setLevel(nil)
     row3:setILevel(nil, nil)
-    row3:setName(nil, nil)
+    row3:setName(nil, nil, nil)
     row3:setMissing(nil, nil)
     row3:setInspected(nil)
-    self.row3 = row3
 
     -- Create tab
     Geary_Interface:createTab("Test",
-        function() contentsFrame:Show() end,
-        function() contentsFrame:Hide() end)
+        function() Geary_Test.contentsFrame:Show() end,
+        function() Geary_Test.contentsFrame:Hide() end)
 
     -- Show the newly created tab
     Geary_Interface:Show()

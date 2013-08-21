@@ -1,7 +1,7 @@
 ## Interface: 50300
 ## Title: Geary
 ## Notes: Summarizes gear and looks for missing gems, enchants, and upgrades
-## Version: 5.3.8-alpha-4
+## Version: 5.3.8-alpha-5
 ## Author: FoamHead
 ## Dependencies: Blizzard_AchievementUI
 ## SavedVariables: Geary_Saved_Options Geary_Saved_Database
@@ -12,7 +12,8 @@ Geary_Item.lua
 Geary_Player.lua
 Geary_Inspect.lua
 
-Geary_Interface_SummaryRow.lua
+Geary_Interface_Summary_Row.lua
+Geary_Interface_Summary_Table.lua
 Geary_Interface_Player.lua
 Geary_Interface_Group.lua
 Geary_Interface_Database.lua
