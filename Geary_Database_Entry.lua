@@ -81,70 +81,10 @@ function Geary_Database_Entry:createFromUnit(unit)
     }
 end
 
-function Geary_Database_Entry:getPlayerFullName()
-    return Geary_Player:fullPlayerName(self.playerName, self.playerRealm)
-end
-
-function Geary_Database_Entry:getFactionInlineIcon()
-    -- Add 2 to log font height which is used as editbox font size
-    local size = Geary_Options:getLogFontHeight() + 2
-    if self.playerFaction == "Horde" then
-        return "|TInterface\\PVPFrame\\PVP-Currency-Horde.png:" .. size .. ":" .. size .. ":0:0:32:32:2:30:2:30|t"
-    elseif self.playerFaction == "Alliance" then
-        return "|TInterface\\PVPFrame\\PVP-Currency-Alliance.png:" .. size .. ":" .. size .. ":0:0:32:32:4:28:2:30|t"
-    else
-        return "(?)"
-    end
-end
-
--- TODO Temp to help with column alignment
-function Geary_Database_Entry:strpad2prefix(str, len)
-    return ("%" .. (strlen(str) + ((len - strlen(str)) * 2)) .. "s"):format(str)
-end
-
-function Geary_Database_Entry:getEquippedItemLevelString()
-    local iLevelString
-    if self.itemCount and self.itemCount > 0 then
-        iLevelString = ("%6.2f"):format(self.iLevelTotal / self.itemCount)
-    else
-        iLevelString = "?"
-    end
-    return self:strpad2prefix(iLevelString, 6)
-end
-
-function Geary_Database_Entry:getClassInlineIcon()
-    return Geary.CC_NA .. "(?)" .. Geary.CC_END
-end
-
-function Geary_Database_Entry:getSpecName()
-    if self.playerSpecId == nil then
-        return "None"
-    end
-
-    local _, specName = GetSpecializationInfoByID(self.playerSpecId)
-    return specName
-end
-
-function Geary_Database_Entry:getSpecInlineIcon()
-    if self.playerSpecId == nil then
-        return "(?)"
-    end
-    local _, _, _, icon = GetSpecializationInfoByID(self.playerSpecId)
-    -- Add 2 to log font height which is used as editbox font size
-    return "|T" .. icon .. ":" .. (Geary_Options:getLogFontHeight() + 2) .. "|t"
-    --return "|T" .. icon .. ":12:12:0:0:64:64:0:63:0:63|t"
-end
-
-function Geary_Database_Entry:getRoleInlineIcon()
-    return Geary.CC_DEBUG .. "(?)" .. Geary.CC_END
-end
-
 function Geary_Database_Entry:getMissingRequiredCount()
-    return self.missingItems + self.missingGems + self.missingEnchants +
-        (self.missingBeltBuckle and 1 or 0)
+    return self.missingItems + self.missingGems + self.missingEnchants + (self.missingBeltBuckle and 1 or 0)
 end
 
 function Geary_Database_Entry:getMissingOptionalCount()
-    return self.missingUpgrades + self.missingEotbp + (self.missingCoh and 1 or 0) +
-        (self.missingCov and 1 or 0)
+    return self.missingUpgrades + self.missingEotbp + (self.missingCoh and 1 or 0) + (self.missingCov and 1 or 0)
 end

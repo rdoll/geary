@@ -1,7 +1,7 @@
 ## Interface: 50300
 ## Title: Geary
 ## Notes: Summarizes gear and looks for missing gems, enchants, and upgrades
-## Version: 5.3.8-alpha-5
+## Version: 5.3.9-beta
 ## Author: FoamHead
 ## Dependencies: Blizzard_AchievementUI
 ## SavedVariables: Geary_Saved_Options Geary_Saved_Database

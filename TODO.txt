@@ -35,17 +35,19 @@ Group would be the same except:
 - Instead of (or in addition to?) (X) to delete, have [Inspect] button to reinspect
 - Show all members of the group. If no inspect data, show -'s for missing items and Date/Time as "Never"
 - Show group summary
-                
+
 
 * Database:
-** If database is disabled, show that in interface
 ** Option for automatically pruning entries older than x days
 ** Sort by clicking on column headers
 ** Filter results by Faction, Class, Level, etc
+** Show details of inspection on hover/click
 ** //Maybe:// Sync database entries with group, guild members, or specific players
 ** //Doubtful:// Store results for multiple specs
 * Group:
 ** Sort by clicking on column headers
+** Show details of inspection on hover/click
+** Inspect group member with right click
 ** //Maybe:// Inspect all members of your group with one click
 * Player:
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text

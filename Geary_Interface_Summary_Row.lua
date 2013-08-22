@@ -130,6 +130,14 @@ function Geary_Interface_Summary_Row:getFrame()
     return self.rowFrame
 end
 
+function Geary_Interface_Summary_Row:Show()
+    self.rowFrame:Show()
+end
+
+function Geary_Interface_Summary_Row:Hide()
+    self.rowFrame:Hide()
+end
+
 local _unknownTextureFilename = "Interface\\ICONS\\INV_Misc_QuestionMark"
 local _unknownTextureInline = "|T" .. _unknownTextureFilename .. ":0|t"
 

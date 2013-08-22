@@ -43,7 +43,7 @@ function Geary_Interface_Summary_Table:createContents(parent)
     local headerFontString = headerFrame:CreateFontString("$parent_FontString")
     headerFontString:SetFont(fontFilename, fontSize)
     headerFontString:SetPoint("TOPLEFT", headerFrame, "TOPLEFT")
-    headerFontString:SetText(Geary.CC_FAILED ..
+    headerFontString:SetText(Geary.CC_HEADER ..
         "Fac  Cls  Spe  Rol  Lvl    iLevel    Name                         Missing     Inspected" .. Geary.CC_END)
 
     -- Set table header row frame's height to fit contents
@@ -68,7 +68,7 @@ function Geary_Interface_Summary_Table:getRow(rowNumber)
     if self.rows[rowNumber] == nil then
 
         -- Row does not exist so create it
-        local row = Geary_Interface_Summary_Row:new({parent = self.rowsFrame})
+        local row = Geary_Interface_Summary_Row:new{parent = self.rowsFrame}
 
         -- Place row in the table
         -- Note: Assumes rows are always created in sequential order

@@ -39,6 +39,7 @@ function Geary_Database:ADDON_LOADED()
 end
 
 -- Convert flat tables into object instances
+-- Lazy, one-time conversion so we don't slow down addon loading
 function Geary_Database:_makeObjects()
     if not self.madeObjects then
         for _, entryTable in pairs(Geary_Saved_Database.results) do
