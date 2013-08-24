@@ -167,8 +167,7 @@ function Geary:debugLog(...)
     if self.debugOn then
         Geary_Interface_Log:append(self.CC_DEBUG)
         self:_log(...)
-        Geary_Interface_Log:append(self.CC_END)
-        Geary_Interface_Log:append("\n")
+        Geary_Interface_Log:append(self.CC_END .. "\n")
     end
 end
 

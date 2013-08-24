@@ -91,6 +91,7 @@ function Geary_Interface_Group:updateGroupEntries()
         unitPrefix = "party"
         unitLimit = 4
     else
+        -- Not in any kind of group
         return
     end
 
@@ -122,15 +123,10 @@ function Geary_Interface_Group:renderEntries()
 
         row = self.summaryTable:getRow(rowNumber)
         rowNumber = rowNumber + 1
-        row:setFaction(entry.playerFaction)
-        row:setClass(entry.playerClassId)
-        row:setSpec(entry.playerSpecId)
-        row:setRole(entry.playerSpecId)
-        row:setLevel(entry.playerLevel)
-        row:setILevel(entry.itemCount, entry.iLevelTotal)
-        row:setName(entry.playerName, entry.playerRealm, entry.playerClassId)
-        row:setMissing(entry:getMissingRequiredCount(), entry:getMissingOptionalCount())
-        row:setInspected(entry.inspectedAt)
+        row:setFromEntry(entry)
+        row:setOnClickHandler(function (row, mouseButton, down)
+            Geary_Inspect:inspectGuid(row:getGuid())
+        end)
         row:Show()
     end
 

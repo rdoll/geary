@@ -37,7 +37,7 @@ function Geary_Icon:init()
     button:SetScript("OnHide", button.StopMovingOrSizing)
     button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp",
         "Button4Up", "Button5Up")
-    button:SetScript("OnClick", function(self) Geary_Icon:OnClick(self) end)
+    button:SetScript("OnClick", function(self, mouseButton, down) Geary_Icon:OnClick(mouseButton, down) end)
     if Geary_Options:isIconShown() then
         button:Show()
     else
@@ -46,8 +46,7 @@ function Geary_Icon:init()
     self.button = button
 end
 
-function Geary_Icon:OnClick(button)
-    local mouseButton = GetMouseButtonClicked()
+function Geary_Icon:OnClick(mouseButton, down)
     if mouseButton == "LeftButton" then
         Geary_Inspect:inspectTarget()
     elseif mouseButton == "MiddleButton" then

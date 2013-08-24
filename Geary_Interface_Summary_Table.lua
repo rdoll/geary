@@ -72,14 +72,14 @@ function Geary_Interface_Summary_Table:getRow(rowNumber)
 
         -- Place row in the table
         -- Note: Assumes rows are always created in sequential order
-        row:getFrame():SetPoint("LEFT", self.rowsFrame, "LEFT", 0, 0)
-        row:getFrame():SetPoint("RIGHT", self.rowsFrame, "RIGHT", -0, 0)
+        row:getButton():SetPoint("LEFT", self.rowsFrame, "LEFT", 0, 0)
+        row:getButton():SetPoint("RIGHT", self.rowsFrame, "RIGHT", -0, 0)
         if rowNumber == 1 then
             -- First row is linked to top of rowsFrame
-            row:getFrame():SetPoint("TOP", self.rowsFrame, "TOP", 0, -1)
+            row:getButton():SetPoint("TOP", self.rowsFrame, "TOP", 0, -1)
         else
             -- Subsequent rows are beneath their predecessor
-            row:getFrame():SetPoint("TOP", self.rows[rowNumber - 1]:getFrame(), "BOTTOM", 0, -1)
+            row:getButton():SetPoint("TOP", self.rows[rowNumber - 1]:getButton(), "BOTTOM", 0, -1)
         end
 
         self.rows[rowNumber] = row

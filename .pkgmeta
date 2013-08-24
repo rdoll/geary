@@ -1,5 +1,3 @@
 ignore:
     - .idea      # ignore the IntelliJ project directory
     - Geary.iml  # ignore the IntelliJ project settings file
-
-license-output: LICENSE.txt

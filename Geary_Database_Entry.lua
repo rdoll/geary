@@ -74,6 +74,7 @@ function Geary_Database_Entry:createFromUnit(unit)
     local name, realm = UnitName(unit)
     local _, _, classId = UnitClass(unit)
     return self:new{
+        playerGuid    = UnitGUID(unit),
         playerName    = name,
         playerRealm   = realm,
         playerClassId = classId,

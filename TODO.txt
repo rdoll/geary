@@ -1,4 +1,5 @@
-In no particular order, here are things Geary does NOT do yet, but I am considering:
+Ideas/Notes
+-----------
 
 * Change next milestone in interface from "Next: 70 to HoF/ToES LFR" to "Next: 70 until 470"
   with a tooltip that shows all milestones and how long until reaching them.
@@ -8,47 +9,34 @@ In no particular order, here are things Geary does NOT do yet, but I am consider
 ** Could split HoF/ToES LFR into separate milestones and add heroic scenario milestone
 ** Note: Not sure if this inside can be done inside an EditBox
 
-* Geary options: If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
-
 * Geary icon needs a tooltip
 
-* When entire interface is shown/hidden, need to refresh Group and Database tab if they are active
-** Should probably make the interface show/hide call show on the active tab
+* Geary options: If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
 
 * Store interface and icon positions so failures put the windows back in the same spot
 ** Need to watch for being off the screen and reset to the center of the screen
 
-* Add Median, Min, and Max ilevel to group summary?
-** Maybe also show ilevel above, below median next to ilevel column? a ^ - v arrow to indicate above/below
+*** Add group changed detection when Group tab is shown and auto-update on change
+*** When entire interface is shown/hidden, need to refresh Group and Database tab if they are active
+**** Should probably make the interface show/hide call show on the active tab
 
-Database example:
-                           _ Tooltip shows class and spec name
-                          |
-Fac Name              Lv Spe Rol iLevel Items       Date Time                (trash can? red (X)?)
-(H) Foamulon-Doomham  90 (B) (R) 123.45 Missing ##  05/12/13 16:32  (X)  <-- Poup confirms deletion
-    ^                             ^      ^
-    |_ Trimmed & in class color   |      |_ Tooltip shows summary of what's missing
-       Char name is max 12 chars  |
-                                  |_ Tooltip shows item count and total ilevels
 
-Group would be the same except:
-- Instead of (or in addition to?) (X) to delete, have [Inspect] button to reinspect
-- Show all members of the group. If no inspect data, show -'s for missing items and Date/Time as "Never"
-- Show group summary
-
+Under Consideration
+-------------------
 
 * Database:
-** Option for automatically pruning entries older than x days
 ** Sort by clicking on column headers
 ** Filter results by Faction, Class, Level, etc
 ** Show details of inspection on hover/click
+** //Maybe:// Option for automatically pruning entries older than x days
+** //Maybe:// Ability to remove individual database entries
 ** //Maybe:// Sync database entries with group, guild members, or specific players
 ** //Doubtful:// Store results for multiple specs
 * Group:
 ** Sort by clicking on column headers
 ** Show details of inspection on hover/click
-** Inspect group member with right click
 ** //Maybe:// Inspect all members of your group with one click
+** //Maybe:// Show ^ and v icons for players above and below group's average iLevel
 * Player:
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text
 ** //Maybe:// Add options to control the font of the summary text

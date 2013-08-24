@@ -410,3 +410,44 @@ end
 function Geary_Inspect:inspectGroup()
     Geary:print(Geary.CC_ERROR .. "Group inspection is not implemented yet." .. Geary.CC_END)
 end
+
+function Geary_Inspect:inspectGuid(guid)
+
+    if guid == nil then
+        Geary:debugPrint("Cannot inspect nil guid")
+        return
+    end
+
+    if guid == UnitGUID("player") then
+        self:inspectSelf()
+        return
+    end
+
+    if guid == UnitGUID("target") then
+        self:inspectTarget()
+        return
+    end
+
+    local unitPrefix, unitLimit
+    if IsInRaid() then
+        unitPrefix = "raid"
+        unitLimit = 40
+    elseif IsInGroup() then
+        unitPrefix = "party"
+        unitLimit = 4
+    else
+        -- Not in any kind of group
+        return
+    end
+
+    local unit
+    for unitNumber = 1, unitLimit do
+        unit = unitPrefix .. unitNumber
+        if guid == UnitGUID(unit) then
+            self:inspectUnit(unit)
+            return
+        end
+    end
+
+    Geary:print(Geary.CC_ERROR .. "Cannot only inspect your current target and group members." .. Geary.CC_END)
+end

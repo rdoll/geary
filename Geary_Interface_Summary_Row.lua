@@ -22,7 +22,11 @@ function Geary_Interface_Summary_Row:new(config)
         return nil
     end
 
-    local o = {}
+    local o = {
+        rowButton = nil,
+        playerGuid = nil,
+        onClickHandler = nil
+    }
     setmetatable(o, self)
     self.__index = self
     o:createContents(config.parent)
@@ -42,48 +46,57 @@ function Geary_Interface_Summary_Row:createContents(parent)
     local fontHalfCharacterWidth = floor(fontCharacterWidth)
 
     -- Outermost container for row (points set by caller)
-    self.rowFrame = CreateFrame("Frame", "$parent_SummaryRow_" .. Geary_Interface_Summary_Row.summaryRowNumber, parent)
-    self.rowFrame:SetHeight(rowHeight)
+    self.rowButton = CreateFrame("Button", "$parent_SummaryRow_" .. Geary_Interface_Summary_Row.summaryRowNumber, parent)
+    self.rowButton:SetHeight(rowHeight)
 
     -- Start with the backdrop hidden and show/hide it on enter/leave
-    self.rowFrame:SetBackdrop({
+    self.rowButton:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Background",
         tile = true,
         tileSize = 32
     })
-    self.rowFrame:SetBackdropColor(0, 0, 0, 0)
-    self.rowFrame:SetScript("OnEnter", function(frame, motion)
+    self.rowButton:SetBackdropColor(0, 0, 0, 0)
+    self.rowButton:SetScript("OnEnter", function(frame, motion)
         frame:SetBackdropColor(1, 1, 1, 1)
     end)
-    self.rowFrame:SetScript("OnLeave", function(frame, motion)
+    self.rowButton:SetScript("OnLeave", function(frame, motion)
         frame:SetBackdropColor(0, 0, 0, 0)
     end)
-    self.rowFrame:SetScript("OnHide", function(frame, motion)
+    self.rowButton:SetScript("OnHide", function(frame, motion)
         frame:SetBackdropColor(0, 0, 0, 0)
+    end)
+
+    -- Trap clicks we care about
+    self.rowButton.row = self
+    self.rowButton:RegisterForClicks("RightButtonUp")
+    self.rowButton:SetScript("OnClick", function(self, mouseButton, down)
+        if mouseButton == "RightButton" then
+            self.row:OnClick(mouseButton, down)
+        end
     end)
 
     -- Faction texture
-    self.factionTexture = self.rowFrame:CreateTexture("$parent_Faction", "OVERLAY")
-    self.factionTexture:SetPoint("TOPLEFT", self.rowFrame, "TOPLEFT", 2, 0)
+    self.factionTexture = self.rowButton:CreateTexture("$parent_Faction", "OVERLAY")
+    self.factionTexture:SetPoint("TOPLEFT", self.rowButton, "TOPLEFT", 2, 0)
     self.factionTexture:SetSize(rowHeight, rowHeight)
 
     -- Class texture
-    self.classTexture = self.rowFrame:CreateTexture("$parent_Class", "OVERLAY")
+    self.classTexture = self.rowButton:CreateTexture("$parent_Class", "OVERLAY")
     self.classTexture:SetPoint("TOPLEFT", self.factionTexture, "TOPRIGHT", 12, 0)
     self.classTexture:SetSize(rowHeight, rowHeight)
 
     -- Specialization texture
-    self.specTexture = self.rowFrame:CreateTexture("$parent_Spec", "OVERLAY")
+    self.specTexture = self.rowButton:CreateTexture("$parent_Spec", "OVERLAY")
     self.specTexture:SetPoint("TOPLEFT", self.classTexture, "TOPRIGHT", 12, 0)
     self.specTexture:SetSize(rowHeight, rowHeight)
 
     -- Role texture
-    self.roleTexture = self.rowFrame:CreateTexture("$parent_Role", "OVERLAY")
+    self.roleTexture = self.rowButton:CreateTexture("$parent_Role", "OVERLAY")
     self.roleTexture:SetPoint("TOPLEFT", self.specTexture, "TOPRIGHT", 14, 0)
     self.roleTexture:SetSize(rowHeight, rowHeight)
 
     -- Level font string
-    self.levelFontString = self.rowFrame:CreateFontString("$parent_Level", "ARTWORK")
+    self.levelFontString = self.rowButton:CreateFontString("$parent_Level", "ARTWORK")
     self.levelFontString:SetPoint("TOPLEFT", self.roleTexture, "TOPRIGHT", 8, 0)
     self.levelFontString:SetSize(2 * fontCharacterWidth, rowHeight)
     self.levelFontString:SetFont(fontFilename, fontSize)
@@ -91,7 +104,7 @@ function Geary_Interface_Summary_Row:createContents(parent)
     self.levelFontString:SetJustifyV("MIDDLE")
 
     -- Equipped item level font string
-    self.iLevelFontString = self.rowFrame:CreateFontString("$parent_iLevel", "ARTWORK")
+    self.iLevelFontString = self.rowButton:CreateFontString("$parent_iLevel", "ARTWORK")
     self.iLevelFontString:SetPoint("TOPLEFT", self.levelFontString, "TOPRIGHT", 8, 0)
     -- 5 digits plus a period
     self.iLevelFontString:SetSize(5 * fontCharacterWidth + fontHalfCharacterWidth, rowHeight)
@@ -100,7 +113,7 @@ function Geary_Interface_Summary_Row:createContents(parent)
     self.iLevelFontString:SetJustifyV("MIDDLE")
 
     -- Name font string
-    self.nameFontString = self.rowFrame:CreateFontString("$parent_Name", "ARTWORK")
+    self.nameFontString = self.rowButton:CreateFontString("$parent_Name", "ARTWORK")
     self.nameFontString:SetPoint("TOPLEFT", self.iLevelFontString, "TOPRIGHT", 8, 0)
     self.nameFontString:SetSize(14 * fontCharacterWidth, rowHeight)
     self.nameFontString:SetFont(fontFilename, fontSize)
@@ -108,7 +121,7 @@ function Geary_Interface_Summary_Row:createContents(parent)
     self.nameFontString:SetJustifyV("MIDDLE")
 
     -- Missing font string
-    self.missingFontString = self.rowFrame:CreateFontString("$parent_Missing", "ARTWORK")
+    self.missingFontString = self.rowButton:CreateFontString("$parent_Missing", "ARTWORK")
     self.missingFontString:SetPoint("TOPLEFT", self.nameFontString, "TOPRIGHT", 10, 0)
     -- Up to 4 digits, a slash, and 2 spaces
     self.missingFontString:SetSize(5 * fontCharacterWidth + (2 * fontHalfCharacterWidth), rowHeight)
@@ -117,25 +130,35 @@ function Geary_Interface_Summary_Row:createContents(parent)
     self.missingFontString:SetJustifyV("MIDDLE")
 
     -- Inspected at font string
-    self.inspectedFontString = self.rowFrame:CreateFontString("$parent_Inspected", "ARTWORK")
+    self.inspectedFontString = self.rowButton:CreateFontString("$parent_Inspected", "ARTWORK")
     self.inspectedFontString:SetPoint("TOPLEFT", self.missingFontString, "TOPRIGHT", 12, 0)
-    self.inspectedFontString:SetPoint("RIGHT", self.rowFrame, "RIGHT", 0, 0)
+    self.inspectedFontString:SetPoint("RIGHT", self.rowButton, "RIGHT", 0, 0)
     self.inspectedFontString:SetHeight(rowHeight)
     self.inspectedFontString:SetFont(fontFilename, fontSize)
     self.inspectedFontString:SetJustifyH("LEFT")
     self.inspectedFontString:SetJustifyV("MIDDLE")
 end
 
-function Geary_Interface_Summary_Row:getFrame()
-    return self.rowFrame
+function Geary_Interface_Summary_Row:getButton()
+    return self.rowButton
 end
 
 function Geary_Interface_Summary_Row:Show()
-    self.rowFrame:Show()
+    self.rowButton:Show()
 end
 
 function Geary_Interface_Summary_Row:Hide()
-    self.rowFrame:Hide()
+    self.rowButton:Hide()
+end
+
+function Geary_Interface_Summary_Row:setOnClickHandler(onClickHander)
+    self.onClickHandler = onClickHander
+end
+
+function Geary_Interface_Summary_Row:OnClick(mouseButton, down)
+    if self.onClickHandler ~= nil then
+        self.onClickHandler(self, mouseButton, down)
+    end
 end
 
 local _unknownTextureFilename = "Interface\\ICONS\\INV_Misc_QuestionMark"
@@ -144,6 +167,14 @@ local _unknownTextureInline = "|T" .. _unknownTextureFilename .. ":0|t"
 function Geary_Interface_Summary_Row:_setUnknownIconTexture(texture)
     texture:SetTexture(_unknownTextureFilename)
     texture:SetTexCoord(0, 1, 0, 1)
+end
+
+function Geary_Interface_Summary_Row:getGuid()
+    return self.playerGuid
+end
+
+function Geary_Interface_Summary_Row:setGuid(guid)
+    self.playerGuid = guid
 end
 
 function Geary_Interface_Summary_Row:setFaction(factionName)
@@ -230,4 +261,17 @@ end
 
 function Geary_Interface_Summary_Row:setInspected(inspected)
     self.inspectedFontString:SetText(Geary:colorizedRelativeDateTime(inspected))
+end
+
+function Geary_Interface_Summary_Row:setFromEntry(entry)
+    self:setGuid(entry.playerGuid)
+    self:setFaction(entry.playerFaction)
+    self:setClass(entry.playerClassId)
+    self:setSpec(entry.playerSpecId)
+    self:setRole(entry.playerSpecId)
+    self:setLevel(entry.playerLevel)
+    self:setILevel(entry.itemCount, entry.iLevelTotal)
+    self:setName(entry.playerName, entry.playerRealm, entry.playerClassId)
+    self:setMissing(entry:getMissingRequiredCount(), entry:getMissingOptionalCount())
+    self:setInspected(entry.inspectedAt)
 end
