@@ -128,6 +128,10 @@ function Geary.events:INSPECT_READY(unitGuid)
     Geary_Inspect:INSPECT_READY(unitGuid)
 end
 
+function Geary.events:GROUP_ROSTER_UPDATE()
+    Geary_Interface_Group:GROUP_ROSTER_UPDATE()
+end
+
 --
 -- Debugging and logging utilities
 --

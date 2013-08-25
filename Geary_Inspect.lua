@@ -408,7 +408,7 @@ function Geary_Inspect:inspectTarget()
 end
 
 function Geary_Inspect:inspectGroup()
-    Geary:print(Geary.CC_ERROR .. "Group inspection is not implemented yet." .. Geary.CC_END)
+    Geary:print(Geary.CC_ERROR .. "Group inspection is not yet implemented." .. Geary.CC_END)
 end
 
 function Geary_Inspect:inspectGuid(guid)
@@ -437,6 +437,7 @@ function Geary_Inspect:inspectGuid(guid)
         unitLimit = 4
     else
         -- Not in any kind of group
+        Geary:print(Geary.CC_ERROR .. "Can only inspect yourself or your target." .. Geary.CC_END)
         return
     end
 
@@ -449,5 +450,5 @@ function Geary_Inspect:inspectGuid(guid)
         end
     end
 
-    Geary:print(Geary.CC_ERROR .. "Cannot only inspect your current target and group members." .. Geary.CC_END)
+    Geary:print(Geary.CC_ERROR .. "Can only inspect yourself, your target, or your group members." .. Geary.CC_END)
 end

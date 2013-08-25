@@ -217,7 +217,16 @@ function Geary_Interface:_tabOnClick(clickedTabId)
 end
 
 function Geary_Interface:Show()
+
     self.mainFrame:Show()
+
+    -- When the main interface is shown, let the current tab re-render to pick up any missed changes
+    local selectedTab = self.mainFrame.selectedTab
+    if self.tabs.byId[selectedTab] == nil then
+        Geary:debugPrint("Cannot reshow unknown selected tab " .. (selectedTab ~= nil and selectedTab or "nil"))
+    else
+        self.tabs.byId[selectedTab].show()
+    end
 end
 
 function Geary_Interface:Hide()

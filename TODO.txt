@@ -1,6 +1,5 @@
 Ideas/Notes
 -----------
-
 * Change next milestone in interface from "Next: 70 to HoF/ToES LFR" to "Next: 70 until 470"
   with a tooltip that shows all milestones and how long until reaching them.
 ** Show "-" and tooltip of "must be level 90" if too low.
@@ -16,18 +15,13 @@ Ideas/Notes
 * Store interface and icon positions so failures put the windows back in the same spot
 ** Need to watch for being off the screen and reset to the center of the screen
 
-*** Add group changed detection when Group tab is shown and auto-update on change
-*** When entire interface is shown/hidden, need to refresh Group and Database tab if they are active
-**** Should probably make the interface show/hide call show on the active tab
-
 
 Under Consideration
 -------------------
-
 * Database:
 ** Sort by clicking on column headers
-** Filter results by Faction, Class, Level, etc
 ** Show details of inspection on hover/click
+** Filter results by Faction, Class, Level, etc
 ** //Maybe:// Option for automatically pruning entries older than x days
 ** //Maybe:// Ability to remove individual database entries
 ** //Maybe:// Sync database entries with group, guild members, or specific players
@@ -40,11 +34,11 @@ Under Consideration
 * Player:
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text
 ** //Maybe:// Add options to control the font of the summary text
-** //Maybe:// Show empty sockets shown with their graphic
+** //Doubtful:// Show empty sockets shown with their graphic
 ** //Doubtful:// In item tooltips, show set pieces worn and empty extra sockets of the inspected character
 * Options:
 ** //Maybe:// Make options take effect immediately and have cancel revert to previous values
-** //Maybe:// Options to configure mouse clicks for icon
+** //Maybe:// Options to configure mouse clicks for icon and Group/Database tab actions
 * Detection:
 ** //Maybe:// When item level is scaled down, show true max as well as current scaled down
 ** //Maybe:// Detect non-rare MoP gems and non-MoP enchants

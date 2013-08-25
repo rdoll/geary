@@ -45,6 +45,13 @@ function Geary_Interface_Group:init(parent)
     Geary_Interface:createTab("Group",
         function() Geary_Interface_Group:Show() end,
         function() Geary_Interface_Group:Hide() end)
+
+    -- We want to be notified whenever our group membership or group members change
+    Geary:RegisterEvent("GROUP_ROSTER_UPDATE")
+end
+
+function Geary_Interface_Group:GROUP_ROSTER_UPDATE()
+    self:onChanged()
 end
 
 function Geary_Interface_Group:Show()
@@ -67,9 +74,8 @@ function Geary_Interface_Group:Hide()
     self.contentsFrame:Hide()
 end
 
--- TODO While this tab is shown, party/group/raid changed event and automatically update
 function Geary_Interface_Group:onChanged()
-    if self.contentsFrame:IsShown() then
+    if self.contentsFrame:IsShown() or self.noGroupFontString:IsShown() then
         self:Show()
     end
 end
@@ -81,10 +87,12 @@ function Geary_Interface_Group:updateGroupEntries()
     local unitPrefix, unitLimit, entry, guid
     if IsInRaid() then
         -- Player is included in raid units
+        Geary:debugPrint("In a raid")
         unitPrefix = "raid"
         unitLimit = 40
     elseif IsInGroup() then
         -- Player is not included in party units
+        Geary:debugPrint("In a party")
         guid = UnitGUID("player")
         local entry = Geary_Database:getEntry(guid)
         self.groupEntries[guid] = entry and entry or Geary_Database_Entry:createFromUnit("player")
@@ -92,6 +100,7 @@ function Geary_Interface_Group:updateGroupEntries()
         unitLimit = 4
     else
         -- Not in any kind of group
+        Geary:debugPrint("Not in a group")
         return
     end
 
