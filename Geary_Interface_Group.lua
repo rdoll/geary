@@ -30,7 +30,10 @@ function Geary_Interface_Group:init(parent)
     self.contentsFrame:Hide()
 
     -- Summary table
-    self.summaryTable = Geary_Interface_Summary_Table:new{ parent = self.contentsFrame }
+    self.summaryTable = Geary_Interface_Summary_Table:new{
+        parent = self.contentsFrame,
+        owner = self
+    }
 
     -- Summary stats
     self.summaryFontString = self.contentsFrame:CreateFontString("$parent_Group_SummaryFontString", "ARTWORK",
@@ -122,8 +125,8 @@ function Geary_Interface_Group:renderEntries()
 
     -- Fill in one row at a time from entries
     local inspectedCount, groupItemCount, groupILevelTotal = 0, 0, 0
-    local row, rowNumber = nil, 1
-    for _, entry in pairs(self.groupEntries) do
+    local row, rowNumber, orderedPairsFunc = nil, 1, self.summaryTable:getOrderedPairsFunc()
+    for _, entry in orderedPairsFunc(self.groupEntries, self.summaryTable:isAscendingOrder()) do
         if entry.inspectedAt ~= nil then
             inspectedCount = inspectedCount + 1
             groupItemCount = groupItemCount + entry.itemCount

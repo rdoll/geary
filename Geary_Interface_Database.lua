@@ -28,7 +28,10 @@ function Geary_Interface_Database:init(parent)
     self.contentsFrame:Hide()
 
     -- Summary table
-    self.summaryTable = Geary_Interface_Summary_Table:new{ parent = self.contentsFrame }
+    self.summaryTable = Geary_Interface_Summary_Table:new{
+        parent = self.contentsFrame,
+        owner = self
+    }
 
     -- TODO Need a better place for this button and it should match the frame's theme
     -- TODO StatTemplate looks promising, but has some default scripts specific to achievements
@@ -88,8 +91,8 @@ function Geary_Interface_Database:renderEntries()
     self.summaryTable:hideAllRows()
 
     -- Fill in one row at a time from entries
-    local row, rowNumber = nil, 1
-    for _, entry in pairs(Geary_Database:getAllEntries()) do
+    local row, rowNumber, orderedPairsFunc = nil, 1, self.summaryTable:getOrderedPairsFunc()
+    for _, entry in orderedPairsFunc(Geary_Database:getAllEntries(), self.summaryTable:isAscendingOrder()) do
         row = self.summaryTable:getRow(rowNumber)
         rowNumber = rowNumber + 1
         row:setFromEntry(entry)

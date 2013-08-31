@@ -9,7 +9,13 @@
 
 Geary_Interface_Summary_Table = {
     fontFilename = "Fonts\\FRIZQT__.TTF",
-    fontSize = 10
+    fontSize = 10,
+    sortOrders = {
+        { orderedPairsFunc = Geary_Database_Entry.orderedPairsByName,   ascendingOrder = true  },
+        { orderedPairsFunc = Geary_Database_Entry.orderedPairsByName,   ascendingOrder = false },
+        { orderedPairsFunc = Geary_Database_Entry.orderedPairsByILevel, ascendingOrder = true  },
+        { orderedPairsFunc = Geary_Database_Entry.orderedPairsByILevel, ascendingOrder = false }
+    }
 }
 
 function Geary_Interface_Summary_Table:new(config)
@@ -19,8 +25,11 @@ function Geary_Interface_Summary_Table:new(config)
     end
 
     local o = {
+        owner = config ~= nil and config.owner ~= nil and config.owner or nil,
         rowsFrame = nil,
-        rows = {}
+        rows = {},
+        sortOrderIndex = 1,
+        onSortOrderChangedFunc = nil
     }
     setmetatable(o, self)
     self.__index = self
@@ -35,23 +44,32 @@ function Geary_Interface_Summary_Table:createContents(parent)
     local fontSize = Geary_Interface_Summary_Table.fontSize
 
     -- Table header row frame
-    local headerFrame = CreateFrame("Frame", "$parent_Header", parent)
-    headerFrame:SetPoint("TOPLEFT", parent, "TOPLEFT")
-    headerFrame:SetPoint("TOPRIGHT", parent, "TOPRIGHT")
+    local headerButton = CreateFrame("Button", "$parent_Header", parent)
+    headerButton:SetPoint("TOPLEFT", parent, "TOPLEFT")
+    headerButton:SetPoint("TOPRIGHT", parent, "TOPRIGHT")
+
+    -- Trap clicks we care about
+    headerButton.summaryTable = self
+    headerButton:RegisterForClicks("LeftButtonUp")
+    headerButton:SetScript("OnClick", function(self, mouseButton, down)
+        if mouseButton == "LeftButton" then
+            self.summaryTable:setNextSortOrder()
+        end
+    end)
 
     -- Table header row frame contents
-    local headerFontString = headerFrame:CreateFontString("$parent_FontString")
+    local headerFontString = headerButton:CreateFontString("$parent_FontString")
     headerFontString:SetFont(fontFilename, fontSize)
-    headerFontString:SetPoint("TOPLEFT", headerFrame, "TOPLEFT")
+    headerFontString:SetPoint("TOPLEFT", headerButton, "TOPLEFT")
     headerFontString:SetText(Geary.CC_HEADER ..
         "Fac  Cls  Spe  Rol  Lvl    iLevel    Name                         Missing     Inspected" .. Geary.CC_END)
 
     -- Set table header row frame's height to fit contents
-    headerFrame:SetHeight(headerFontString:GetHeight())
+    headerButton:SetHeight(headerFontString:GetHeight())
 
     -- Table body scroll frame
     local scrollFrame = CreateFrame("ScrollFrame", "$parent_ScrollFrame", parent, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", headerFrame, "BOTTOMLEFT")
+    scrollFrame:SetPoint("TOPLEFT", headerButton, "BOTTOMLEFT")
     scrollFrame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT")
 
     -- Table body scroll frame container for rows
@@ -92,4 +110,22 @@ function Geary_Interface_Summary_Table:hideAllRows()
     for _, row in pairs(self.rows) do
         row:Hide()
     end
+end
+
+function Geary_Interface_Summary_Table:setNextSortOrder()
+    self.sortOrderIndex = self.sortOrderIndex + 1
+    if Geary_Interface_Summary_Table.sortOrders[self.sortOrderIndex] == nil then
+        self.sortOrderIndex = 1
+    end
+    if self.owner ~= nil then
+        self.owner:onChanged()
+    end
+end
+
+function Geary_Interface_Summary_Table:getOrderedPairsFunc()
+    return Geary_Interface_Summary_Table.sortOrders[self.sortOrderIndex].orderedPairsFunc
+end
+
+function Geary_Interface_Summary_Table:isAscendingOrder()
+    return Geary_Interface_Summary_Table.sortOrders[self.sortOrderIndex].ascendingOrder
 end

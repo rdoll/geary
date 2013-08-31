@@ -19,16 +19,16 @@ Ideas/Notes
 Under Consideration
 -------------------
 * Database:
-** Sort by clicking on column headers
 ** Show details of inspection on hover/click
-** Filter results by Faction, Class, Level, etc
+** //Maybe:// Sort by clicking on any column header
+** //Maybe:// Filter results by Faction, Class, Level, etc
 ** //Maybe:// Option for automatically pruning entries older than x days
 ** //Maybe:// Ability to remove individual database entries
 ** //Maybe:// Sync database entries with group, guild members, or specific players
 ** //Doubtful:// Store results for multiple specs
 * Group:
-** Sort by clicking on column headers
 ** Show details of inspection on hover/click
+** //Maybe:// Sort by clicking on any column header
 ** //Maybe:// Inspect all members of your group with one click
 ** //Maybe:// Show ^ and v icons for players above and below group's average iLevel
 * Player:

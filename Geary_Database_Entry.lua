@@ -89,3 +89,48 @@ end
 function Geary_Database_Entry:getMissingOptionalCount()
     return self.missingUpgrades + self.missingEotbp + (self.missingCoh and 1 or 0) + (self.missingCov and 1 or 0)
 end
+
+--
+-- Table of entries ordered pairs functions
+-- NOTE: These are member functions, NOT methods
+--
+
+local function _orderByLt(a, b) return a.sortKey < b.sortKey end
+local function _orderByGt(a, b) return a.sortKey > b.sortKey end
+
+local function _orderedNextPair(t, n)
+    local key = t[t.__next]
+    if not key then return end
+    t.__next = t.__next + 1
+    return key.sourceKey, t.__source[key.sourceKey]
+end
+
+function Geary_Database_Entry.orderedPairsByName(entries, ascending)
+    local keys, kn = { __source = entries, __next = 1 }, 1
+    for guid, entry in pairs(entries) do
+        keys[kn] = {
+            sourceKey = guid,
+            sortKey = Geary_Player:fullPlayerName(entry.playerName, entry.playerRealm)
+        }
+        kn  = kn + 1
+    end
+    table.sort(keys, ascending and _orderByLt or _orderByGt)
+    return _orderedNextPair, keys
+end
+
+function Geary_Database_Entry.orderedPairsByILevel(entries, ascending)
+    local keys, kn = { __source = entries, __next = 1 }, 1
+    for guid, entry in pairs(entries) do
+        local ilevel = 0
+        if entry.itemCount and entry.iLevelTotal and entry.itemCount > 0 then
+            ilevel = entry.iLevelTotal / entry.itemCount
+        end
+        keys[kn] = {
+            sourceKey = guid,
+            sortKey = ilevel
+        }
+        kn  = kn + 1
+    end
+    table.sort(keys, ascending and _orderByLt or _orderByGt)
+    return _orderedNextPair, keys
+end

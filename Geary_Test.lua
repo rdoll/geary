@@ -23,6 +23,7 @@ end
 function Geary_Test:all()
     self:dates()
     self:tables()
+    self:entries()
     self:versions()
     self:classColors()
 end
@@ -85,6 +86,45 @@ function Geary_Test:tables()
         Geary:isTableEmpty({ ["1"] = "x", ["3"] = "y" }) and "empty" or "not empty")
     print("{[\"2\"]=\"x\", [\"4\"] = \"y\"} =", Geary:tableSize({ ["2"] = "x", ["4"] = "y" }),
         Geary:isTableEmpty({ ["2"] = "x", ["4"] = "y" }) and "empty" or "not empty")
+end
+
+function Geary_Test:entries()
+
+    local tableAsString
+    tableAsString = function (t)
+        if t == nil then return "nil" end
+        local s = ""
+        for k, v in pairs(t) do
+            s = s .. (strlen(s) > 0 and ", " or "") .. k .. "=" .. (type(v) == "table" and tableAsString(v) or v)
+        end
+        return "{" .. s .. "}"
+    end
+
+    local t
+
+    self:header("entries by name")
+    local joinOrderedByName = function (t, f)
+        local s = ""
+        for k, v in Geary_Database_Entry.orderedPairsByName(t, f) do
+            s = s .. (strlen(s) > 0 and ", " or "") .. k .. "=" .. tableAsString(v)
+        end
+        return "{" .. s .. "}"
+    end
+    t = { ["0x12"] = { playerName = "foo" }, ["0x23"] = { playerName = "bar" } }
+    print(tableAsString(t) .. " ASC =", joinOrderedByName(t, true))
+    print(tableAsString(t) .. " DESC =", joinOrderedByName(t, false))
+
+    self:header("entries by iLevel")
+    local joinOrderedByILevel = function (t, f)
+        local s = ""
+        for k, v in Geary_Database_Entry.orderedPairsByILevel(t, f) do
+            s = s .. (strlen(s) > 0 and ", " or "") .. k .. "=" .. tableAsString(v)
+        end
+        return s
+    end
+    t = { ["0x12"] = {}, ["0x23"] = { itemCount = 0, iLevelTotal = 2 }, ["0x05"] = { itemCount = 2, iLevelTotal = 10 } }
+    print(tableAsString(t) .. " ASC =", joinOrderedByILevel(t, true))
+    print(tableAsString(t) .. " DESC =", joinOrderedByILevel(t, false))
 end
 
 function Geary_Test:versions()
