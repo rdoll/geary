@@ -89,6 +89,10 @@ function Geary:init()
     self:RegisterEvent("PLAYER_LOGOUT")
 end
 
+--
+-- Event handling
+--
+
 function Geary:RegisterEvent(eventName)
     self.eventsFrame:RegisterEvent(eventName)
 end
@@ -429,7 +433,7 @@ local function _slashCommandDumpItem(rest)
     Geary.debugOn = oldDebug
 end
 
-SLASH_GEARY1 = "/geary";
+SLASH_GEARY1 = "/geary"
 
 function SlashCmdList.GEARY(msg, editBox)
     local command, rest = msg:match("^(%S*)%s*(.-)$")

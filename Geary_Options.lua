@@ -30,8 +30,7 @@ function Geary_Options:ADDON_LOADED()
     if Geary_Saved_Options.version ~= nil then
         local verComp = Geary:versionCompare(Geary.version, Geary_Saved_Options.version)
         if verComp == -1 then
-            Geary:print("Upgrading options from " .. Geary_Saved_Options.version .. " to " ..
-                Geary.version)
+            Geary:print("Upgrading options from " .. Geary_Saved_Options.version .. " to " .. Geary.version)
         elseif verComp == 1 then
             Geary:print(Geary.CC_ERROR .. "Options version " .. Geary_Saved_Options.version ..
                 " is newer than Geary version " .. Geary.version .. ". Errors may occur!" .. Geary.CC_END)

@@ -15,6 +15,17 @@ Ideas/Notes
 * Store interface and icon positions so failures put the windows back in the same spot
 ** Need to watch for being off the screen and reset to the center of the screen
 
+* Use frame templates for repeat items (e.g. summary rows)?
+
+* Move events to Geary_Events
+** Store callback function with registration
+** Copy to Looty
+
+* Standardize on class:MethodName, class.functionName, and class.memberName
+** Copy to Looty
+
+* If inspecting yourself, you know your professions and can check for profession perks
+
 
 Under Consideration
 -------------------

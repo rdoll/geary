@@ -8,7 +8,7 @@
 --]]
 
 --[[
-    This entire file starts out fully commented out to save WoW memory space.
+    This entire file starts fully commented out to save WoW memory space.
     It must be manually uncommented to run tests.
 --] ]
 
