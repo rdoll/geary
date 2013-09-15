@@ -75,16 +75,41 @@ function Geary_Item:isTwoHandWeapon()
         (self.invType == "INVTYPE_2HWEAPON" or self.invType == "INVTYPE_RANGED" or self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
--- Player can do legendary quest and has a Sha-Touched or 502+ iLevel weapon
+-- Player can do legendary quest and item is a weapon that is one of the following:
+--   + Sha-Touched
+--   + T15 LFR (502, 506, 510)
+--   + T15 Normal (522, 526, 530)
+--   + T15 Normal Thunderforged (528, 532, 536)
+--   + T15 Heroic (535, 539, 543)
+--   + T15 Heroic Thunderforged (541, 545, 549)
+-- But is NOT:
+--   + T16 Flex (540, 544, 548)
 function Geary_Item:canHaveEotbp(player)
-    return player:isMaxLevel() and
-        (self.isShaTouched or
-            (self.iLevel >= 502 and self:isWeapon() and (self.invType == "INVTYPE_2HWEAPON" or
-                self.invType == "INVTYPE_RANGED" or
-                self.invType == "INVTYPE_RANGEDRIGHT" or
-                self.invType == "INVTYPE_WEAPONMAINHAND" or
-                self.invType == "INVTYPE_WEAPONOFFHAND" or
-                self.invType == "INVTYPE_WEAPON")))
+
+    if not player:isMaxLevel() then
+        return false  -- Player ineligible for legendary
+    end
+
+    if not (self:isWeapon()
+        and (self.invType == "INVTYPE_2HWEAPON"
+            or self.invType == "INVTYPE_RANGED"
+            or self.invType == "INVTYPE_RANGEDRIGHT"
+            or self.invType == "INVTYPE_WEAPONMAINHAND"
+            or self.invType == "INVTYPE_WEAPONOFFHAND"
+            or self.invType == "INVTYPE_WEAPON"))
+    then
+        return false  -- Not a weapon type EotBP can be used on
+    end
+
+    if self.isShaTouched then
+        return true  -- Sha-Touched can have EotBP
+    end
+
+    if self.iLevel >= 502 and self.iLevel <= 549 and self.iLevel ~= 540 and self.iLevel ~= 544 and self.iLevel ~= 548 then
+        return true  -- T15 item level range but not T16 Flex
+    else
+        return false  -- item level out of allowed range
+    end
 end
 
 -- Player can do legendary quest and has a head item with sockets

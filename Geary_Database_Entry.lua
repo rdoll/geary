@@ -16,14 +16,14 @@ Geary_Database_Entry = {
         playerLevel       = nil,
         playerClassId     = nil,
         playerSpecId      = nil,
-        itemCount         = 0,
-        iLevelTotal       = 0,
-        missingItems      = 0, -- empty + failed
-        missingGems       = 0, -- missing + failed
-        missingEnchants   = 0,
+        itemCount         = nil,
+        iLevelTotal       = nil,
+        missingItems      = nil,  -- empty + failed
+        missingGems       = nil,  -- missing + failed
+        missingEnchants   = nil,
         missingBeltBuckle = false,
-        missingUpgrades   = 0,
-        missingEotbp      = 0,
+        missingUpgrades   = nil,
+        missingEotbp      = nil,
         missingCoh        = false,
         missingCov        = false,
         inspectedAt       = nil
@@ -83,11 +83,21 @@ function Geary_Database_Entry:createFromUnit(unit)
 end
 
 function Geary_Database_Entry:getMissingRequiredCount()
-    return self.missingItems + self.missingGems + self.missingEnchants + (self.missingBeltBuckle and 1 or 0)
+    if self.missingItems == nil and self.missingGems == nil and self.missingEnchants == nil then
+        return nil
+    else
+        return (self.missingItems or 0) + (self.missingGems or 0) + (self.missingEnchants or 0)
+            + (self.missingBeltBuckle and 1 or 0)
+    end
 end
 
 function Geary_Database_Entry:getMissingOptionalCount()
-    return self.missingUpgrades + self.missingEotbp + (self.missingCoh and 1 or 0) + (self.missingCov and 1 or 0)
+    if self.missingUpgrades == nil and self.missingEotbp == nil then
+        return nil
+    else
+        return (self.missingUpgrades or 0) + (self.missingEotbp or 0) + (self.missingCoh and 1 or 0)
+            + (self.missingCov and 1 or 0)
+    end
 end
 
 --

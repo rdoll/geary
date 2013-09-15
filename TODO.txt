@@ -5,7 +5,6 @@ Ideas/Notes
 ** Show "-" and tooltip of "must be level 90" if too low.
 ** What would be shown in log?
 ** What would be shown if passed all milestones?
-** Could split HoF/ToES LFR into separate milestones and add heroic scenario milestone
 ** Note: Not sure if this inside can be done inside an EditBox
 
 * Geary icon needs a tooltip
@@ -25,6 +24,8 @@ Ideas/Notes
 ** Copy to Looty
 
 * If inspecting yourself, you know your professions and can check for profession perks
+
+*** 5.4: Add Legendary cloak detection to inspection ***
 
 
 Under Consideration

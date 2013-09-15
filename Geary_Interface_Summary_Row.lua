@@ -229,7 +229,7 @@ function Geary_Interface_Summary_Row:setLevel(level)
 end
 
 function Geary_Interface_Summary_Row:setILevel(itemCount, iLevelTotal)
-    if itemCount and itemCount > 0 then
+    if itemCount and iLevelTotal and itemCount > 0 then
         self.iLevelFontString:SetFormattedText("%6.2f", iLevelTotal / itemCount)
     else
         self.iLevelFontString:SetText(_unknownTextureInline)
