@@ -27,15 +27,24 @@ function Geary_Database:ADDON_LOADED()
         local verComp = Geary:versionCompare(Geary.version, Geary_Saved_Database.version)
         if verComp == -1 then
             Geary:print("Upgrading database from " .. Geary_Saved_Database.version .. " to " .. Geary.version)
+            if Geary:versionCompare("5.4.2-release", Geary_Saved_Database.version) == -1 then
+                self:_upgradeTo5_4_2_release()
+            end
         elseif verComp == 1 then
             Geary:print(Geary.CC_ERROR .. "Database version " .. Geary_Saved_Database.version ..
                 " is newer than Geary version " .. Geary.version .. ". Errors may occur!" .. Geary.CC_END)
         end
-        -- Add future upgrades here
     end
 
     -- The database is now correct for this version
     Geary_Saved_Database.version = Geary.version
+end
+
+-- Added missingLegCloak to Geary_Database_Entry
+function Geary_Database:_upgradeTo5_4_2_release()
+    for _, entry in pairs(Geary_Saved_Database.results) do
+        entry.missingLegCloak = false
+    end
 end
 
 -- Convert flat tables into object instances

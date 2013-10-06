@@ -66,6 +66,7 @@ function Geary_Database_Entry:createFromInspection(inspect)
         missingEotbp      = inspect.eotbpMissing,
         missingCoh        = inspect.isMissingCohMeta,
         missingCov        = inspect.isMissingCov,
+        missingLegCloak   = inspect.isMissingLegCloak,
         inspectedAt       = time()
     }
 end
@@ -96,7 +97,7 @@ function Geary_Database_Entry:getMissingOptionalCount()
         return nil
     else
         return (self.missingUpgrades or 0) + (self.missingEotbp or 0) + (self.missingCoh and 1 or 0)
-            + (self.missingCov and 1 or 0)
+            + (self.missingCov and 1 or (self.missingLegCloak and 1 or 0))
     end
 end
 

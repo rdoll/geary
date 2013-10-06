@@ -296,7 +296,7 @@ function Geary_Interface_Player:_initSummary(parent, paperDollFrame)
     fontString:SetJustifyV("TOP")
     fontString:SetJustifyH("CENTER")
     fontString:SetPoint("TOPLEFT", frame, "TOPLEFT")
-    fontString:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, -60)
+    fontString:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, -55)
     frame.playerFontString = fontString
 
     local editBox = CreateFrame("EditBox", "$parent_StatsEditBox", frame)
@@ -437,13 +437,24 @@ function Geary_Interface_Player:inspectionEnd(inspect)
     end
 
     local covColor, covString = Geary.CC_NA, "-"
+    local legCloakColor, legCloakString = Geary.CC_NA, "-"
     if inspect.hasCov or inspect.isMissingCov then
+        -- Has or is missing CoV, so leg cloak is n/a
         if inspect.hasCov then
             covColor = Geary.CC_CORRECT
             covString = "Yes"
         else
             covColor = Geary.CC_OPTIONAL
             covString = "No"
+        end
+    elseif inspect.hasLegCloak or inspect.isMissingLegCloak then
+        -- Does not have CoV, but has or is missing leg cloak
+        if inspect.hasLegCloak then
+            legCloakColor = Geary.CC_CORRECT
+            legCloakString = "Yes"
+        else
+            legCloakColor = Geary.CC_OPTIONAL
+            legCloakString = "No"
         end
     end
 
@@ -485,6 +496,7 @@ function Geary_Interface_Player:inspectionEnd(inspect)
         eotbpColor .. "EotBP: " .. eotbpCounts .. Geary.CC_END .. "\n" ..
         cohColor .. "CoH Meta: " .. cohString .. Geary.CC_END .. "\n" ..
         covColor .. "CoV: " .. covString .. Geary.CC_END .. "\n" ..
+        legCloakColor .. "Leg Cloak: " .. legCloakString .. Geary.CC_END .. "\n" ..
         "\n" ..
         "Equipped iLevel: " .. ("%.2f"):format(inspect.iLevelEquipped) .. "\n" ..
         upgradedColor .. "Upgraded iLevel: " .. upgradedILevel .. Geary.CC_END .. "\n" ..

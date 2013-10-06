@@ -31,14 +31,13 @@ function Geary_Options:ADDON_LOADED()
         local verComp = Geary:versionCompare(Geary.version, Geary_Saved_Options.version)
         if verComp == -1 then
             Geary:print("Upgrading options from " .. Geary_Saved_Options.version .. " to " .. Geary.version)
+            if Geary:versionCompare("5.1.17-beta", Geary_Saved_Options.version) == -1 then
+                self:_upgradeTo5_1_17_beta()
+            end
         elseif verComp == 1 then
             Geary:print(Geary.CC_ERROR .. "Options version " .. Geary_Saved_Options.version ..
                 " is newer than Geary version " .. Geary.version .. ". Errors may occur!" .. Geary.CC_END)
         end
-        if Geary:versionCompare("5.1.17-beta", Geary_Saved_Options.version) == -1 then
-            self:_upgradeTo5_1_17_beta()
-        end
-        -- Add future upgrades here
     end
 
     -- If any option is missing, set it to the default

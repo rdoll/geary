@@ -21,31 +21,33 @@ function Geary_Inspect:resetInfo()
 end
 
 function Geary_Inspect:resetData()
-    self.hasTwoHandWeapon = false
-    self.filledSlots = 0
-    self.emptySlots = 0
-    self.failedSlots = 0
-    self.itemCount = 0
-    self.iLevelTotal = 0
-    self.iLevelEquipped = 0.0
-    self.minItem = nil
-    self.maxItem = nil
+    self.hasTwoHandWeapon        = false
+    self.filledSlots             = 0
+    self.emptySlots              = 0
+    self.failedSlots             = 0
+    self.itemCount               = 0
+    self.iLevelTotal             = 0
+    self.iLevelEquipped          = 0.0
+    self.minItem                 = nil
+    self.maxItem                 = nil
     wipe(self.items)
-    self.filledSockets = 0
-    self.emptySockets = 0
-    self.failedJewelIds = 0
-    self.isMissingBeltBuckle = false
-    self.enchantedCount = 0
-    self.unenchantedCount = 0
-    self.upgradeLevel = 0
-    self.upgradeMax = 0
+    self.filledSockets           = 0
+    self.emptySockets            = 0
+    self.failedJewelIds          = 0
+    self.isMissingBeltBuckle     = false
+    self.enchantedCount          = 0
+    self.unenchantedCount        = 0
+    self.upgradeLevel            = 0
+    self.upgradeMax              = 0
     self.upgradeItemLevelMissing = 0
-    self.eotbpFilled = 0
-    self.eotbpMissing = 0
-    self.hasCohMeta = false
-    self.isMissingCohMeta = false
-    self.hasCov = false
-    self.isMissingCov = false
+    self.eotbpFilled             = 0
+    self.eotbpMissing            = 0
+    self.hasCohMeta              = false
+    self.isMissingCohMeta        = false
+    self.hasCov                  = false
+    self.isMissingCov            = false
+    self.hasLegCloak             = false
+    self.isMissingLegCloak       = false
 end
 
 function Geary_Inspect:startTimer(milliseconds)
@@ -190,6 +192,8 @@ function Geary_Inspect:_processFilledSlot(slotName, itemLink)
         if slotName == "BackSlot" then
             self.hasCov = item.hasCov
             self.isMissingCov = item.isMissingCov
+            self.hasLegCloak = item.hasLegCloak
+            self.isMissingLegCloak = item.isMissingLegCloak
         end
     end
 
@@ -218,7 +222,7 @@ function Geary_Inspect:_processFilledSlot(slotName, itemLink)
     end
 end
 
--- Max player level item level milestones
+-- Endgame minimum item level milestones
 -- NOTE: Must be in order from lowest iLevel to highest
 local _itemLevelMilestones = {
     { iLevel = 435, milestone = "LFD heroic" },
@@ -286,6 +290,8 @@ function Geary_Inspect:_showSummary()
     end
     if self.isMissingCov then
         Geary:log(Geary.CC_OPTIONAL .. "Missing Cloak of Virtue" .. Geary.CC_END)
+    elseif self.isMissingCov then
+        Geary:log(Geary.CC_OPTIONAL .. "Missing legendary cloak" .. Geary.CC_END)
     end
 
     if self.emptySockets > 0 then

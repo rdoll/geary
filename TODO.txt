@@ -25,7 +25,11 @@ Ideas/Notes
 
 * If inspecting yourself, you know your professions and can check for profession perks
 
-*** 5.4: Add Legendary cloak detection to inspection ***
+* Missing EotBP on offhand weapon isn't the same as on main hand (no inline image or item link)
+** Maybe only when both MH and OH are missing EotBP?
+
+*** 516 (520/524) heroic scenario weapons cannot have an EotBP
+*** Can 535 (539/543) items from Timeless Isle use EotBP? Or are there no 535 Timeless Isle weapons?
 
 
 Under Consideration
@@ -59,7 +63,7 @@ Under Consideration
 ** //Maybe:// Detect unspent talent points
 ** //Maybe:// Don't allow inspection while in combat and abort inspection if combat starts
 ** //Doubtful:// Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
-* UI
+* UI:
 ** //Maybe:// Store window locations in options so addon load failures don't force you to reposition them
 ** //Maybe:// Add non-English client support via localizations
 ** //Maybe:// Inspection results added to player tooltips

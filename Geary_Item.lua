@@ -120,7 +120,7 @@ function Geary_Item:canHaveCohMeta(player)
 end
 
 -- Player can do legendary quest
-function Geary_Item:canHaveCov(player)
+function Geary_Item:canHaveCovOrLegCloak(player)
     return player:isMaxLevel()
 end
 
@@ -235,7 +235,9 @@ function Geary_Item:new(o)
         hasCohMeta              = false,
         isMissingCohMeta        = false,
         hasCov                  = false,
-        isMissingCov            = false
+        isMissingCov            = false,
+        hasLegCloak             = false,
+        isMissingLegCloak       = false
     }
     if o then
         for name, value in pairs(o) do
@@ -294,9 +296,18 @@ function Geary_Item:probe(player)
         self.isMissingCohMeta = not self.hasCohMeta
     end
 
-    if self.slot == "BackSlot" and self:canHaveCov(player) then
-        self.hasCov = self:isCov()
-        self.isMissingCov = not self.hasCov
+    if self.slot == "BackSlot" and self:canHaveCovOrLegCloak(player) then
+        if self.quality == ITEM_QUALITY_LEGENDARY then
+            self.hasCov = false
+            self.isMissingCov = false
+            self.hasLegCloak = true
+            self.isMissingLegCloak = false
+        else
+            self.hasCov = self:isCov()
+            self.isMissingCov = not self.hasCov
+            self.hasLegCloak = false
+            self.isMissingLegCloak = true
+        end
     end
 
     -- Report info about the item
@@ -332,6 +343,8 @@ function Geary_Item:probe(player)
     end
     if self.isMissingCov then
         Geary:log(Geary.CC_OPTIONAL .. "   Missing Cloak of Virtue" .. Geary.CC_END)
+    elseif self.isMissingLegCloak then
+        Geary:log(Geary.CC_OPTIONAL .. "   Missing legendary cloak" .. Geary.CC_END)
     end
 
     return true
