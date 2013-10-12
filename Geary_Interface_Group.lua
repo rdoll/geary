@@ -137,7 +137,7 @@ function Geary_Interface_Group:renderEntries()
         rowNumber = rowNumber + 1
         row:setFromEntry(entry)
         row:setOnClickHandler(function (row, mouseButton, down)
-            Geary_Inspect:inspectGuid(row:getGuid())
+            Geary_Inspect:InspectGuid(row:getGuid())
         end)
         row:Show()
     end

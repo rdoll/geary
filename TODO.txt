@@ -28,6 +28,11 @@ Ideas/Notes
 * Missing EotBP on offhand weapon isn't the same as on main hand (no inline image or item link)
 ** Maybe only when both MH and OH are missing EotBP?
 
+* Seen two cases where group tab hover and right click didn't work
+** Last person in group that had enough people to cause scrolling
+** No one in group
+** Is related to being in combat when assigning onhover/onclick handlers?
+
 
 Under Consideration
 -------------------

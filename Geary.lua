@@ -111,6 +111,7 @@ function Geary.events:ADDON_LOADED(addOnName)
         Geary_Database:ADDON_LOADED()
 
         -- Init other modules
+        Geary_Timer:Init()
         Geary_Item:init() -- Must be before Geary_Interface_Player
         Geary_Interface:init()
         Geary_Icon:init()
@@ -319,11 +320,11 @@ Geary:init()
 
 local function _slashCommandInspect(rest)
     if rest == "self" then
-        Geary_Inspect:inspectSelf()
+        Geary_Inspect:InspectSelf()
     elseif rest == "target" then
-        Geary_Inspect:inspectTarget()
+        Geary_Inspect:InspectTarget()
     elseif rest == "group" then
-        Geary_Inspect:inspectGroup()
+        Geary_Inspect:InspectGroup()
     else
         print(_usage)
     end

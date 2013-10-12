@@ -9,13 +9,13 @@
 
 <Bindings>
     <Binding name="GEARY_INSPECT_SELF" header="GEARY_BINDINGS_HEADER">
-        Geary_Inspect:inspectSelf()
+        Geary_Inspect:InspectSelf()
     </Binding>
     <Binding name="GEARY_INSPECT_TARGET">
-        Geary_Inspect:inspectTarget()
+        Geary_Inspect:InspectTarget()
     </Binding>
     <Binding name="GEARY_INSPECT_GROUP">
-        Geary_Inspect:inspectGroup()
+        Geary_Inspect:InspectGroup()
     </Binding>
     <Binding name="GEARY_SHOW_UI">
         Geary_Interface:Show()

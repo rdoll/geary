@@ -464,7 +464,7 @@ function Geary_Interface_Player:inspectionEnd(inspect)
         upgradedILevel = ("%.2f"):format((inspect.iLevelTotal + inspect.upgradeItemLevelMissing) / inspect.itemCount)
     end
 
-    local milestoneLevel, milestoneName = inspect:getItemLevelMilestone()
+    local milestoneLevel, milestoneName = inspect:GetItemLevelMilestone()
     local milestoneColor, milestoneString = Geary.CC_NA, "-"
     if milestoneLevel ~= nil then
         milestoneColor = Geary.CC_MILESTONE

@@ -48,11 +48,11 @@ end
 
 function Geary_Icon:OnClick(mouseButton, down)
     if mouseButton == "LeftButton" then
-        Geary_Inspect:inspectTarget()
+        Geary_Inspect:InspectTarget()
     elseif mouseButton == "MiddleButton" then
         Geary_Interface:toggle()
     elseif mouseButton == "RightButton" then
-        Geary_Inspect:inspectSelf()
+        Geary_Inspect:InspectSelf()
     elseif mouseButton == "Button4" or mouseButton == "Button5" then
         Geary_Options_Interface:toggle()
     end

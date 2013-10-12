@@ -8,19 +8,19 @@
 --]]
 
 Geary_Inspect = {
-    items          = {},                    -- Make table once and wipe it in reset
-    timerFrame     = CreateFrame("Frame"),  -- Frame for timer OnUpdate tick events
-    inspectTimeout = 3000,                  -- Time in ms to wait before assuming an inspect failed
-    inspectTries   = 3                      -- Try to get inspect data from server this many times
+    items           = {},    -- Make table once and wipe it in reset
+    timerId         = nil,   -- Inspection in progress timer ID
+    INSPECT_TIMEOUT = 3000,  -- Time in ms to wait before assuming an inspect failed
+    INSPECT_TRIES   = 3      -- Try to get inspect data from server this many times
 }
 
-function Geary_Inspect:resetInfo()
+function Geary_Inspect:_ResetInfo()
     self.inProgress = false
     self.inspectTry = 0
     self.player = nil
 end
 
-function Geary_Inspect:resetData()
+function Geary_Inspect:_ResetData()
     self.hasTwoHandWeapon        = false
     self.filledSlots             = 0
     self.emptySlots              = 0
@@ -50,36 +50,29 @@ function Geary_Inspect:resetData()
     self.isMissingLegCloak       = false
 end
 
-function Geary_Inspect:startTimer(milliseconds)
-    self.timerFrame.expires = milliseconds / 1000
-    self.timerFrame:SetScript("OnUpdate", self.timerFrame.OnUpdate)
+function Geary_Inspect:_StartTimer()
+    self.timerId = Geary_Timer:Start(self.INSPECT_TIMEOUT, false, function(secondsLeft) Geary_Inspect:_TimerExpired() end)
 end
 
-function Geary_Inspect:stopTimer()
-    self.timerFrame.expires = 0
-    self.timerFrame:SetScript("OnUpdate", nil)
-end
-
-function Geary_Inspect.timerFrame:OnUpdate(sinceLastUpdate)
-    self.expires = self.expires - sinceLastUpdate
-    if self.expires <= 0 then
-        Geary_Inspect:timerExpired()
+function Geary_Inspect:_StopTimer()
+    if self.timerId ~= nil then
+        Geary_Timer:Stop(self.timerId)
+        self.timerId = nil
     end
 end
 
-function Geary_Inspect:timerExpired()
-    Geary_Inspect:stopTimer()
-    if self.inspectTry < self.inspectTries then
-        Geary_Inspect:reinspectRequest()
+function Geary_Inspect:_TimerExpired()
+    if self.inspectTry < self.INSPECT_TRIES then
+        self:_ReinspectRequest()
     else
-        Geary_Inspect:inspectionFailed()
-        Geary:log(Geary.CC_FAILED .. "Inspection failed after " .. self.inspectTries .. " tries." .. Geary.CC_END)
+        self:_InspectionFailed()
+        Geary:log(Geary.CC_FAILED .. "Inspection failed after " .. self.INSPECT_TRIES .. " tries." .. Geary.CC_END)
     end
 end
 
 function Geary_Inspect:PLAYER_LOGOUT()
     if self.inProgress then
-        self:_inspectionOver()
+        self:_InspectionOver()
     end
 end
 
@@ -96,7 +89,7 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
     end
 
     if not self.player:isUnitStillSamePlayer() then
-        self:inspectionTargetChanged()
+        self:_InspectionTargetChanged()
         return
     end
 
@@ -109,14 +102,14 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
     for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
         itemLink = GetInventoryItemLink(self.player.unit, Geary_Item:getSlotNumberForName(slotName))
         if itemLink == nil then
-            self:_processEmptySlot(slotName)
+            self:_ProcessEmptySlot(slotName)
         else
-            self:_processFilledSlot(slotName, itemLink)
+            self:_ProcessFilledSlot(slotName, itemLink)
         end
     end
 
     if (self.failedJewelIds > 0 or self.emptySlots > 0 or self.failedSlots > 0) and
-        self.inspectTry < self.inspectTries
+        self.inspectTry < self.INSPECT_TRIES
     then
         -- We failed to get them gem for a jewelId or there are empty slots which the server
         -- may not have sent to us. Since retries are left, hope one will get the missing data.
@@ -129,13 +122,13 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 
     -- Inspection is complete
     self.iLevelEquipped = self.iLevelTotal / self.itemCount
-    self:inspectionPassed()
+    self:_InspectionPassed()
 
     -- Show summary
-    self:_showSummary()
+    self:_ShowSummary()
 end
 
-function Geary_Inspect:_processEmptySlot(slotName)
+function Geary_Inspect:_ProcessEmptySlot(slotName)
 
     -- Increase empty slot count if appropriate
     if slotName == "SecondaryHandSlot" and self.hasTwoHandWeapon and not self.player:hasTitansGrip() then
@@ -151,7 +144,7 @@ function Geary_Inspect:_processEmptySlot(slotName)
     end
 end
 
-function Geary_Inspect:_processFilledSlot(slotName, itemLink)
+function Geary_Inspect:_ProcessFilledSlot(slotName, itemLink)
 
     local item = Geary_Item:new{ slot = slotName, link = itemLink }
     if not item:probe(self.player) then
@@ -232,7 +225,7 @@ local _itemLevelMilestones = {
     { iLevel = 496, milestone = "SoO LFR" }
 }
 
-function Geary_Inspect:getItemLevelMilestone()
+function Geary_Inspect:GetItemLevelMilestone()
     if self.player:isMaxLevel() then
         for index, data in ipairs(_itemLevelMilestones) do
             if (self.iLevelEquipped < data.iLevel) then
@@ -243,7 +236,7 @@ function Geary_Inspect:getItemLevelMilestone()
     return nil, nil
 end
 
-function Geary_Inspect:_showSummary()
+function Geary_Inspect:_ShowSummary()
 
     Geary:log()
     Geary:log(("--- %s %s %i %s %s ---"):format(self.player:getFactionInlineIcon(),
@@ -255,7 +248,7 @@ function Geary_Inspect:_showSummary()
         self.hasTwoHandWeapon and (self.player:hasTitansGrip() and " (TG)" or " (2H)") or "",
         self.iLevelTotal))
 
-    local milestoneLevel, milestoneName = self:getItemLevelMilestone()
+    local milestoneLevel, milestoneName = self:GetItemLevelMilestone()
     if milestoneLevel then
         Geary:log(Geary.CC_MILESTONE .. milestoneLevel .. " iLevel points until " .. milestoneName .. " ready" ..
             Geary.CC_END)
@@ -321,33 +314,33 @@ function Geary_Inspect:_showSummary()
     end
 end
 
-function Geary_Inspect:_inspectionOver()
-    self:stopTimer()
+function Geary_Inspect:_InspectionOver()
+    self:_StopTimer()
     self.inProgress = false
     Geary:UnregisterEvent("INSPECT_READY")
     ClearInspectPlayer()
 end
 
-function Geary_Inspect:inspectionTargetChanged()
+function Geary_Inspect:_InspectionTargetChanged()
     local message = Geary.CC_FAILED .. "Unit " .. self.player.unit .. " changed, aborting inspection of " ..
         self.player:getFullNameLink() .. Geary.CC_END
     Geary:print(message)
     Geary:log(message)
-    self:inspectionFailed()
+    self:_InspectionFailed()
 end
 
-function Geary_Inspect:inspectionFailed()
-    self:_inspectionOver()
+function Geary_Inspect:_InspectionFailed()
+    self:_InspectionOver()
     Geary_Interface_Player:inspectionFailed(self)
 end
 
-function Geary_Inspect:inspectionPassed()
-    self:_inspectionOver()
+function Geary_Inspect:_InspectionPassed()
+    self:_InspectionOver()
     Geary_Interface_Player:inspectionEnd(self)
     Geary_Database:storeInspection(self)
 end
 
-function Geary_Inspect:inspectUnitRequest(unit)
+function Geary_Inspect:_InspectUnitRequest(unit)
     -- Cannot do two inspections at once
     if self.inProgress then
         Geary:print(Geary.CC_FAILED .. "Cannot inspect", unit, "while inspection of", self.player:getFullNameLink(),
@@ -356,8 +349,8 @@ function Geary_Inspect:inspectUnitRequest(unit)
     end
 
     -- Reset everything and show the UI for results
-    self:resetInfo()
-    self:stopTimer()
+    self:_ResetInfo()
+    self:_StopTimer()
     Geary_Interface_Log:clearIfTooLarge()
     Geary_Interface:Show()
 
@@ -369,35 +362,35 @@ function Geary_Inspect:inspectUnitRequest(unit)
     Geary_Interface_Player:clear()
 
     -- Request inspection
-    self:makeInspectRequest()
+    self:_MakeInspectRequest()
 end
 
-function Geary_Inspect:reinspectRequest()
+function Geary_Inspect:_ReinspectRequest()
     if self.player:isUnitStillSamePlayer() then
         Geary:log(Geary.CC_FAILED .. "Inspection failed, retrying..." .. Geary.CC_END)
-        self:makeInspectRequest()
+        self:_MakeInspectRequest()
     else
-        self:inspectionTargetChanged()
+        self:_InspectionTargetChanged()
     end
 end
 
-function Geary_Inspect:makeInspectRequest()
+function Geary_Inspect:_MakeInspectRequest()
     self.inProgress = true;
-    self:resetData()
+    self:_ResetData()
     Geary:log()
     Geary:log(("Inspecting %s %s %s %i %s (%s)"):format(self.player.unit, self.player:getFactionInlineIcon(),
         self.player:getFullNameLink(), self.player.level, self.player:getColorizedClassName(), self.player.guid))
     self.inspectTry = self.inspectTry + 1
     Geary_Interface_Player:inspectionStart(self)
-    self:startTimer(self.inspectTimeout)
+    self:_StartTimer()
     Geary:RegisterEvent("INSPECT_READY")
     NotifyInspect(self.player.unit)
 end
 
-function Geary_Inspect:inspectUnit(unit)
+function Geary_Inspect:_InspectUnit(unit)
     if CanInspect(unit) then
         if CheckInteractDistance(unit, 1) then
-            self:inspectUnitRequest(unit)
+            self:_InspectUnitRequest(unit)
         else
             Geary:print(Geary.CC_ERROR .. "Can inspect, but out of range", unit .. Geary.CC_END)
         end
@@ -406,19 +399,19 @@ function Geary_Inspect:inspectUnit(unit)
     end
 end
 
-function Geary_Inspect:inspectSelf()
-    self:inspectUnitRequest("player")
+function Geary_Inspect:InspectSelf()
+    self:_InspectUnitRequest("player")
 end
 
-function Geary_Inspect:inspectTarget()
-    self:inspectUnit("target")
+function Geary_Inspect:InspectTarget()
+    self:_InspectUnit("target")
 end
 
-function Geary_Inspect:inspectGroup()
+function Geary_Inspect:InspectGroup()
     Geary:print(Geary.CC_ERROR .. "Group inspection is not yet implemented." .. Geary.CC_END)
 end
 
-function Geary_Inspect:inspectGuid(guid)
+function Geary_Inspect:InspectGuid(guid)
 
     if guid == nil then
         Geary:debugPrint("Cannot inspect nil guid")
@@ -426,12 +419,12 @@ function Geary_Inspect:inspectGuid(guid)
     end
 
     if guid == UnitGUID("player") then
-        self:inspectSelf()
+        self:InspectSelf()
         return
     end
 
     if guid == UnitGUID("target") then
-        self:inspectTarget()
+        self:InspectTarget()
         return
     end
 
@@ -452,7 +445,7 @@ function Geary_Inspect:inspectGuid(guid)
     for unitNumber = 1, unitLimit do
         unit = unitPrefix .. unitNumber
         if guid == UnitGUID(unit) then
-            self:inspectUnit(unit)
+            self:_InspectUnit(unit)
             return
         end
     end
