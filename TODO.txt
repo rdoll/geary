@@ -28,9 +28,6 @@ Ideas/Notes
 * Missing EotBP on offhand weapon isn't the same as on main hand (no inline image or item link)
 ** Maybe only when both MH and OH are missing EotBP?
 
-*** 516 (520/524) heroic scenario weapons cannot have an EotBP
-*** Can 535 (539/543) items from Timeless Isle use EotBP? Or are there no 535 Timeless Isle weapons?
-
 
 Under Consideration
 -------------------

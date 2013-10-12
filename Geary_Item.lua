@@ -75,15 +75,22 @@ function Geary_Item:isTwoHandWeapon()
         (self.invType == "INVTYPE_2HWEAPON" or self.invType == "INVTYPE_RANGED" or self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
+--
 -- Player can do legendary quest and item is a weapon that is one of the following:
 --   + Sha-Touched
 --   + T15 LFR (502, 506, 510)
 --   + T15 Normal (522, 526, 530)
---   + T15 Normal Thunderforged (528, 532, 536)
+--   + T15 Normal Thunderforged (528, 532, 536)  ** Conflicts with T16 LFR **
 --   + T15 Heroic (535, 539, 543)
 --   + T15 Heroic Thunderforged (541, 545, 549)
+--
 -- But is NOT:
+--   + Heroic scenario (516, 520, 524)
+--   + T16 LFR (528, 532, 536)  ** Conflicts with T15 Normal Thunderforged **
 --   + T16 Flex (540, 544, 548)
+--
+-- For the conflicting T15 Normal Thunderforged and T16 LFR item levels, use item IDs.
+--
 function Geary_Item:canHaveEotbp(player)
 
     if not player:isMaxLevel() then
@@ -105,11 +112,58 @@ function Geary_Item:canHaveEotbp(player)
         return true  -- Sha-Touched can have EotBP
     end
 
-    if self.iLevel >= 502 and self.iLevel <= 549 and self.iLevel ~= 540 and self.iLevel ~= 544 and self.iLevel ~= 548 then
-        return true  -- T15 item level range but not T16 Flex
-    else
-        return false  -- item level out of allowed range
+    if self.iLevel == 502 or self.iLevel == 506 or self.iLevel == 510 then
+        return true  -- T15 LFR item
+    elseif self.iLevel == 522 or self.iLevel == 526 or self.iLevel == 530 then
+        return true  -- T15 Normal item
+    elseif self.iLevel == 535 or self.iLevel == 539 or self.iLevel == 543 then
+        return true  -- T15 Heroic item
+    elseif self.iLevel == 541 or self.iLevel == 545 or self.iLevel == 549 then
+        return true  -- T15 Heroic Thunderforged item
+    elseif self.iLevel ~= 528 and self.iLevel ~= 532 and self.iLevel ~= 536 then
+        return false  -- Not T15 Normal Thunderforged or T16 LFR item
     end
+
+    if self.id == 96004      -- Worldbreaker's Stormscythe
+        or self.id == 96038  -- Kura-Kura, Kazra'jin's Skullcleaver
+        or self.id == 96181  -- Uroe, Harbinger of Terror
+        or self.id == 96050  -- Shattered Tortoiseshell Longbow
+        or self.id == 96231  -- Miracoran, the Vehement Chord
+        or self.id == 96153  -- Voice of the Quilen
+        or self.id == 96130  -- Acid-Spine Bonemace
+        or self.id == 96142  -- Hand of the Dark Animus
+        or self.id == 96187  -- Torall, Rod of the Shattered Throne
+        or self.id == 96233  -- Zeeg's Ancient Kegsmasher
+        or self.id == 96239  -- Jerthud, Graceful Hand of the Savior
+        or self.id == 96230  -- Invocation of the Dawn
+        or self.id == 96175  -- Shan-Dun, Breaker of Hope
+        or self.id == 96249  -- Bo-Ris, Horror in the Night
+        or self.id == 96012  -- Soulblade of the Breaking Storm
+        or self.id == 96162  -- Qon's Flaming Scimitar
+        or self.id == 96248  -- Do-tharak, the Swordbreaker
+        or self.id == 96047  -- Zerat, Malakk's Soulburning Greatsword
+        or self.id == 96247  -- Greatsword of Frozen Hells
+        or self.id == 96019  -- Jalak's Maelstrom Staff
+        or self.id == 96029  -- Dinomancer's Spiritbinding Spire
+        or self.id == 96092  -- Giorgio's Caduceus of Pure Moods
+        or self.id == 96167  -- Suen-Wo, Spire of the Falling Sun
+        or self.id == 96234  -- Darkwood Spiritstaff
+        or self.id == 96042  -- Amun-Thoth, Sul's Spiritrending Talons
+        or self.id == 96163  -- Wu-Lai, Bladed Fan of the Consorts
+        or self.id == 97128  -- Tia-Tia, the Scything Star
+        or self.id == 96070  -- Megaera's Poisoned Fang
+        or self.id == 96115  -- Ritual Dagger of the Mind's Eye
+        or self.id == 96146  -- Athame of the Sanguine Ritual
+        or self.id == 96152  -- Iron Qon's Boot Knife
+        or self.id == 96232  -- Fyn's Flickering Dagger
+        or self.id == 96238  -- Nadagast's Exsanguinator
+        or self.id == 96100  -- Durumu's Baleful Gaze
+        or self.id == 96032  -- Venomlord's Totemic Wand
+    then
+        return true  -- T15 Normal Thunderforged item
+    end
+
+    return false  -- Anything else
 end
 
 -- Player can do legendary quest and has a head item with sockets
@@ -495,10 +549,10 @@ function Geary_Item:_setUpgrades(upgradeLevel, upgradeMax)
         self.upgradeMax = upgradeMax
         if upgradeLevel < upgradeMax then
             if self.quality <= ITEM_QUALITY_RARE then
-                -- Rare quality items use 750 Justive Points to upgrade 8 levels
+                -- Rare quality items cost 750 Justice Points to upgrade 8 levels
                 self.upgradeItemLevelMissing = (upgradeMax - upgradeLevel) * 8
             else
-                -- Epic quality items use 250 Valor Points to upgrade 4 levels
+                -- Epic quality items cost 250 Valor Points to upgrade 4 levels
                 self.upgradeItemLevelMissing = (upgradeMax - upgradeLevel) * 4
             end
         end
