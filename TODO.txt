@@ -33,6 +33,9 @@ Ideas/Notes
 ** No one in group
 ** Is related to being in combat when assigning onhover/onclick handlers?
 
+* Replace custom timer frame onupdate handler with an Animation?
+* Use Cooldown for geary icon cooldown effect
+
 
 Under Consideration
 -------------------

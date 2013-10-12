@@ -17,11 +17,11 @@ function Geary_Timer:Init()
 end
 
 function Geary_Timer.timerFrame:StartTimer(timerId, seconds, callOnEveryTick, callback)
-    Geary:print("Geary_Timer starting timer", timerId, "for", seconds)
+    Geary:debugPrint("Geary_Timer starting timer", timerId, "for", seconds)
 
     if Geary:isTableEmpty(self.timers) then
         self:SetScript("OnUpdate", self.OnUpdate)
-        Geary:print("Geary_Timer hooked OnUpdate")
+        Geary:debugPrint("Geary_Timer hooked OnUpdate")
     end
 
     self.timers[timerId] = {
@@ -37,11 +37,11 @@ function Geary_Timer.timerFrame:OnUpdate(secondsSinceLastUpdate)
     for timerId, timerData in pairs(self.timers) do
         timerData.seconds = timerData.seconds - secondsSinceLastUpdate
         if timerData.seconds <= 0 then
-            Geary:print("Geary_Timer expired callback for", timerId)
+            Geary:debugPrint("Geary_Timer expired callback for", timerId)
             timerData.callback(0)
             expired[timerId] = 1  -- Defer timer removal from table until not iterating over table
         elseif timerData.callOnEveryTick then
-            Geary:print("Geary_Timer tick callback for", timerId)
+            Geary:debugPrint("Geary_Timer tick callback for", timerId)
             timerData.callback(timerData.seconds)
         end
     end
@@ -52,11 +52,11 @@ function Geary_Timer.timerFrame:OnUpdate(secondsSinceLastUpdate)
 end
 
 function Geary_Timer.timerFrame:StopTimer(timerId)
-    Geary:print("Geary_Timer stopping timer", timerId)
+    Geary:debugPrint("Geary_Timer stopping timer", timerId)
     self.timers[timerId] = nil
     if Geary:isTableEmpty(self.timers) then
         self:SetScript("OnUpdate", nil)
-        Geary:print("Geary_Timer unhooked OnUpdate")
+        Geary:debugPrint("Geary_Timer unhooked OnUpdate")
     end
 end
 
