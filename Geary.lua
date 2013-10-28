@@ -19,9 +19,8 @@ Geary = {
     -- Debug settings
     debugOn = false,
 
-    -- Event handling
-    eventsFrame = nil,
-    events      = {},
+    -- Event handler IDs
+    addOnLoadedEventHandlerId = nil,
 
     -- Font Color Codes
     CC_START     = "|c",
@@ -76,35 +75,21 @@ function Geary:init()
     _G["BINDING_NAME_GEARY_HIDE_OPTIONS"]      = "Hide Options"
     _G["BINDING_NAME_GEARY_TOGGLE_OPTIONS"]    = "Toggle Options"
 
-    -- Set script handlers for defined events
-    -- Note that the event first argument is eaten when the handler is invoked
-    self.eventsFrame = CreateFrame("Frame", "Geary_EventsFrame")
-    self.eventsFrame:Hide()
-    self.eventsFrame:SetScript("OnEvent", function(self, event, ...)
-        Geary.events[event](self, ...)
-    end)
-
-    -- Register loading events
-    self:RegisterEvent("ADDON_LOADED")
-    self:RegisterEvent("PLAYER_LOGOUT")
+    -- Init event handling for reception of AddOn loaded event
+    Geary_Event:Init()
+    self.addOnLoadedEventHandlerId =
+        Geary_Event:RegisterEvent("ADDON_LOADED", function(addOnName) Geary:ADDON_LOADED(addOnName) end)
 end
 
 --
 -- Event handling
 --
 
-function Geary:RegisterEvent(eventName)
-    self.eventsFrame:RegisterEvent(eventName)
-end
-
-function Geary:UnregisterEvent(eventName)
-    self.eventsFrame:UnregisterEvent(eventName)
-end
-
-function Geary.events:ADDON_LOADED(addOnName)
+-- This is centralized to control module initialization order
+function Geary:ADDON_LOADED(addOnName)
     if addOnName == "Geary" then
         -- Don't need to track ADDON_LOADED anymore
-        Geary:UnregisterEvent("ADDON_LOADED")
+        Geary_Event:UnregisterEvent(self.addOnLoadedEventHandlerId)
 
         -- Init saved variables first
         Geary_Options:ADDON_LOADED()
@@ -117,24 +102,6 @@ function Geary.events:ADDON_LOADED(addOnName)
         Geary_Icon:init()
         Geary_Options_Interface:init()
     end
-end
-
-function Geary.events:PLAYER_LOGOUT()
-    -- Unregister all events
-    for eventName, _ in pairs(self) do
-        Geary:UnregisterEvent(eventName)
-    end
-
-    -- Abort any inspection in progress
-    Geary_Inspect:PLAYER_LOGOUT()
-end
-
-function Geary.events:INSPECT_READY(unitGuid)
-    Geary_Inspect:INSPECT_READY(unitGuid)
-end
-
-function Geary.events:GROUP_ROSTER_UPDATE()
-    Geary_Interface_Group:GROUP_ROSTER_UPDATE()
 end
 
 --
@@ -309,12 +276,6 @@ function Geary:colorizedRelativeDateTime(timestamp)
 end
 
 --
--- Main
---
-
-Geary:init()
-
---
 -- Slash commands
 --
 
@@ -454,3 +415,9 @@ function SlashCmdList.GEARY(msg, editBox)
         print(_usage)
     end
 end
+
+--
+-- Main
+--
+
+Geary:init()

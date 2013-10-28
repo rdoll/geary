@@ -12,6 +12,7 @@ Geary_Interface_Group = {
     contentsFrame = nil,
     summaryTable = nil,
     summaryFontString = nil,
+    groupRosterUpdateEventHandlerId = nil,
     groupEntries = {}
 }
 
@@ -48,13 +49,24 @@ function Geary_Interface_Group:init(parent)
     Geary_Interface:createTab("Group",
         function() Geary_Interface_Group:Show() end,
         function() Geary_Interface_Group:Hide() end)
+end
 
-    -- We want to be notified whenever our group membership or group members change
-    Geary:RegisterEvent("GROUP_ROSTER_UPDATE")
+function Geary_Interface_Group:_RegisterEvents()
+    if self.groupRosterUpdateEventHandlerId == nil then
+        self.groupRosterUpdateEventHandlerId =
+            Geary_Event:RegisterEvent("GROUP_ROSTER_UPDATE", function() Geary_Interface_Group:GROUP_ROSTER_UPDATE() end)
+    end
 end
 
 function Geary_Interface_Group:GROUP_ROSTER_UPDATE()
     self:onChanged()
+end
+
+function Geary_Interface_Group:_UnregisterEvents()
+    if self.groupRosterUpdateEventHandlerId ~= nil then
+        Geary_Event:UnregisterEvent(self.groupRosterUpdateEventHandlerId)
+        self.groupRosterUpdateEventHandlerId = nil
+    end
 end
 
 function Geary_Interface_Group:Show()
@@ -69,12 +81,14 @@ function Geary_Interface_Group:Show()
         self.contentsFrame:Show()
         self:renderEntries()
     end
+    self:_RegisterEvents()
 end
 
 function Geary_Interface_Group:Hide()
     self.noGroupFontString:Hide()
     self.summaryFontString:Hide()
     self.contentsFrame:Hide()
+    self:_UnregisterEvents()
 end
 
 function Geary_Interface_Group:onChanged()

@@ -517,7 +517,7 @@ function Geary_Interface_Player:setItem(slotName, item)
     local slotData = self.paperDoll.slots[slotName]
 
     if slotData.item ~= nil and slotData.item.link == item.link then
-        Geary:debugPrint(Geary.CC_DEBUG .. "Paper doll slot", slotName, "already", item.link .. Geary.CC_END)
+        -- Geary:debugPrint(Geary.CC_DEBUG .. "Paper doll slot", slotName, "already", item.link .. Geary.CC_END)
         return
     end
 

@@ -16,10 +16,6 @@ Ideas/Notes
 
 * Use frame templates for repeat items (e.g. summary rows)?
 
-* Move events to Geary_Events
-** Store callback function with registration
-** Copy to Looty
-
 * Standardize on class:MethodName, class.functionName, and class.memberName
 ** Copy to Looty
 
@@ -41,6 +37,7 @@ Under Consideration
 -------------------
 * Database:
 ** Show details of inspection on hover/click
+** From settings, ability to prune inspections old than x days
 ** //Maybe:// Sort by clicking on any column header
 ** //Maybe:// Filter results by Faction, Class, Level, etc
 ** //Maybe:// Option for automatically pruning entries older than x days
