@@ -29,11 +29,11 @@ function Geary_Interface_Summary_Row:new(config)
     }
     setmetatable(o, self)
     self.__index = self
-    o:createContents(config.parent)
+    o:_CreateContents(config.parent)
     return o
 end
 
-function Geary_Interface_Summary_Row:createContents(parent)
+function Geary_Interface_Summary_Row:_CreateContents(parent)
 
     -- Increment static unique row number (cannot use self -- that's an instance)
     Geary_Interface_Summary_Row.summaryRowNumber = Geary_Interface_Summary_Row.summaryRowNumber + 1
@@ -139,7 +139,7 @@ function Geary_Interface_Summary_Row:createContents(parent)
     self.inspectedFontString:SetJustifyV("MIDDLE")
 end
 
-function Geary_Interface_Summary_Row:getButton()
+function Geary_Interface_Summary_Row:GetButton()
     return self.rowButton
 end
 
@@ -151,7 +151,7 @@ function Geary_Interface_Summary_Row:Hide()
     self.rowButton:Hide()
 end
 
-function Geary_Interface_Summary_Row:setOnClickHandler(onClickHander)
+function Geary_Interface_Summary_Row:SetOnClickHandler(onClickHander)
     self.onClickHandler = onClickHander
 end
 
@@ -164,20 +164,20 @@ end
 local _unknownTextureFilename = "Interface\\ICONS\\INV_Misc_QuestionMark"
 local _unknownTextureInline = "|T" .. _unknownTextureFilename .. ":0|t"
 
-function Geary_Interface_Summary_Row:_setUnknownIconTexture(texture)
+function Geary_Interface_Summary_Row:_SetUnknownIconTexture(texture)
     texture:SetTexture(_unknownTextureFilename)
     texture:SetTexCoord(0, 1, 0, 1)
 end
 
-function Geary_Interface_Summary_Row:getGuid()
+function Geary_Interface_Summary_Row:GetGuid()
     return self.playerGuid
 end
 
-function Geary_Interface_Summary_Row:setGuid(guid)
+function Geary_Interface_Summary_Row:SetGuid(guid)
     self.playerGuid = guid
 end
 
-function Geary_Interface_Summary_Row:setFaction(factionName)
+function Geary_Interface_Summary_Row:SetFaction(factionName)
     if factionName == "Horde" then
         self.factionTexture:SetTexture("Interface\\PVPFrame\\PVP-Currency-Horde")
         self.factionTexture:SetTexCoord(2 / 32, 30 / 32, 2 / 32, 30 / 32)
@@ -185,24 +185,24 @@ function Geary_Interface_Summary_Row:setFaction(factionName)
         self.factionTexture:SetTexture("Interface\\PVPFrame\\PVP-Currency-Alliance")
         self.factionTexture:SetTexCoord(4 / 32, 28 / 32, 2 / 32, 30 / 32)
     else
-        self:_setUnknownIconTexture(self.factionTexture)
+        self:_SetUnknownIconTexture(self.factionTexture)
     end
 end
 
-function Geary_Interface_Summary_Row:setClass(classId)
+function Geary_Interface_Summary_Row:SetClass(classId)
     local _, classTag, _ = GetClassInfo(classId or 0) -- translate nil to 0
     if CLASS_ICON_TCOORDS[classTag] == nil then
-        self:_setUnknownIconTexture(self.classTexture)
+        self:_SetUnknownIconTexture(self.classTexture)
     else
         self.classTexture:SetTexture("Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES")
         self.classTexture:SetTexCoord(unpack(CLASS_ICON_TCOORDS[classTag]))
     end
 end
 
-function Geary_Interface_Summary_Row:setSpec(specId)
+function Geary_Interface_Summary_Row:SetSpec(specId)
     local _, _, _, icon = GetSpecializationInfoByID(specId or 0) -- translate nil to 0
     if icon == nil then
-        self:_setUnknownIconTexture(self.specTexture)
+        self:_SetUnknownIconTexture(self.specTexture)
     else
         self.specTexture:SetTexture(icon)
     end
@@ -214,21 +214,21 @@ local _roleIconTexCoords = {
     ["DAMAGER"] = { 20 / 64, 39 / 64, 22 / 64, 41 / 64 }
 }
 
-function Geary_Interface_Summary_Row:setRole(specId)
+function Geary_Interface_Summary_Row:SetRole(specId)
     local roleTag = GetSpecializationRoleByID(specId or 0) -- translate nil to 0
     if roleTag == nil then
-        self:_setUnknownIconTexture(self.roleTexture)
+        self:_SetUnknownIconTexture(self.roleTexture)
     else
         self.roleTexture:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
         self.roleTexture:SetTexCoord(unpack(_roleIconTexCoords[roleTag]))
     end
 end
 
-function Geary_Interface_Summary_Row:setLevel(level)
+function Geary_Interface_Summary_Row:SetLevel(level)
     self.levelFontString:SetText(level or _unknownTextureInline)
 end
 
-function Geary_Interface_Summary_Row:setILevel(itemCount, iLevelTotal)
+function Geary_Interface_Summary_Row:SetILevel(itemCount, iLevelTotal)
     if itemCount and iLevelTotal and itemCount > 0 then
         self.iLevelFontString:SetFormattedText("%6.2f", iLevelTotal / itemCount)
     else
@@ -236,15 +236,15 @@ function Geary_Interface_Summary_Row:setILevel(itemCount, iLevelTotal)
     end
 end
 
-function Geary_Interface_Summary_Row:setName(name, realm, classId)
+function Geary_Interface_Summary_Row:SetName(name, realm, classId)
     if name == nil or strlen(name) == 0 then
         self.nameFontString:SetText(_unknownTextureInline)
     else
-        self.nameFontString:SetText(Geary_Player:classColorize(classId, Geary_Player:fullPlayerName(name, realm)))
+        self.nameFontString:SetText(Geary_Player:ClassColorize(classId, Geary_Player:FullPlayerName(name, realm)))
     end
 end
 
-function Geary_Interface_Summary_Row:setMissing(requiredCount, optionalCount)
+function Geary_Interface_Summary_Row:SetMissing(requiredCount, optionalCount)
     local required, optional
     if requiredCount == nil then
         required = _unknownTextureInline
@@ -259,19 +259,19 @@ function Geary_Interface_Summary_Row:setMissing(requiredCount, optionalCount)
     self.missingFontString:SetText(required .. " / " .. optional)
 end
 
-function Geary_Interface_Summary_Row:setInspected(inspected)
-    self.inspectedFontString:SetText(Geary:colorizedRelativeDateTime(inspected))
+function Geary_Interface_Summary_Row:SetInspected(inspected)
+    self.inspectedFontString:SetText(Geary:ColorizedRelativeDateTime(inspected))
 end
 
-function Geary_Interface_Summary_Row:setFromEntry(entry)
-    self:setGuid(entry.playerGuid)
-    self:setFaction(entry.playerFaction)
-    self:setClass(entry.playerClassId)
-    self:setSpec(entry.playerSpecId)
-    self:setRole(entry.playerSpecId)
-    self:setLevel(entry.playerLevel)
-    self:setILevel(entry.itemCount, entry.iLevelTotal)
-    self:setName(entry.playerName, entry.playerRealm, entry.playerClassId)
-    self:setMissing(entry:getMissingRequiredCount(), entry:getMissingOptionalCount())
-    self:setInspected(entry.inspectedAt)
+function Geary_Interface_Summary_Row:SetFromEntry(entry)
+    self:SetGuid(entry.playerGuid)
+    self:SetFaction(entry.playerFaction)
+    self:SetClass(entry.playerClassId)
+    self:SetSpec(entry.playerSpecId)
+    self:SetRole(entry.playerSpecId)
+    self:SetLevel(entry.playerLevel)
+    self:SetILevel(entry.itemCount, entry.iLevelTotal)
+    self:SetName(entry.playerName, entry.playerRealm, entry.playerClassId)
+    self:SetMissing(entry:GetMissingRequiredCount(), entry:GetMissingOptionalCount())
+    self:SetInspected(entry.inspectedAt)
 end

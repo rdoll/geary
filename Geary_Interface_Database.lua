@@ -13,7 +13,7 @@ Geary_Interface_Database = {
     summaryTable = nil
 }
 
-function Geary_Interface_Database:init(parent)
+function Geary_Interface_Database:Init(parent)
 
     -- Nothing to see here message
     self.noEntriesfontString = parent:CreateFontString("$parent_Database_FontString", "ARTWORK", "GameFontNormal")
@@ -39,7 +39,7 @@ function Geary_Interface_Database:init(parent)
     button:SetSize(95, 17)
     button:SetPoint("BOTTOM", self.contentsFrame, "BOTTOM", 24, -21)
     button:SetText("Delete All")
-    button:SetScript("OnClick", function(self) Geary_Interface_Database:deleteAll() end)
+    button:SetScript("OnClick", function(self) Geary_Interface_Database:DeleteAll() end)
 
     -- Summary stats
     self.summaryFontString = self.contentsFrame:CreateFontString("$parent_Group_SummaryFontString", "ARTWORK",
@@ -51,13 +51,13 @@ function Geary_Interface_Database:init(parent)
     self.summaryFontString:SetJustifyH("CENTER")
     self.summaryFontString:SetJustifyV("MIDDLE")
 
-    Geary_Interface:createTab("Database",
+    Geary_Interface:CreateTab("Database",
         function() Geary_Interface_Database:Show() end,
         function() Geary_Interface_Database:Hide() end)
 end
 
 function Geary_Interface_Database:Show()
-    if Geary_Database:getNumberEntries() == 0 then
+    if Geary_Database:GetNumberEntries() == 0 then
         self.contentsFrame:Hide()
         self.summaryFontString:Hide()
         self.noEntriesfontString:Show()
@@ -65,7 +65,7 @@ function Geary_Interface_Database:Show()
         self.noEntriesfontString:Hide()
         self.summaryFontString:Hide()
         self.contentsFrame:Show()
-        self:renderEntries()
+        self:RenderEntries()
     end
 end
 
@@ -75,29 +75,29 @@ function Geary_Interface_Database:Hide()
     self.contentsFrame:Hide()
 end
 
-function Geary_Interface_Database:onChanged()
+function Geary_Interface_Database:OnChanged()
     if self.contentsFrame:IsShown() then
         self:Show()
     end
 end
 
-function Geary_Interface_Database:deleteAll()
-    Geary_Database:deleteAll()
+function Geary_Interface_Database:DeleteAll()
+    Geary_Database:DeleteAll()
 end
 
-function Geary_Interface_Database:renderEntries()
+function Geary_Interface_Database:RenderEntries()
 
     -- Hide all rows to start
-    self.summaryTable:hideAllRows()
+    self.summaryTable:HideAllRows()
 
     -- Fill in one row at a time from entries
-    local row, rowNumber, orderedPairsFunc = nil, 1, self.summaryTable:getOrderedPairsFunc()
-    for _, entry in orderedPairsFunc(Geary_Database:getAllEntries(), self.summaryTable:isAscendingOrder()) do
-        row = self.summaryTable:getRow(rowNumber)
+    local row, rowNumber, orderedPairsFunc = nil, 1, self.summaryTable:GetOrderedPairsFunc()
+    for _, entry in orderedPairsFunc(Geary_Database:GetAllEntries(), self.summaryTable:IsAscendingOrder()) do
+        row = self.summaryTable:GetRow(rowNumber)
         rowNumber = rowNumber + 1
-        row:setFromEntry(entry)
-        row:setOnClickHandler(function (row, mouseButton, down)
-            Geary_Inspect:InspectGuid(row:getGuid())
+        row:SetFromEntry(entry)
+        row:SetOnClickHandler(function (row, mouseButton, down)
+            Geary_Inspect:InspectGuid(row:GetGuid())
         end)
         row:Show()
     end

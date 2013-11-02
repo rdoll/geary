@@ -8,7 +8,10 @@
 --]]
 
 Geary_Item = {
-    tooltip = CreateFrame("GameTooltip", "Geary_Tooltip_Scanner", nil, "GameTooltipTemplate")
+    tooltip = CreateFrame("GameTooltip", "Geary_Tooltip_Scanner", nil, "GameTooltipTemplate"),
+
+    -- Inexplicably missing constants
+    MAX_GEMS = 4
 }
 
 -- Details of all slots and what they can contain (slotNumber filled in during init)
@@ -46,7 +49,7 @@ local _socketNames = {
     EMPTY_SOCKET_HYDRAULIC
 }
 
-function Geary_Item:init()
+function Geary_Item:Init()
     -- Determine inventory slot numbers from names and set the slot order
     for slotName, slotData in pairs(_slotDetails) do
         slotData.slotNumber, _ = GetInventorySlotInfo(slotName)
@@ -54,24 +57,24 @@ function Geary_Item:init()
     end
 end
 
-function Geary_Item:getInvSlotsInOrder()
+function Geary_Item:GetInvSlotsInOrder()
     return _slotOrder
 end
 
-function Geary_Item:getSlotNumberForName(slotName)
+function Geary_Item:GetSlotNumberForName(slotName)
     return _slotDetails[slotName].slotNumber
 end
 
-function Geary_Item:isInvSlotName(slotName)
+function Geary_Item:IsInvSlotName(slotName)
     return _slotDetails[slotName] ~= nil
 end
 
-function Geary_Item:isWeapon()
+function Geary_Item:IsWeapon()
     return self.slot == "MainHandSlot" or self.slot == "SecondaryHandSlot"
 end
 
-function Geary_Item:isTwoHandWeapon()
-    return self:isWeapon() and
+function Geary_Item:IsTwoHandWeapon()
+    return self:IsWeapon() and
         (self.invType == "INVTYPE_2HWEAPON" or self.invType == "INVTYPE_RANGED" or self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
@@ -91,13 +94,13 @@ end
 --
 -- For the conflicting T15 Normal Thunderforged and T16 LFR item levels, use item IDs.
 --
-function Geary_Item:canHaveEotbp(player)
+function Geary_Item:CanHaveEotbp(player)
 
-    if not player:isMaxLevel() then
+    if not player:IsMaxLevel() then
         return false  -- Player ineligible for legendary
     end
 
-    if not (self:isWeapon()
+    if not (self:IsWeapon()
         and (self.invType == "INVTYPE_2HWEAPON"
             or self.invType == "INVTYPE_RANGED"
             or self.invType == "INVTYPE_RANGEDRIGHT"
@@ -167,20 +170,20 @@ function Geary_Item:canHaveEotbp(player)
 end
 
 -- Player can do legendary quest and has a head item with sockets
-function Geary_Item:canHaveCohMeta(player)
-    return player:isMaxLevel() and self.slot == "HeadSlot" and
-        (not Geary:isTableEmpty(self.filledSockets) or
-            not Geary:isTableEmpty(self.emptySockets) or not Geary:isTableEmpty(self.failedJewelIds))
+function Geary_Item:CanHaveCohMeta(player)
+    return player:IsMaxLevel() and self.slot == "HeadSlot" and
+        (not Geary:IsTableEmpty(self.filledSockets) or
+            not Geary:IsTableEmpty(self.emptySockets) or not Geary:IsTableEmpty(self.failedJewelIds))
 end
 
 -- Player can do legendary quest
-function Geary_Item:canHaveCovOrLegCloak(player)
-    return player:isMaxLevel()
+function Geary_Item:CanHaveCovOrLegCloak(player)
+    return player:IsMaxLevel()
 end
 
 -- Determines if the item is a cloak with an item ID of the 6 Cloaks of Virtue
 -- NOTE: Must use item IDs to be locale independent
-function Geary_Item:isCov()
+function Geary_Item:IsCov()
     return
         self.id == 98146 or  -- Oxhorn Bladebreaker
         self.id == 98147 or  -- Tigerclaw Cape
@@ -190,18 +193,18 @@ function Geary_Item:isCov()
         self.id == 98335     -- Oxhoof Greatcloak
 end
 
-function Geary_Item:isMissingRequired()
-    return self.iLevel == 0 or not Geary:isTableEmpty(self.emptySockets) or
-        not Geary:isTableEmpty(self.failedJewelIds) or (self.canEnchant and self.enchantText == nil) or
+function Geary_Item:IsMissingRequired()
+    return self.iLevel == 0 or not Geary:IsTableEmpty(self.emptySockets) or
+        not Geary:IsTableEmpty(self.failedJewelIds) or (self.canEnchant and self.enchantText == nil) or
         self.isMissingBeltBuckle
 end
 
-function Geary_Item:isMissingOptional()
+function Geary_Item:IsMissingOptional()
     return self.upgradeItemLevelMissing > 0 or self.isMissingEotbp or self.isMissingCohMeta or
         self.isMissingCov
 end
 
-function Geary_Item:iLevelWithUpgrades()
+function Geary_Item:ILevelWithUpgrades()
     local upgrades = ""
     if self.upgradeMax > 0 then
         upgrades = " " .. (self.upgradeLevel < self.upgradeMax and Geary.CC_UPGRADE or Geary.CC_CORRECT) ..
@@ -212,20 +215,20 @@ function Geary_Item:iLevelWithUpgrades()
     return Geary.CC_START .. colorCode .. tostring(self.iLevel) .. Geary.CC_END .. upgrades
 end
 
-function Geary_Item:getBeltBuckleItemWithTexture()
-    return self:_getItemLinkWithTexture(90046, "Living Steel Belt Buckle")
+function Geary_Item:GetBeltBuckleItemWithTexture()
+    return self:_GetItemLinkWithTexture(90046, "Living Steel Belt Buckle")
 end
 
-function Geary_Item:getEotbpItemWithTexture()
-    return self:_getItemLinkWithTexture(93403, "Eye of the Black Prince")
+function Geary_Item:GetEotbpItemWithTexture()
+    return self:_GetItemLinkWithTexture(93403, "Eye of the Black Prince")
 end
 
-function Geary_Item:getItemLinkWithInlineTexture()
+function Geary_Item:GetItemLinkWithInlineTexture()
     return self.inlineTexture == nil and self.link or (self.inlineTexture .. " " .. self.link)
 end
 
-function Geary_Item:getGemLinkWithInlineTexture(itemLink)
-    local inlineGemTexture = self:_getItemInlineTexture(itemLink)
+function Geary_Item:GetGemLinkWithInlineTexture(itemLink)
+    local inlineGemTexture = self:_GetItemInlineTexture(itemLink)
     if inlineGemTexture == nil then
         return itemLink
     else
@@ -233,13 +236,13 @@ function Geary_Item:getGemLinkWithInlineTexture(itemLink)
     end
 end
 
-function Geary_Item:_getItemLinkWithTexture(itemId, itemName)
+function Geary_Item:_GetItemLinkWithTexture(itemId, itemName)
     local itemLink = select(2, GetItemInfo(itemId))
     if itemLink == nil then
-        Geary:debugLog(itemName, "item ID", itemId, "not in local cache")
+        Geary:DebugLog(itemName, "item ID", itemId, "not in local cache")
         return itemName
     end
-    local inlineTexture = self:_getItemInlineTexture(itemLink)
+    local inlineTexture = self:_GetItemInlineTexture(itemLink)
     if inlineTexture == nil then
         return itemLink
     else
@@ -247,8 +250,8 @@ function Geary_Item:_getItemLinkWithTexture(itemId, itemName)
     end
 end
 
-function Geary_Item:_getItemInlineTexture(itemLink)
-    local size = Geary_Options:getLogFontHeight()
+function Geary_Item:_GetItemInlineTexture(itemLink)
+    local size = Geary_Options:GetLogFontHeight()
     local texture = select(10, GetItemInfo(itemLink))
     if texture == nil or texture:len() == 0 then
         return nil
@@ -303,7 +306,7 @@ function Geary_Item:new(o)
     return newObject
 end
 
-function Geary_Item:probe(player)
+function Geary_Item:Probe(player)
     if self.link == nil then
         error("Cannot probe item without link")
         return false
@@ -315,49 +318,49 @@ function Geary_Item:probe(player)
     end
 
     -- Workaround an item link bug with the signed suffixId being unsigned in the link
-    self.link = self:_itemLinkSuffixIdBugWorkaround(self.link)
+    self.link = self:_ItemLinkSuffixIdBugWorkaround(self.link)
 
     -- Get base item info
     self.id = tonumber(self.link:match("|Hitem:(%d+):"))
     self.canEnchant = _slotDetails[self.slot].canEnchant
     self.name, _, self.quality, _, _, self.iType, self.subType, _, self.invType, self.texture, _ = GetItemInfo(self.link)
-    self.inlineTexture = self:_getItemInlineTexture(self.link)
+    self.inlineTexture = self:_GetItemInlineTexture(self.link)
 
     -- Parse data from the item's tooltip
-    self:_parseTooltip()
+    self:_ParseTooltip()
 
     -- Ensure we got the data we should have
     -- Note that this also covers the case when the Server fails to send us any tooltip information
     if self.iLevel < 1 then
-        Geary:log(Geary.CC_FAILED .. self.slot .. " item has no item level in " .. self.link .. Geary.CC_END)
+        Geary:Log(Geary.CC_FAILED .. self.slot .. " item has no item level in " .. self.link .. Geary.CC_END)
         return false
     end
 
     -- Get socketed gem information
-    self:_getGems(self.slot)
+    self:_GetGems(self.slot)
 
     -- Check for special cases wrt gems
     if self.slot == "WaistSlot" then
-        self.isMissingBeltBuckle = self:_isMissingExtraGem()
+        self.isMissingBeltBuckle = self:_IsMissingExtraGem()
     end
 
-    if self:canHaveEotbp(player) then
-        self.isMissingEotbp = self:_isMissingExtraGem()
+    if self:CanHaveEotbp(player) then
+        self.isMissingEotbp = self:_IsMissingExtraGem()
         self.hasEotbp = not self.isMissingEotbp
     end
 
-    if self:canHaveCohMeta(player) then
+    if self:CanHaveCohMeta(player) then
         self.isMissingCohMeta = not self.hasCohMeta
     end
 
-    if self.slot == "BackSlot" and self:canHaveCovOrLegCloak(player) then
+    if self.slot == "BackSlot" and self:CanHaveCovOrLegCloak(player) then
         if self.quality == ITEM_QUALITY_LEGENDARY then
             self.hasCov = false
             self.isMissingCov = false
             self.hasLegCloak = true
             self.isMissingLegCloak = false
         else
-            self.hasCov = self:isCov()
+            self.hasCov = self:IsCov()
             self.isMissingCov = not self.hasCov
             self.hasLegCloak = false
             self.isMissingLegCloak = true
@@ -365,40 +368,40 @@ function Geary_Item:probe(player)
     end
 
     -- Report info about the item
-    Geary:log(("%s %s %s %s %s"):format(self:iLevelWithUpgrades(), self:getItemLinkWithInlineTexture(),
+    Geary:Log(("%s %s %s %s %s"):format(self:ILevelWithUpgrades(), self:GetItemLinkWithInlineTexture(),
         self.slot:gsub("Slot$", ""), self.iType, self.subType))
 
     for _, text in pairs(self.emptySockets) do
-        Geary:log(Geary.CC_MISSING .. "   No gem in " .. text .. Geary.CC_END)
+        Geary:Log(Geary.CC_MISSING .. "   No gem in " .. text .. Geary.CC_END)
     end
 
     for _, itemLink in pairs(self.filledSockets) do
-        Geary:log(Geary.CC_CORRECT .. "   Gem " .. self:getGemLinkWithInlineTexture(itemLink) .. Geary.CC_END)
+        Geary:Log(Geary.CC_CORRECT .. "   Gem " .. self:GetGemLinkWithInlineTexture(itemLink) .. Geary.CC_END)
     end
 
     for socketIndex, _ in ipairs(self.failedJewelIds) do
-        Geary:log(Geary.CC_FAILED .. "   Failed to get gem in socket " .. socketIndex .. Geary.CC_END)
+        Geary:Log(Geary.CC_FAILED .. "   Failed to get gem in socket " .. socketIndex .. Geary.CC_END)
     end
 
     if self.enchantText ~= nil then
-        Geary:log(Geary.CC_CORRECT .. "   " .. self.enchantText .. Geary.CC_END)
+        Geary:Log(Geary.CC_CORRECT .. "   " .. self.enchantText .. Geary.CC_END)
     elseif self.canEnchant then
-        Geary:log(Geary.CC_MISSING .. "   Missing enchant!" .. Geary.CC_END)
+        Geary:Log(Geary.CC_MISSING .. "   Missing enchant!" .. Geary.CC_END)
     end
 
     if self.isMissingBeltBuckle then
-        Geary:log(Geary.CC_MISSING .. "   Missing " .. self:getBeltBuckleItemWithTexture() .. Geary.CC_END)
+        Geary:Log(Geary.CC_MISSING .. "   Missing " .. self:GetBeltBuckleItemWithTexture() .. Geary.CC_END)
     end
     if self.isMissingEotbp then
-        Geary:log(Geary.CC_OPTIONAL .. "   Missing " .. self:getEotbpItemWithTexture() .. Geary.CC_END)
+        Geary:Log(Geary.CC_OPTIONAL .. "   Missing " .. self:GetEotbpItemWithTexture() .. Geary.CC_END)
     end
     if self.isMissingCohMeta then
-        Geary:log(Geary.CC_OPTIONAL .. "   Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
+        Geary:Log(Geary.CC_OPTIONAL .. "   Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
     end
     if self.isMissingCov then
-        Geary:log(Geary.CC_OPTIONAL .. "   Missing Cloak of Virtue" .. Geary.CC_END)
+        Geary:Log(Geary.CC_OPTIONAL .. "   Missing Cloak of Virtue" .. Geary.CC_END)
     elseif self.isMissingLegCloak then
-        Geary:log(Geary.CC_OPTIONAL .. "   Missing legendary cloak" .. Geary.CC_END)
+        Geary:Log(Geary.CC_OPTIONAL .. "   Missing legendary cloak" .. Geary.CC_END)
     end
 
     return true
@@ -420,7 +423,7 @@ end
 -- The root cause seems to be GetInventoryItemLink returns a link with the suffixId as
 -- unsigned when it has to be signed.
 --
-function Geary_Item:_itemLinkSuffixIdBugWorkaround(link)
+function Geary_Item:_ItemLinkSuffixIdBugWorkaround(link)
     local before, suffixId, after = link:match("(.-item:.-:.-:.-:.-:.-:.-:)(.-)(:.+)")
     if tonumber(suffixId) > 32767 then
         -- Too large for 16-bit signed, so convert unsigned to signed
@@ -441,7 +444,7 @@ local _shaTouchedString = '"' .. EMPTY_SOCKET_HYDRAULIC .. '"'
 -- ENCHANTED_TOOLTIP_LINE = "Enchanted: %s"
 local _enchantedRegex = "^%s*" .. ENCHANTED_TOOLTIP_LINE:gsub("%%s", "")
 
-function Geary_Item:_parseTooltip()
+function Geary_Item:_ParseTooltip()
 
     -- Ensure owner is set (ClearLines unsets owner)
     -- ANCHOR_NONE without setting any points means it's never rendered
@@ -454,26 +457,26 @@ function Geary_Item:_parseTooltip()
 
     -- Parase the left side text (right side text isn't useful)
     for lineNum = 1, self.tooltip:NumLines() do
-        (function() -- Function so we can use return as "continue"
+        (function(self) -- Function so we can use return as "continue"
             local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
             -- Eat any color codes (e.g. gem stats have them)
             text = text:gsub("|c%x%x%x%x%x%x%x%x(.-)|r", "%1")
-            Geary:debugLog(text)
+            Geary:DebugLog(text)
 
             local iLevel = text:match(_itemLevelRegex)
             if iLevel then
-                self:_setItemLevel(tonumber(iLevel))
+                self:_SetItemLevel(tonumber(iLevel))
                 return  -- "continue"
             end
 
             local upgradeLevel, upgradeMax = text:match(_upgradeLevelRegex)
             if upgradeLevel and upgradeMax then
-                self:_setUpgrades(tonumber(upgradeLevel), tonumber(upgradeMax))
+                self:_SetUpgrades(tonumber(upgradeLevel), tonumber(upgradeMax))
                 return  -- "continue"
             end
 
             if text:match(_enchantedRegex) then
-                self:_setEnchantText(text)
+                self:_SetEnchantText(text)
                 return  -- "continue"
             end
 
@@ -488,27 +491,27 @@ function Geary_Item:_parseTooltip()
                     return  -- "continue"
                 end
             end
-        end)()
+        end)(self)
     end
 
     -- Clear the tooltip's content (which also clears its owner)
     self.tooltip:ClearLines()
 end
 
-function Geary_Item:_getGems(slot)
+function Geary_Item:_GetGems(slot)
     -- Get jewelIds from the item link
     local jewelId = {}
     jewelId[1], jewelId[2], jewelId[3], jewelId[4] =
     self.link:match("item:.-:.-:(.-):(.-):(.-):(.-):")
 
     -- Check all sockets for a gem
-    for socketIndex = 1, Geary.MAX_GEMS do
+    for socketIndex = 1, self.MAX_GEMS do
         local itemName, itemLink = GetItemGem(self.link, socketIndex)
         if itemLink == nil then
             if jewelId[socketIndex] ~= nil and tonumber(jewelId[socketIndex]) ~= 0 then
                 -- GetItemGem returned nil because the gem is not in the player's local cache
                 self.failedJewelIds[socketIndex] = jewelId[socketIndex]
-                Geary:debugLog(("GetItemGem(%s, %i) returned nil when link had %d"):format(self.link:gsub("|", "||"),
+                Geary:DebugLog(("GetItemGem(%s, %i) returned nil when link had %d"):format(self.link:gsub("|", "||"),
                     socketIndex, tonumber(jewelId[socketIndex])))
             end
         else
@@ -519,7 +522,7 @@ function Geary_Item:_getGems(slot)
                     -- Not sure this is possible, but check it to be safe
                     -- We failed to get the gem's quality from its link, so count it as failed
                     self.failedJewelIds[socketIndex] = jewelId[socketIndex]
-                    Geary:debugLog("Failed to get item quality from gem", itemLink)
+                    Geary:DebugLog("Failed to get item quality from gem", itemLink)
                 else
                     if gemQuality == ITEM_QUALITY_LEGENDARY then
                         self.hasCohMeta = true
@@ -533,17 +536,17 @@ function Geary_Item:_getGems(slot)
     end
 end
 
-function Geary_Item:_setItemLevel(iLevel)
+function Geary_Item:_SetItemLevel(iLevel)
     if self.iLevel > 0 then
-        Geary:print(Geary.CC_ERROR .. "ERROR: Multiple item levels found on " .. self.link .. Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "ERROR: Multiple item levels found on " .. self.link .. Geary.CC_END)
     else
         self.iLevel = iLevel
     end
 end
 
-function Geary_Item:_setUpgrades(upgradeLevel, upgradeMax)
+function Geary_Item:_SetUpgrades(upgradeLevel, upgradeMax)
     if self.upgradeLevel > 0 or self.upgradeMax > 0 then
-        Geary:print(Geary.CC_ERROR .. "ERROR: Multiple upgrade levels found on " .. self.link .. Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "ERROR: Multiple upgrade levels found on " .. self.link .. Geary.CC_END)
     else
         self.upgradeLevel = upgradeLevel
         self.upgradeMax = upgradeMax
@@ -559,9 +562,9 @@ function Geary_Item:_setUpgrades(upgradeLevel, upgradeMax)
     end
 end
 
-function Geary_Item:_setEnchantText(enchantText)
+function Geary_Item:_SetEnchantText(enchantText)
     if self.enchantText ~= nil then
-        Geary:print(Geary.CC_ERROR .. "ERROR: Multiple enchants found on " .. self.link .. Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "ERROR: Multiple enchants found on " .. self.link .. Geary.CC_END)
     else
         self.enchantText = enchantText
     end
@@ -572,7 +575,7 @@ end
 -- so instead we look for gems in the extra socket. By comparing the number of sockets in the BASE item
 -- versus the number of gems and sockets in THIS item, we can tell if there is an extra gem.
 -- Note: This is tooltip parsing similar to the full parse, but we just care about empty sockets.
-function Geary_Item:_isMissingExtraGem()
+function Geary_Item:_IsMissingExtraGem()
 
     -- Get the base item info from this item
     local _, baseItemLink = GetItemInfo(self.id)
@@ -591,7 +594,7 @@ function Geary_Item:_isMissingExtraGem()
     for lineNum = 1, self.tooltip:NumLines() do
         (function()  -- Function so we can use return as "continue"
             local text = _G["Geary_Tooltip_ScannerTextLeft" .. lineNum]:GetText()
-            Geary:debugLog("extra gem:", text)
+            Geary:DebugLog("extra gem:", text)
 
             for _, socketName in pairs(_socketNames) do
                 if text == socketName then
@@ -607,10 +610,10 @@ function Geary_Item:_isMissingExtraGem()
 
     -- Total sockets in THIS item is filled plus failed plus empty
     -- If total is <= the count in the base item, the extra gem is missing
-    Geary:debugLog(("extra gem: filled=%i, failed=%i, empty=%i, base=%i"):format(Geary:tableSize(self.filledSockets),
-        Geary:tableSize(self.failedJewelIds), Geary:tableSize(self.emptySockets), baseSocketCount))
-    if Geary:tableSize(self.filledSockets) + Geary:tableSize(self.failedJewelIds) +
-        Geary:tableSize(self.emptySockets) <= baseSocketCount
+    Geary:DebugLog(("extra gem: filled=%i, failed=%i, empty=%i, base=%i"):format(Geary:TableSize(self.filledSockets),
+        Geary:TableSize(self.failedJewelIds), Geary:TableSize(self.emptySockets), baseSocketCount))
+    if Geary:TableSize(self.filledSockets) + Geary:TableSize(self.failedJewelIds) +
+        Geary:TableSize(self.emptySockets) <= baseSocketCount
     then
         return true
     else

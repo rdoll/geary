@@ -31,19 +31,19 @@ local _fontFilenames = {
     }
 }
 
-function Geary_Options_Interface:init()
+function Geary_Options_Interface:Init()
     -- Add our options frame to the Interface Addon Options GUI
     local frame = CreateFrame("Frame", "Geary_Ui_Options_Frame", UIParent)
     frame:Hide()
     frame.name = Geary.title
-    frame.default = function(self) Geary_Options_Interface:onDefault(self) end
-    frame.okay = function(self) Geary_Options_Interface:onOkay(self) end
+    frame.default = function(self) Geary_Options_Interface:OnDefault(self) end
+    frame.okay = function(self) Geary_Options_Interface:OnOkay(self) end
     frame:SetScript("OnShow", function(self) Geary_Options_Interface:OnShow(self) end)
     InterfaceOptions_AddCategory(frame)
     self.mainFrame = frame
 end
 
-function Geary_Options_Interface:_createContents()
+function Geary_Options_Interface:_CreateContents()
 
     -- Title
     local title = self.mainFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -61,18 +61,18 @@ function Geary_Options_Interface:_createContents()
     subtitle:SetText("Version: " .. Geary.version .. "\n" .. Geary.notes)
 
     -- Create sections
-    local section = self:_createIconSection(subtitle)
-    section = self:_createInterfaceSection(section)
-    section = self:_createDatabaseSection(section)
+    local section = self:_CreateIconSection(subtitle)
+    section = self:_CreateInterfaceSection(section)
+    section = self:_CreateDatabaseSection(section)
 
     -- Mark created so we don't recreate everything
     self.contentsCreated = true
 end
 
-function Geary_Options_Interface:_createIconSection(previousItem)
+function Geary_Options_Interface:_CreateIconSection(previousItem)
 
     -- Icon header
-    local iconHeader = self:_createHeader(self.mainFrame, "Geary Icon Button")
+    local iconHeader = self:_CreateHeader(self.mainFrame, "Geary Icon Button")
     iconHeader:SetWidth(self.mainFrame:GetWidth() - 32)
     iconHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -2, -5)
 
@@ -142,10 +142,10 @@ local function _logFontFilenameDropdownInitialize(self, level)
     end
 end
 
-function Geary_Options_Interface:_createInterfaceSection(previousItem)
+function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
 
     -- Geary interface header
-    local interfaceHeader = self:_createHeader(self.mainFrame, "Geary Interface")
+    local interfaceHeader = self:_CreateHeader(self.mainFrame, "Geary Interface")
     interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
     interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -45)
 
@@ -161,7 +161,7 @@ function Geary_Options_Interface:_createInterfaceSection(previousItem)
     UIDropDownMenu_Initialize(dropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetWidth(dropdown, 100)
     UIDropDownMenu_SetButtonWidth(dropdown, 124)
-    UIDropDownMenu_SetSelectedID(dropdown, _fontFilenames.byFilename[Geary_Options.getLogFontFilename()].id)
+    UIDropDownMenu_SetSelectedID(dropdown, _fontFilenames.byFilename[Geary_Options.GetLogFontFilename()].id)
     UIDropDownMenu_JustifyText(dropdown, "LEFT")
 
     -- Log font height slider
@@ -203,10 +203,10 @@ function Geary_Options_Interface:_createInterfaceSection(previousItem)
     return label
 end
 
-function Geary_Options_Interface:_createDatabaseSection(previousItem)
+function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
 
     -- Geary database header
-    local interfaceHeader = self:_createHeader(self.mainFrame, "Geary Database")
+    local interfaceHeader = self:_CreateHeader(self.mainFrame, "Geary Database")
     interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
     interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -5, -45)
 
@@ -263,7 +263,7 @@ function Geary_Options_Interface:_createDatabaseSection(previousItem)
     return self.databaseMinLevelSlider
 end
 
-function Geary_Options_Interface:_createHeader(parent, name)
+function Geary_Options_Interface:_CreateHeader(parent, name)
 
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetHeight(16)
@@ -300,7 +300,7 @@ end
 
 function Geary_Options_Interface:Hide()
     if InterfaceOptionsFrameCancel == nil then
-        Geary:print(Geary.CC_ERROR .. "Cannot hide Interface options" .. Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "Cannot hide Interface options" .. Geary.CC_END)
     else
         -- If the cancel button isn't visible, clicking it causes the frame to be shown
         if InterfaceOptionsFrameCancel:IsVisible() then
@@ -310,7 +310,7 @@ function Geary_Options_Interface:Hide()
     end
 end
 
-function Geary_Options_Interface:toggle()
+function Geary_Options_Interface:Toggle()
     if InterfaceOptionsFrame:IsShown() then
         Geary_Options_Interface:Hide()
     else
@@ -321,46 +321,46 @@ end
 function Geary_Options_Interface:OnShow(frame)
     -- Create options frame contents once when necessary
     if not self.contentsCreated then
-        self:_createContents()
+        self:_CreateContents()
     end
 
     -- Make the options match the current settings
-    self.iconShownCheckbox:SetChecked(Geary_Options:isIconShown())
-    self.iconScaleSlider:SetValue(ceil(Geary_Options:getIconScale() * 100))
+    self.iconShownCheckbox:SetChecked(Geary_Options:IsIconShown())
+    self.iconScaleSlider:SetValue(ceil(Geary_Options:GetIconScale() * 100))
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
-        _fontFilenames.byFilename[Geary_Options:getLogFontFilename()].id)
-    self.logFontHeightSlider:SetValue(Geary_Options:getLogFontHeight())
-    self.databaseEnabledCheckbox:SetChecked(Geary_Options:isDatabaseEnabled())
-    self.databaseMinLevelSlider:SetValue(Geary_Options:getDatabaseMinLevel())
+        _fontFilenames.byFilename[Geary_Options:GetLogFontFilename()].id)
+    self.logFontHeightSlider:SetValue(Geary_Options:GetLogFontHeight())
+    self.databaseEnabledCheckbox:SetChecked(Geary_Options:IsDatabaseEnabled())
+    self.databaseMinLevelSlider:SetValue(Geary_Options:GetDatabaseMinLevel())
 end
 
-function Geary_Options_Interface:onDefault(frame)
-    self.iconShownCheckbox:SetChecked(Geary_Options:getDefaultIconShown())
-    self.iconScaleSlider:SetValue(ceil(Geary_Options:getDefaultIconScale() * 100))
+function Geary_Options_Interface:OnDefault(frame)
+    self.iconShownCheckbox:SetChecked(Geary_Options:GetDefaultIconShown())
+    self.iconScaleSlider:SetValue(ceil(Geary_Options:GetDefaultIconScale() * 100))
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
-        _fontFilenames.byFilename[Geary_Options:getDefaultLogFontFilename()].id)
-    self.logFontHeightSlider:SetValue(Geary_Options:getDefaultLogFontHeight())
-    self.databaseEnabledCheckbox:SetChecked(Geary_Options:getDefaultDatabaseEnabled())
-    self.databaseMinLevelSlider:SetValue(Geary_Options:getDefaultDatabaseMinLevel())
+        _fontFilenames.byFilename[Geary_Options:GetDefaultLogFontFilename()].id)
+    self.logFontHeightSlider:SetValue(Geary_Options:GetDefaultLogFontHeight())
+    self.databaseEnabledCheckbox:SetChecked(Geary_Options:GetDefaultDatabaseEnabled())
+    self.databaseMinLevelSlider:SetValue(Geary_Options:GetDefaultDatabaseMinLevel())
 end
 
-function Geary_Options_Interface:onOkay(frame)
+function Geary_Options_Interface:OnOkay(frame)
     if self.iconShownCheckbox:GetChecked() then
         Geary_Icon:Show()
     else
         Geary_Icon:Hide()
     end
-    Geary_Icon:setScale(self.iconScaleSlider:GetValue() / 100)
-    Geary_Interface_Log:setFont(_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
+    Geary_Icon:SetScale(self.iconScaleSlider:GetValue() / 100)
+    Geary_Interface_Log:SetFont(_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
         self.logFontHeightSlider:GetValue())
     if self.databaseEnabledCheckbox:GetChecked() then
-        Geary_Database:enable()
+        Geary_Database:Enable()
     else
-        Geary_Database:disable()
+        Geary_Database:Disable()
     end
-    Geary_Database:setMinLevel(self.databaseMinLevelSlider:GetValue())
+    Geary_Database:SetMinLevel(self.databaseMinLevelSlider:GetValue())
 end

@@ -35,7 +35,7 @@ Geary_Interface_Player = {
     }
 }
 
-function Geary_Interface_Player:init(parent)
+function Geary_Interface_Player:Init(parent)
 
     local frame = CreateFrame("Frame", "$parent_Frame", parent)
     frame:Hide()
@@ -49,26 +49,26 @@ function Geary_Interface_Player:init(parent)
     fontString:SetText("No inspection details available")
     frame.unavailFontString = fontString
 
-    self:_initPaperDoll(self.mainFrame)
-    self:_initSummary(self.mainFrame, self.paperDoll.frame)
+    self:_InitPaperDoll(self.mainFrame)
+    self:_InitSummary(self.mainFrame, self.paperDoll.frame)
 
-    Geary_Interface:createTab("Player",
+    Geary_Interface:CreateTab("Player",
         function() Geary_Interface_Player:Show() end,
         function() Geary_Interface_Player:Hide() end)
 end
 
-function Geary_Interface_Player:_initPaperDoll(parent)
+function Geary_Interface_Player:_InitPaperDoll(parent)
     local frame = CreateFrame("Frame", "$parent_PaperDollFrame", parent)
     frame:Hide()
     frame:SetPoint("TOPLEFT", parent, "TOPLEFT")
     frame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -186, 0)
     self.paperDoll.frame = frame
 
-    self:_initModel(self.paperDoll.frame)
-    self:_initSlots(self.paperDoll.frame)
+    self:_InitModel(self.paperDoll.frame)
+    self:_InitSlots(self.paperDoll.frame)
 end
 
-function Geary_Interface_Player:_initModel(parent)
+function Geary_Interface_Player:_InitModel(parent)
 
     -- Scale the model widths and heights which were pulled from the PaperDollFrame
     local scale = 0.8888
@@ -113,10 +113,10 @@ function Geary_Interface_Player:_initModel(parent)
     self.paperDoll.model = model
 end
 
-function Geary_Interface_Player:_initSlots(parent)
+function Geary_Interface_Player:_InitSlots(parent)
 
     local lastLeft, lastRight
-    for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
+    for _, slotName in ipairs(Geary_Item:GetInvSlotsInOrder()) do
 
         local frame = CreateFrame("Frame", "$parent_" .. slotName .. "_Frame", parent)
         frame.emptyTooltip = _G[slotName:upper()]
@@ -163,7 +163,7 @@ function Geary_Interface_Player:_initSlots(parent)
         info.enchantTexture:SetSize(10, 10)
 
         info.gemTextures = {}
-        for gemIndex = 1, Geary.MAX_GEMS do
+        for gemIndex = 1, Geary_Item.MAX_GEMS do
             info.gemTextures[gemIndex] = info:CreateTexture("$parent_Gem_Texture_" .. gemIndex, "OVERLAY")
             info.gemTextures[gemIndex]:SetSize(10, 10)
         end
@@ -216,7 +216,7 @@ function Geary_Interface_Player:_initSlots(parent)
                 elseif self.side == "right" then
                     GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
                 else
-                    Geary:print(Geary.CC_ERROR .. "Unknown info side '" ..
+                    Geary:Print(Geary.CC_ERROR .. "Unknown info side '" ..
                         (self.side == nil and "nil" or self.side) .. "'" .. Geary.CC_END)
                 end
                 GameTooltip:SetText(self.tooltip)
@@ -250,7 +250,7 @@ function Geary_Interface_Player:_initSlots(parent)
             elseif self.paperDollSide == "right" then
                 GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 0, self:GetHeight())
             else
-                Geary:print(Geary.CC_ERROR .. "Unknown paperDollSide '" ..
+                Geary:Print(Geary.CC_ERROR .. "Unknown paperDollSide '" ..
                     (self.paperDollSide == nil and "nil" or self.paperDollSide) .. "'" .. Geary.CC_END)
                 GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
             end
@@ -284,7 +284,7 @@ function Geary_Interface_Player:_initSlots(parent)
     end
 end
 
-function Geary_Interface_Player:_initSummary(parent, paperDollFrame)
+function Geary_Interface_Player:_InitSummary(parent, paperDollFrame)
 
     local frame = CreateFrame("Frame", "$parent_Summary", parent)
     frame:Hide()
@@ -326,7 +326,7 @@ function Geary_Interface_Player:_initSummary(parent, paperDollFrame)
     self.summary = frame
 end
 
-function Geary_Interface_Player:clear()
+function Geary_Interface_Player:Clear()
 
     self.paperDoll.hasPlayer = false
     self.paperDoll.model:ClearModel()
@@ -339,11 +339,11 @@ function Geary_Interface_Player:clear()
         slotData.info.tooltip = nil
         slotData.info.fontString:SetText("")
         slotData.info.enchantTexture:SetTexture(0, 0, 0, 0)
-        for gemIndex = 1, Geary.MAX_GEMS do
+        for gemIndex = 1, Geary_Item.MAX_GEMS do
             slotData.info.gemTextures[gemIndex]:SetTexture(0, 0, 0, 0)
         end
         slotData.icon:Hide()
-        self:_setItemBorder(slotName, nil)
+        self:_SetItemBorder(slotName, nil)
     end
 
     if self.mainFrame:IsVisible() then
@@ -351,22 +351,22 @@ function Geary_Interface_Player:clear()
     end
 end
 
-function Geary_Interface_Player:_setPlayerSummaryText(inspect)
+function Geary_Interface_Player:_SetPlayerSummaryText(inspect)
     self.summary.playerFontString:SetFormattedText("\n" ..
         "%s %s\n" .. -- Player name and faction
         "%i %s %s\n", -- Level, class, and spec
-        inspect.player:getFactionInlineIcon(), inspect.player:getFullNameLink(),
-        inspect.player.level, inspect.player:getColorizedClassName(), inspect.player:getSpecWithInlineIcon())
+        inspect.player:GetFactionInlineIcon(), inspect.player:GetFullNameLink(),
+        inspect.player.level, inspect.player:GetColorizedClassName(), inspect.player:GetSpecWithInlineIcon())
 end
 
-function Geary_Interface_Player:inspectionStart(inspect)
+function Geary_Interface_Player:InspectionStart(inspect)
 
     self.paperDoll.hasPlayer = true
 
     SetPaperDollBackground(self.paperDoll.model, inspect.player.unit)
     self.paperDoll.model:SetUnit(inspect.player.unit)
 
-    self:_setPlayerSummaryText(inspect)
+    self:_SetPlayerSummaryText(inspect)
     self.summary.statsEditBox:SetText("         Inspection try #" .. inspect.inspectTry .. "...")
 
     if self.mainFrame:IsVisible() then
@@ -374,23 +374,23 @@ function Geary_Interface_Player:inspectionStart(inspect)
     end
 end
 
-function Geary_Interface_Player:inspectionFailed(inspect)
-    self:_markMissingItems(inspect)
-    self:_setPlayerSummaryText(inspect)
+function Geary_Interface_Player:InspectionFailed(inspect)
+    self:_MarkMissingItems(inspect)
+    self:_SetPlayerSummaryText(inspect)
     self.summary.statsEditBox:SetText(Geary.CC_FAILED .. "          Inspection failed" .. Geary.CC_END)
 end
 
-function Geary_Interface_Player:inspectionEnd(inspect)
+function Geary_Interface_Player:InspectionEnd(inspect)
 
-    self:_setPlayerSummaryText(inspect)
-    self:_markMissingItems(inspect)
+    self:_SetPlayerSummaryText(inspect)
+    self:_MarkMissingItems(inspect)
 
     -- TODO This is duplicated work from Geary_Inspect using private data
 
     local itemColor, itemCounts, itemTwoHand
     itemColor = (inspect.emptySlots > 0 or inspect.failedSlots > 0) and Geary.CC_MISSING or Geary.CC_CORRECT
     itemCounts = inspect.filledSlots .. "/" .. inspect.itemCount
-    itemTwoHand = inspect.hasTwoHandWeapon and (inspect.player:hasTitansGrip() and " (TG)" or " (2H)") or ""
+    itemTwoHand = inspect.hasTwoHandWeapon and (inspect.player:HasTitansGrip() and " (TG)" or " (2H)") or ""
 
     local upgradeColor, upgradeCounts = Geary.CC_NA, "-"
     if inspect.upgradeMax > 0 then
@@ -475,14 +475,14 @@ function Geary_Interface_Player:inspectionEnd(inspect)
     if inspect.minItem ~= nil then
         minItemColor = ""
         minItemString = inspect.minItem.link:gsub("[|]h.-[|]h",
-            "|h" .. inspect.minItem:iLevelWithUpgrades() .. " " .. inspect.minItem.inlineTexture .. "|h")
+            "|h" .. inspect.minItem:ILevelWithUpgrades() .. " " .. inspect.minItem.inlineTexture .. "|h")
     end
 
     local maxItemColor, maxItemString = Geary.CC_NA, "-"
     if inspect.maxItem ~= nil then
         maxItemColor = ""
         maxItemString = inspect.maxItem.link:gsub("[|]h.-[|]h",
-            "|h" .. inspect.maxItem:iLevelWithUpgrades() .. " " .. inspect.maxItem.inlineTexture .. "|h")
+            "|h" .. inspect.maxItem:ILevelWithUpgrades() .. " " .. inspect.maxItem.inlineTexture .. "|h")
     end
 
     self.summary.statsEditBox:SetText(itemColor .. "Items: " .. itemCounts .. itemTwoHand .. Geary.CC_END .. "\n" ..
@@ -507,17 +507,17 @@ function Geary_Interface_Player:inspectionEnd(inspect)
         maxItemColor .. "Highest Item: " .. maxItemString .. Geary.CC_END)
 end
 
-function Geary_Interface_Player:setItem(slotName, item)
+function Geary_Interface_Player:SetItem(slotName, item)
 
     if self.paperDoll.slots[slotName] == nil then
-        Geary:print(Geary.CC_FAILED .. "Invalid slotName", slotName, "for paper doll" .. Geary.CC_END)
+        Geary:Print(Geary.CC_FAILED .. "Invalid slotName", slotName, "for paper doll" .. Geary.CC_END)
         return
     end
 
     local slotData = self.paperDoll.slots[slotName]
 
     if slotData.item ~= nil and slotData.item.link == item.link then
-        -- Geary:debugPrint(Geary.CC_DEBUG .. "Paper doll slot", slotName, "already", item.link .. Geary.CC_END)
+        -- Geary:DebugPrint(Geary.CC_DEBUG .. "Paper doll slot", slotName, "already", item.link .. Geary.CC_END)
         return
     end
 
@@ -526,58 +526,58 @@ function Geary_Interface_Player:setItem(slotName, item)
     slotData.icon:SetTexture(item.texture)
     slotData.icon:SetTexCoord(0, 1, 0, 1) -- Must reset in case icon was previously missing item texture
     slotData.icon:Show()
-    self:_setItemBorder(slotName, item)
+    self:_SetItemBorder(slotName, item)
 
-    self:_addInfoTooltipText(slotData.info, item:iLevelWithUpgrades() .. " " ..
-        item:getItemLinkWithInlineTexture())
-    slotData.info.fontString:SetText(item:iLevelWithUpgrades())
-    self:_setEnchantIcon(slotData.info, item)
-    self:_setGemIcons(slotData.info, item)
+    self:_AddInfoTooltipText(slotData.info, item:ILevelWithUpgrades() .. " " ..
+        item:GetItemLinkWithInlineTexture())
+    slotData.info.fontString:SetText(item:ILevelWithUpgrades())
+    self:_SetEnchantIcon(slotData.info, item)
+    self:_SetGemIcons(slotData.info, item)
 
     if item.isMissingCohMeta then
-        self:_addInfoTooltipText(slotData.info,
+        self:_AddInfoTooltipText(slotData.info,
             Geary.CC_OPTIONAL .. "Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
     end
 
     if item.isMissingCov then
-        self:_addInfoTooltipText(slotData.info, Geary.CC_OPTIONAL .. "Missing Cloak of Virtue" .. Geary.CC_END)
+        self:_AddInfoTooltipText(slotData.info, Geary.CC_OPTIONAL .. "Missing Cloak of Virtue" .. Geary.CC_END)
     end
 
     -- Set the background color based on any issues with this item
-    if item:isMissingRequired() then
+    if item:IsMissingRequired() then
         slotData.info:SetBackdropColor(1, 0, 0, 0.44)
-    elseif item:isMissingOptional() then
+    elseif item:IsMissingOptional() then
         slotData.info:SetBackdropColor(1, 1, 0, 0.33)
     else
         slotData.info:SetBackdropColor(0, 0, 0, 0)
     end
 end
 
-function Geary_Interface_Player:_setEnchantIcon(info, item)
+function Geary_Interface_Player:_SetEnchantIcon(info, item)
     if item.enchantText == nil then
         if item.canEnchant then
             info.enchantTexture:SetTexture("Interface\\COMMON\\Indicator-Red")
             info.enchantTexture:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-            self:_addInfoTooltipText(info, Geary.CC_ERROR .. "Missing enchant" .. Geary.CC_END)
+            self:_AddInfoTooltipText(info, Geary.CC_ERROR .. "Missing enchant" .. Geary.CC_END)
         else
             info.enchantTexture:SetTexture(0, 0, 0, 0)
         end
     else
         info.enchantTexture:SetTexture("Interface\\ICONS\\inv_misc_enchantedscroll")
-        self:_addInfoTooltipText(info, Geary.CC_CORRECT .. item.enchantText .. Geary.CC_END)
+        self:_AddInfoTooltipText(info, Geary.CC_CORRECT .. item.enchantText .. Geary.CC_END)
     end
 end
 
-function Geary_Interface_Player:_setGemIcons(info, item)
+function Geary_Interface_Player:_SetGemIcons(info, item)
     local gemTextureIndex = 1
 
     -- Clear all
-    for gemNum = 1, Geary.MAX_GEMS do
+    for gemNum = 1, Geary_Item.MAX_GEMS do
         info.gemTextures[gemTextureIndex]:SetTexture(0, 0, 0, 0)
     end
 
     -- Filled gems
-    for gemNum = 1, Geary.MAX_GEMS do
+    for gemNum = 1, Geary_Item.MAX_GEMS do
         if item.filledSockets[gemNum] ~= nil then
             local texture = select(10, GetItemInfo(item.filledSockets[gemNum]))
             if texture == nil then
@@ -585,28 +585,28 @@ function Geary_Interface_Player:_setGemIcons(info, item)
                 texture = "Interface\\ICONS\\INV_Misc_Gem_Variety_01"
             end
             info.gemTextures[gemTextureIndex]:SetTexture(texture)
-            self:_addInfoTooltipText(info, Geary.CC_CORRECT .. "Gem " .. Geary.CC_END ..
-                Geary_Item:getGemLinkWithInlineTexture(item.filledSockets[gemNum]))
+            self:_AddInfoTooltipText(info, Geary.CC_CORRECT .. "Gem " .. Geary.CC_END ..
+                Geary_Item:GetGemLinkWithInlineTexture(item.filledSockets[gemNum]))
             gemTextureIndex = gemTextureIndex + 1
         end
     end
 
     -- Missing gems
-    for gemNum = 1, Geary.MAX_GEMS do
+    for gemNum = 1, Geary_Item.MAX_GEMS do
         if item.emptySockets[gemNum] ~= nil then
             info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
             info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-            self:_addInfoTooltipText(info, Geary.CC_ERROR .. "Empty " .. item.emptySockets[gemNum] .. Geary.CC_END)
+            self:_AddInfoTooltipText(info, Geary.CC_ERROR .. "Empty " .. item.emptySockets[gemNum] .. Geary.CC_END)
             gemTextureIndex = gemTextureIndex + 1
         end
     end
 
     -- Failed gems
-    for gemNum = 1, Geary.MAX_GEMS do
+    for gemNum = 1, Geary_Item.MAX_GEMS do
         if item.failedJewelIds[gemNum] ~= nil then
             info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
             info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-            self:_addInfoTooltipText(info, Geary.CC_FAILED .. "Failed to get gem details" .. Geary.CC_END)
+            self:_AddInfoTooltipText(info, Geary.CC_FAILED .. "Failed to get gem details" .. Geary.CC_END)
             gemTextureIndex = gemTextureIndex + 1
         end
     end
@@ -615,7 +615,7 @@ function Geary_Interface_Player:_setGemIcons(info, item)
     if item.isMissingBeltBuckle then
         info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Red")
         info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-        self:_addInfoTooltipText(info, Geary.CC_ERROR .. "Missing " .. Geary_Item:getBeltBuckleItemWithTexture() ..
+        self:_AddInfoTooltipText(info, Geary.CC_ERROR .. "Missing " .. Geary_Item:GetBeltBuckleItemWithTexture() ..
             Geary.CC_END)
         gemTextureIndex = gemTextureIndex + 1
     end
@@ -624,13 +624,13 @@ function Geary_Interface_Player:_setGemIcons(info, item)
     if item.isMissingEotbp then
         info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Yellow")
         info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
-        self:_addInfoTooltipText(info, Geary.CC_OPTIONAL .. "Missing " .. Geary_Item:getEotbpItemWithTexture() ..
+        self:_AddInfoTooltipText(info, Geary.CC_OPTIONAL .. "Missing " .. Geary_Item:GetEotbpItemWithTexture() ..
             Geary.CC_END)
         gemTextureIndex = gemTextureIndex + 1
     end
 end
 
-function Geary_Interface_Player:_addInfoTooltipText(info, text)
+function Geary_Interface_Player:_AddInfoTooltipText(info, text)
     if info.tooltip == nil then
         info.tooltip = text
     else
@@ -638,7 +638,7 @@ function Geary_Interface_Player:_addInfoTooltipText(info, text)
     end
 end
 
-function Geary_Interface_Player:_setItemBorder(slotName, item)
+function Geary_Interface_Player:_SetItemBorder(slotName, item)
     -- TODO If the item's probe failed, would be nice to see CC_FAILED color on border
     if item == nil then
         self.paperDoll.slots[slotName].frame:SetBackdropBorderColor(0, 0, 0, 0)
@@ -648,17 +648,17 @@ function Geary_Interface_Player:_setItemBorder(slotName, item)
     end
 end
 
-function Geary_Interface_Player:_markMissingItems(inspect)
+function Geary_Interface_Player:_MarkMissingItems(inspect)
     local mainHandIsTwoHand = false
-    for _, slotName in ipairs(Geary_Item:getInvSlotsInOrder()) do
+    for _, slotName in ipairs(Geary_Item:GetInvSlotsInOrder()) do
         local slotData = self.paperDoll.slots[slotName]
         if slotName == "MainHandSlot" and slotData.item ~= nil then
-            mainHandIsTwoHand = slotData.item:isTwoHandWeapon()
+            mainHandIsTwoHand = slotData.item:IsTwoHandWeapon()
         end
         if slotData.item == nil then
-            if slotName == "SecondaryHandSlot" and mainHandIsTwoHand and not inspect.player:hasTitansGrip()
+            if slotName == "SecondaryHandSlot" and mainHandIsTwoHand and not inspect.player:HasTitansGrip()
             then
-                Geary:debugLog(slotName, "not missing because main hand is 2Her and no Titan's Grip")
+                Geary:DebugLog(slotName, "not missing because main hand is 2Her and no Titan's Grip")
             else
                 -- A red circle with slash through it
                 slotData.icon:SetTexture("Interface\\Transmogrify\\Textures.png")
@@ -667,8 +667,7 @@ function Geary_Interface_Player:_markMissingItems(inspect)
 
                 slotData.frame:SetBackdropBorderColor(1, 0, 0, 1)
                 slotData.info:SetBackdropColor(1, 0, 0, 0.5)
-                self:_addInfoTooltipText(slotData.info,
-                    Geary.CC_ERROR .. TRANSMOGRIFY_INVALID_REASON1 .. Geary.CC_END)
+                self:_AddInfoTooltipText(slotData.info, Geary.CC_ERROR .. TRANSMOGRIFY_INVALID_REASON1 .. Geary.CC_END)
             end
         end
     end

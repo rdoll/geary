@@ -42,12 +42,12 @@ function Geary_Database_Entry:new(o)
     return o
 end
 
-function Geary_Database_Entry:makeObject(entryTable)
+function Geary_Database_Entry:MakeObject(entryTable)
     setmetatable(entryTable, self)
     self.__index = self
 end
 
-function Geary_Database_Entry:createFromInspection(inspect)
+function Geary_Database_Entry:CreateFromInspection(inspect)
     return self:new{
         playerGuid        = inspect.player.guid,
         playerName        = inspect.player.name,
@@ -71,7 +71,7 @@ function Geary_Database_Entry:createFromInspection(inspect)
     }
 end
 
-function Geary_Database_Entry:createFromUnit(unit)
+function Geary_Database_Entry:CreateFromUnit(unit)
     local name, realm = UnitName(unit)
     local _, _, classId = UnitClass(unit)
     return self:new{
@@ -83,7 +83,7 @@ function Geary_Database_Entry:createFromUnit(unit)
     }
 end
 
-function Geary_Database_Entry:getMissingRequiredCount()
+function Geary_Database_Entry:GetMissingRequiredCount()
     if self.missingItems == nil and self.missingGems == nil and self.missingEnchants == nil then
         return nil
     else
@@ -92,7 +92,7 @@ function Geary_Database_Entry:getMissingRequiredCount()
     end
 end
 
-function Geary_Database_Entry:getMissingOptionalCount()
+function Geary_Database_Entry:GetMissingOptionalCount()
     if self.missingUpgrades == nil and self.missingEotbp == nil then
         return nil
     else
@@ -121,7 +121,7 @@ function Geary_Database_Entry.orderedPairsByName(entries, ascending)
     for guid, entry in pairs(entries) do
         keys[kn] = {
             sourceKey = guid,
-            sortKey = Geary_Player:fullPlayerName(entry.playerName, entry.playerRealm)
+            sortKey = Geary_Player:FullPlayerName(entry.playerName, entry.playerRealm)
         }
         kn  = kn + 1
     end

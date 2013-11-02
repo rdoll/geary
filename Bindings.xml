@@ -24,7 +24,7 @@
         Geary_Interface:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_UI">
-        Geary_Interface:toggle()
+        Geary_Interface:Toggle()
     </Binding>
     <Binding name="GEARY_SHOW_ICON">
         Geary_Icon:Show()
@@ -33,7 +33,7 @@
         Geary_Icon:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_ICON">
-        Geary_Icon:toggle()
+        Geary_Icon:Toggle()
     </Binding>
     <Binding name="GEARY_SHOW_OPTIONS">
         Geary_Options_Interface:Show()
@@ -42,6 +42,6 @@
         Geary_Options_Interface:Hide()
     </Binding>
     <Binding name="GEARY_TOGGLE_OPTIONS">
-        Geary_Options_Interface:toggle()
+        Geary_Options_Interface:Toggle()
     </Binding>
 </Bindings>

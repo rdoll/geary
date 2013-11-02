@@ -9,6 +9,7 @@
 
 Geary = {
     -- AddOn info
+    NAME    = "Geary",
     version = nil,
     title   = nil,
     notes   = nil,
@@ -34,10 +35,7 @@ Geary = {
     CC_HEADER    = "|cffff00ff",
     CC_NA        = "|cff909090",
     CC_DEBUG     = GRAY_FONT_COLOR_CODE,
-    CC_END       = FONT_COLOR_CODE_CLOSE,
-
-    -- Inexplicably missing constants
-    MAX_GEMS = 4
+    CC_END       = FONT_COLOR_CODE_CLOSE
 }
 
 -- "VERSION" gets replaced with the TOC version
@@ -51,12 +49,12 @@ Geary version VERSION Usage
 /geary dumpitem <itemid | itemlink> [slotname]
 ]]
 
-function Geary:init()
+function Geary:Init()
     -- Our info
-    self.version = GetAddOnMetadata("Geary", "Version")
-    self.title   = GetAddOnMetadata("Geary", "Title")
-    self.notes   = GetAddOnMetadata("Geary", "Notes")
-    self:print("Loaded version", self.version)
+    self.version = GetAddOnMetadata(self.NAME, "Version")
+    self.title   = GetAddOnMetadata(self.NAME, "Title")
+    self.notes   = GetAddOnMetadata(self.NAME, "Notes")
+    self:Print("Loaded version", self.version)
     _usage = _usage:gsub("VERSION", Geary.version, 1)
     self.homeRealmName = GetRealmName()
 
@@ -87,7 +85,7 @@ end
 
 -- This is centralized to control module initialization order
 function Geary:ADDON_LOADED(addOnName)
-    if addOnName == "Geary" then
+    if addOnName == self.NAME then
         -- Don't need to track ADDON_LOADED anymore
         Geary_Event:UnregisterEvent(self.addOnLoadedEventHandlerId)
 
@@ -97,10 +95,10 @@ function Geary:ADDON_LOADED(addOnName)
 
         -- Init other modules
         Geary_Timer:Init()
-        Geary_Item:init() -- Must be before Geary_Interface_Player
-        Geary_Interface:init()
-        Geary_Icon:init()
-        Geary_Options_Interface:init()
+        Geary_Item:Init() -- Must be before Geary_Interface_Player
+        Geary_Interface:Init()
+        Geary_Icon:Init()
+        Geary_Options_Interface:Init()
     end
 end
 
@@ -108,42 +106,42 @@ end
 -- Debugging and logging utilities
 --
 
-function Geary:isDebugOn()
+function Geary:IsDebugOn()
     return self.debugOn
 end
 
 -- Automatically adds a space between arguments and a newline at end
-function Geary:print(...)
+function Geary:Print(...)
     print(self.title .. ":", ...)
 end
 
-function Geary:debugPrint(...)
-    if self.debugOn then
-        self:print(...)
+function Geary:DebugPrint(...)
+    if self:IsDebugOn() then
+        self:Print(...)
     end
 end
 
-function Geary:_log(...)
+function Geary:_Log(...)
     local args = { ... }
     for index, value in ipairs(args) do
-        Geary_Interface_Log:append(value)
+        Geary_Interface_Log:Append(value)
         if index < #args then
-            Geary_Interface_Log:append(" ")
+            Geary_Interface_Log:Append(" ")
         end
     end
 end
 
 -- Automatically adds a space between arguments and a newline at end
-function Geary:log(...)
-    self:_log(...)
-    Geary_Interface_Log:append("\n")
+function Geary:Log(...)
+    self:_Log(...)
+    Geary_Interface_Log:Append("\n")
 end
 
-function Geary:debugLog(...)
-    if self.debugOn then
-        Geary_Interface_Log:append(self.CC_DEBUG)
-        self:_log(...)
-        Geary_Interface_Log:append(self.CC_END .. "\n")
+function Geary:DebugLog(...)
+    if self:IsDebugOn() then
+        Geary_Interface_Log:Append(self.CC_DEBUG)
+        self:_Log(...)
+        Geary_Interface_Log:Append(self.CC_END .. "\n")
     end
 end
 
@@ -154,7 +152,7 @@ end
 -- so make our own functions.
 --
 
-function Geary:isTableEmpty(t)
+function Geary:IsTableEmpty(t)
     if t ~= nil then
         for _ in pairs(t) do
             return false
@@ -163,7 +161,7 @@ function Geary:isTableEmpty(t)
     return true
 end
 
-function Geary:tableSize(t)
+function Geary:TableSize(t)
     local count = 0
     if t ~= nil then
         for _ in pairs(t) do
@@ -182,7 +180,7 @@ end
 --   -1 if version1 is less than version2
 --    0 if version1 equals version2
 --    1 if version1 is greater than version2
-function Geary:versionCompare(version1, version2)
+function Geary:VersionCompare(version1, version2)
 
     -- Split versions into a table of parts
     local v1Parts = version1 ~= nil and { strsplit(".-", version1) } or {}
@@ -190,7 +188,7 @@ function Geary:versionCompare(version1, version2)
 
     -- Compare each part
     for index = 1, max(#v1Parts, #v2Parts) do
-        local partResult = self:_versionPartCompare(v1Parts[index], v2Parts[index])
+        local partResult = self:_VersionPartCompare(v1Parts[index], v2Parts[index])
         if partResult ~= 0 then
             return partResult  -- Parts did not match, so we're done
         end
@@ -204,7 +202,7 @@ end
 --   -1 if v1Part is less than v2Part
 --    0 if v1Part equals v2Part
 --    1 if v1Part is greater than v2Part
-function Geary:_versionPartCompare(v1Part, v2Part)
+function Geary:_VersionPartCompare(v1Part, v2Part)
 
     -- Check lengths first
     if v1Part ~= nil and v2Part == nil then
@@ -242,12 +240,11 @@ function Geary:_versionPartCompare(v1Part, v2Part)
     end
 end
 
-
 --
 -- Date/time utilities
 --
 
-function Geary:colorizedRelativeDateTime(timestamp)
+function Geary:ColorizedRelativeDateTime(timestamp)
 
     if timestamp == nil or timestamp < 1 then
         return self.CC_NA .. "never" .. self.CC_END
@@ -297,7 +294,7 @@ local function _slashCommandUi(rest)
     elseif rest == "hide" then
         Geary_Interface:Hide()
     elseif rest == "toggle" then
-        Geary_Interface:toggle()
+        Geary_Interface:Toggle()
     else
         print(_usage)
     end
@@ -309,7 +306,7 @@ local function _slashCommandIcon(rest)
     elseif rest == "hide" then
         Geary_Icon:Hide()
     elseif rest == "toggle" then
-        Geary_Icon:toggle()
+        Geary_Icon:Toggle()
     else
         print(_usage)
     end
@@ -321,7 +318,7 @@ local function _slashCommandOptions(rest)
     elseif rest == "hide" then
         Geary_Options_Interface:Hide()
     elseif rest == "toggle" then
-        Geary_Options_Interface:toggle()
+        Geary_Options_Interface:Toggle()
     else
         print(_usage)
     end
@@ -336,7 +333,7 @@ local function _slashCommandDebug(rest)
         print(_usage)
         return
     end
-    Geary:print("Debugging is " .. (Geary:isDebugOn() and "on" or "off"))
+    Geary:Print("Debugging is " .. (Geary:IsDebugOn() and "on" or "off"))
 end
 
 local function _slashCommandDumpItem(rest)
@@ -349,7 +346,7 @@ local function _slashCommandDumpItem(rest)
         itemId, slotBaseName = rest:match("^(%d+)%s*(.*)$")
         _, itemLink = GetItemInfo(tonumber(itemId))
         if itemLink == nil then
-            Geary:print(Geary.CC_FAILED .. "Item ID", itemId, "not in local cache." .. Geary.CC_END)
+            Geary:Print(Geary.CC_FAILED .. "Item ID", itemId, "not in local cache." .. Geary.CC_END)
             return
         end
     else
@@ -362,26 +359,26 @@ local function _slashCommandDumpItem(rest)
     else
         slotName = slotBaseName .. "Slot"
     end
-    if not Geary_Item:isInvSlotName(slotName) then
-        Geary:print(Geary.CC_ERROR .. "Invalid slot name", slotBaseName .. Geary.CC_END)
+    if not Geary_Item:IsInvSlotName(slotName) then
+        Geary:Print(Geary.CC_ERROR .. "Invalid slot name", slotBaseName .. Geary.CC_END)
         return
     end
 
     local oldDebug = Geary.debugOn
     Geary.debugOn = true
 
-    Geary_Interface_Log:clearIfTooLarge()
-    Geary_Interface:selectTab("Log")
+    Geary_Interface_Log:ClearIfTooLarge()
+    Geary_Interface:SelectTab("Log")
     Geary_Interface:Show()
-    Geary:debugLog()
-    Geary:debugLog("--- Dumping", slotName, "item", itemLink, "---")
+    Geary:DebugLog()
+    Geary:DebugLog("--- Dumping", slotName, "item", itemLink, "---")
     local item = Geary_Item:new{
         slot = slotName,
         link = itemLink
     }
     local player = Geary_Player:new{ unit = "player" } -- Use only guaranteed player we can get at
-    player:probeInfo()
-    item:probe(player)
+    player:Probe()
+    item:Probe(player)
 
     if not DevTools_Dump then
         LoadAddOn("Blizzard_DebugTools")
@@ -389,7 +386,7 @@ local function _slashCommandDumpItem(rest)
     if DevTools_Dump then
         DevTools_Dump(item)
     else
-        Geary:debugPrint("Failed to load Blizzard_DebugTools or find DevTools_Dump")
+        Geary:DebugPrint("Failed to load Blizzard_DebugTools or find DevTools_Dump")
     end
 
     Geary.debugOn = oldDebug
@@ -420,4 +417,4 @@ end
 -- Main
 --
 
-Geary:init()
+Geary:Init()

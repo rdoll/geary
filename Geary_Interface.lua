@@ -17,26 +17,26 @@ Geary_Interface = {
     }
 }
 
-function Geary_Interface:init()
+function Geary_Interface:Init()
 
     -- Create the main interface elements
-    self:_createMainFrame()
-    self:_createContentFrame(self.mainFrame)
+    self:_CreateMainFrame()
+    self:_CreateContentFrame(self.mainFrame)
 
     -- Init interface tab modules
-    Geary_Interface_Player:init(self.contentFrame)
-    Geary_Interface_Group:init(self.contentFrame)
-    Geary_Interface_Database:init(self.contentFrame)
-    Geary_Interface_Log:init(self.contentFrame)
+    Geary_Interface_Player:Init(self.contentFrame)
+    Geary_Interface_Group:Init(self.contentFrame)
+    Geary_Interface_Database:Init(self.contentFrame)
+    Geary_Interface_Log:Init(self.contentFrame)
 
     -- Tabs created, so initialize their state and select initial tab
     PanelTemplates_SetNumTabs(self.mainFrame, self.tabs.count)
     self.mainFrame.selectedTab = self.tabs.byName["Player"]
     PanelTemplates_UpdateTabs(self.mainFrame)
-    self:_tabOnClick(self.mainFrame.selectedTab)
+    self:_TabOnClick(self.mainFrame.selectedTab)
 end
 
-function Geary_Interface:_createMainFrame()
+function Geary_Interface:_CreateMainFrame()
 
     local frame = CreateFrame("Frame", "Geary_Ui_Main", UIParent)
     frame:Hide()
@@ -153,7 +153,7 @@ function Geary_Interface:_createMainFrame()
     button:SetScript("OnClick", function(self) HideParentPanel(self) end)
 end
 
-function Geary_Interface:_createContentFrame(parent)
+function Geary_Interface:_CreateContentFrame(parent)
     local frame = CreateFrame("Frame", "$parent_Content", parent)
     frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 22, -21)
     frame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -22, 24)
@@ -162,7 +162,7 @@ end
 
 -- NOTE: AchievementFrameTabButtonTemplate is defined in the Blizzard_AchievementUI AddOn
 -- NOTE: which must be loaded before we can use the template. This is done via a TOC dependency.
-function Geary_Interface:createTab(tabName, showFunc, hideFunc)
+function Geary_Interface:CreateTab(tabName, showFunc, hideFunc)
 
     -- Create it
     local tabId = self.tabs.count + 1
@@ -176,7 +176,7 @@ function Geary_Interface:createTab(tabName, showFunc, hideFunc)
     end
     tab:SetScript("OnClick", function(self)
         PlaySound("igCharacterInfoTab")
-        Geary_Interface:_tabOnClick(self:GetID())
+        Geary_Interface:_TabOnClick(self:GetID())
     end)
 
     -- Store tab data
@@ -189,15 +189,15 @@ function Geary_Interface:createTab(tabName, showFunc, hideFunc)
     self.tabs.count = tabId
 end
 
-function Geary_Interface:selectTab(tabName)
+function Geary_Interface:SelectTab(tabName)
     if self.tabs.byName[tabName] == nil then
-        Geary:print(Geary.CC_ERROR .. "Cannot find tab '" .. tabName .. "'" .. Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "Cannot find tab '" .. tabName .. "'" .. Geary.CC_END)
     else
-        self:_tabOnClick(self.tabs.byName[tabName])
+        self:_TabOnClick(self.tabs.byName[tabName])
     end
 end
 
-function Geary_Interface:_tabOnClick(clickedTabId)
+function Geary_Interface:_TabOnClick(clickedTabId)
 
     -- Update tabs to show which is selected
     local mainFrameName = self.mainFrame:GetName()
@@ -223,7 +223,7 @@ function Geary_Interface:Show()
     -- When the main interface is shown, let the current tab re-render to pick up any missed changes
     local selectedTab = self.mainFrame.selectedTab
     if self.tabs.byId[selectedTab] == nil then
-        Geary:debugPrint("Cannot reshow unknown selected tab " .. (selectedTab ~= nil and selectedTab or "nil"))
+        Geary:DebugPrint("Cannot reshow unknown selected tab " .. (selectedTab ~= nil and selectedTab or "nil"))
     else
         self.tabs.byId[selectedTab].show()
     end
@@ -233,7 +233,7 @@ function Geary_Interface:Hide()
     self.mainFrame:Hide()
 end
 
-function Geary_Interface:toggle()
+function Geary_Interface:Toggle()
     if (self.mainFrame:IsShown()) then
         self:Hide()
     else

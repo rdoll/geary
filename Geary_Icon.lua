@@ -11,13 +11,13 @@ Geary_Icon = {
     button = nil
 }
 
-function Geary_Icon:init()
+function Geary_Icon:Init()
     local button = CreateFrame("Button", "Geary_Ui_Icon_Button", UIParent)
     button:SetMovable(true)
     button:SetClampedToScreen(true)
     button:SetResizable(false)
     button:SetSize(70, 70)
-    button:SetScale(Geary_Options:getIconScale())
+    button:SetScale(Geary_Options:GetIconScale())
     button:SetPoint("CENTER", UIParent, "CENTER")
     button:SetBackdrop({
         bgFile   = "Interface\\ICONS\\INV_Misc_EngGizmos_30.png",
@@ -27,9 +27,7 @@ function Geary_Icon:init()
         edgeSize = 32,
         insets   = { left = 6, right = 6, top = 6, bottom = 6 }
     })
-    -- TODO Use one of these to highlight on click down and remove on click up
-    -- Interface/BUTTONS/ButtonHilight-Square.png
-    -- Interface/BUTTONS/CheckButtonHilight.png
+    button:SetHighlightTexture("Interface\\BUTTONS\\ButtonHilight-Square.png", "ADD")
     button:EnableMouse(true)
     button:RegisterForDrag("LeftButton")
     button:SetScript("OnDragStart", button.StartMoving)
@@ -38,7 +36,7 @@ function Geary_Icon:init()
     button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp",
         "Button4Up", "Button5Up")
     button:SetScript("OnClick", function(self, mouseButton, down) Geary_Icon:OnClick(mouseButton, down) end)
-    if Geary_Options:isIconShown() then
+    if Geary_Options:IsIconShown() then
         button:Show()
     else
         button:Hide()
@@ -50,25 +48,25 @@ function Geary_Icon:OnClick(mouseButton, down)
     if mouseButton == "LeftButton" then
         Geary_Inspect:InspectTarget()
     elseif mouseButton == "MiddleButton" then
-        Geary_Interface:toggle()
+        Geary_Interface:Toggle()
     elseif mouseButton == "RightButton" then
         Geary_Inspect:InspectSelf()
     elseif mouseButton == "Button4" or mouseButton == "Button5" then
-        Geary_Options_Interface:toggle()
+        Geary_Options_Interface:Toggle()
     end
 end
 
 function Geary_Icon:Show()
     self.button:Show()
-    Geary_Options:setIconShown()
+    Geary_Options:SetIconShown()
 end
 
 function Geary_Icon:Hide()
     self.button:Hide()
-    Geary_Options:setIconHidden()
+    Geary_Options:SetIconHidden()
 end
 
-function Geary_Icon:toggle()
+function Geary_Icon:Toggle()
     if (self.button:IsShown()) then
         self:Hide()
     else
@@ -76,7 +74,7 @@ function Geary_Icon:toggle()
     end
 end
 
-function Geary_Icon:setScale(scale)
+function Geary_Icon:SetScale(scale)
     self.button:SetScale(scale)
-    Geary_Options:setIconScale(scale)
+    Geary_Options:SetIconScale(scale)
 end

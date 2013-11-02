@@ -21,15 +21,15 @@ function Geary_Event:Init()
 end
 
 function Geary_Event.eventFrame:_RegisterEvent(eventHandlerId, eventName, callback)
-    Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Event registering", eventHandlerId, "for", eventName, Geary.CC_END)
+    Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Event registering", eventHandlerId, "for", eventName, Geary.CC_END)
 
     if self.events[eventName] == nil then
         self.events[eventName] = {}
     end
 
-    if Geary.isTableEmpty(self.events[eventName]) then
+    if Geary:IsTableEmpty(self.events[eventName]) then
         self:RegisterEvent(eventName)
-        Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Event registered", eventName, Geary.CC_END)
+        Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Event registered", eventName, Geary.CC_END)
     end
 
     self.events[eventName][eventHandlerId] = callback
@@ -37,7 +37,7 @@ end
 
 function Geary_Event.eventFrame:_HandleEvent(eventName, ...)
     for handlerId, callback in pairs(self.events[eventName]) do
-        Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Event calling handler ID", handlerId, "for event", eventName, Geary.CC_END)
+        Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Event calling handler ID", handlerId, "for event", eventName, Geary.CC_END)
         callback(...)
     end
 end
@@ -56,16 +56,16 @@ end
 function Geary_Event.eventFrame:_UnregisterEvent(eventHandlerId)
     local eventName = self:_FindEventNameForHandlerId(eventHandlerId)
     if eventName == nil then
-        Geary:print(Geary.CC_ERROR .. "Geary_Event failed to find ID", eventHandlerId, Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "Geary_Event failed to find ID", eventHandlerId, Geary.CC_END)
         return
     end
-    Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Event unregistering ID", eventHandlerId, "from", eventName, Geary.CC_END)
+    Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Event unregistering ID", eventHandlerId, "from", eventName, Geary.CC_END)
 
     self.events[eventName][eventHandlerId] = nil
-    if Geary:isTableEmpty(self.events[eventName]) then
+    if Geary:IsTableEmpty(self.events[eventName]) then
         self:UnregisterEvent(eventName)
         self.events[eventName] = nil
-        Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Event unregistered", eventName, Geary.CC_END)
+        Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Event unregistered", eventName, Geary.CC_END)
     end
 end
 
@@ -73,7 +73,7 @@ function Geary_Event.eventFrame:_UnregisterAll()
     for eventName, _ in pairs(self.events) do
         self:UnregisterEvent(eventName)
         self.events[eventName] = nil
-        Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Event unregistered", eventName, Geary.CC_END)
+        Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Event unregistered", eventName, Geary.CC_END)
     end
 end
 

@@ -13,7 +13,7 @@ Geary_Interface_Log = {
     LETTERS_MAX = 10000
 }
 
-function Geary_Interface_Log:init(parent)
+function Geary_Interface_Log:Init(parent)
 
     local frame = CreateFrame("ScrollFrame", "$parent_Log", parent, "UIPanelScrollFrameTemplate")
     -- "UIPanelScrollFrameTemplate2")  Includes borders around the scrollbar
@@ -33,7 +33,7 @@ function Geary_Interface_Log:init(parent)
     editBox:EnableMouseWheel(true)
     editBox:SetHyperlinksEnabled(true)
     editBox:Disable()
-    editBox:SetFont(Geary_Options:getLogFontFilename(), Geary_Options:getLogFontHeight())
+    editBox:SetFont(Geary_Options:GetLogFontFilename(), Geary_Options:GetLogFontHeight())
     editBox:SetScript("OnHyperlinkClick", function(self, link, text, button)
         SetItemRef(link, text, button)
     end)
@@ -47,10 +47,10 @@ function Geary_Interface_Log:init(parent)
     end)
     -- As text is added, scroll to the bottom so the most recent lines are visible
     editBox:SetScript("OnTextSet", function(self, userInput)
-        Geary_Interface_Log:_setScrollBarToBottom()
+        Geary_Interface_Log:_SetScrollBarToBottom()
     end)
     editBox:SetScript("OnTextChanged", function(self, userInput)
-        Geary_Interface_Log:_setScrollBarToBottom()
+        Geary_Interface_Log:_SetScrollBarToBottom()
     end)
     self.editBox = editBox
 
@@ -62,18 +62,18 @@ function Geary_Interface_Log:init(parent)
     button:SetSize(75, 17)
     button:SetPoint("BOTTOM", self.scrollFrame, "BOTTOM", 24, -21)
     button:SetText("Clear")
-    button:SetScript("OnClick", function(self) Geary_Interface_Log:clear() end)
+    button:SetScript("OnClick", function(self) Geary_Interface_Log:Clear() end)
 
-    Geary_Interface:createTab("Log",
+    Geary_Interface:CreateTab("Log",
         function() Geary_Interface_Log.scrollFrame:Show() end,
         function() Geary_Interface_Log.scrollFrame:Hide() end)
 end
 
-function Geary_Interface_Log:_setScrollBarToBottom()
+function Geary_Interface_Log:_SetScrollBarToBottom()
     self.scrollFrame:SetVerticalScroll(self.scrollFrame:GetVerticalScrollRange())
 end
 
-function Geary_Interface_Log:append(newText)
+function Geary_Interface_Log:Append(newText)
     if (newText ~= nil) then
         self.editBox:Insert(newText)
     end
@@ -82,18 +82,18 @@ end
 -- Callers can use this to clear the log at the start of an operation so it doesn't get too large
 -- Note: Ideally I'd like to prune the old lines to make room, but that cratered my client so
 --       we're going with a clear controlled by callers
-function Geary_Interface_Log:clearIfTooLarge()
+function Geary_Interface_Log:ClearIfTooLarge()
     if self.editBox:GetNumLetters() > self.LETTERS_MAX then
-        self:clear()
+        self:Clear()
     end
 end
 
-function Geary_Interface_Log:clear()
+function Geary_Interface_Log:Clear()
     self.editBox:SetText("")
 end
 
-function Geary_Interface_Log:setFont(fontFilename, fontHeight)
+function Geary_Interface_Log:SetFont(fontFilename, fontHeight)
     self.editBox:SetFont(fontFilename, fontHeight)
-    Geary_Options:setLogFontFilename(fontFilename)
-    Geary_Options:setLogFontHeight(fontHeight)
+    Geary_Options:SetLogFontFilename(fontFilename)
+    Geary_Options:SetLogFontHeight(fontHeight)
 end

@@ -28,7 +28,7 @@ Geary_Player = {
 -- Business logic methods not tied to a player instance
 --
 
-function Geary_Player:classColorize(classId, text)
+function Geary_Player:ClassColorize(classId, text)
     local _, classTag, _ = GetClassInfo(classId or 0) -- translate nil to zero to prevent errors
     text = text or ""
     if RAID_CLASS_COLORS[classTag] == nil then
@@ -38,7 +38,7 @@ function Geary_Player:classColorize(classId, text)
     end
 end
 
-function Geary_Player:fullPlayerName(name, realm)
+function Geary_Player:FullPlayerName(name, realm)
     if name == nil then
         return nil
     end
@@ -65,11 +65,11 @@ function Geary_Player:new(o)
     return o
 end
 
-function Geary_Player:isMaxLevel()
+function Geary_Player:IsMaxLevel()
     return self.level == self.MAX_LEVEL
 end
 
-function Geary_Player:probeInfo()
+function Geary_Player:Probe()
     if self.unit == nil then
         error("Cannot get player info without unit!")
         return
@@ -86,15 +86,15 @@ function Geary_Player:probeInfo()
     self.faction, _ = UnitFactionGroup(self.unit)
 end
 
-function Geary_Player:isUnitStillSamePlayer()
+function Geary_Player:IsUnitStillSamePlayer()
     return self.guid == UnitGUID(self.unit)
 end
 
-function Geary_Player:getFullNameLink()
-    return format(TEXT_MODE_A_STRING_DEST_UNIT, "", self.guid, self.name, self:fullPlayerName(self.name, self.realm))
+function Geary_Player:GetFullNameLink()
+    return format(TEXT_MODE_A_STRING_DEST_UNIT, "", self.guid, self.name, self:FullPlayerName(self.name, self.realm))
 end
 
-function Geary_Player:getFactionInlineIcon()
+function Geary_Player:GetFactionInlineIcon()
     if self.faction == "Horde" then
         return "|TInterface\\PVPFrame\\PVP-Currency-Horde.png:16:16:0:0:32:32:2:30:2:30|t"
     elseif self.faction == "Alliance" then
@@ -104,8 +104,8 @@ function Geary_Player:getFactionInlineIcon()
     end
 end
 
-function Geary_Player:getColorizedClassName()
-    return self:classColorize(self.classId, self.className)
+function Geary_Player:GetColorizedClassName()
+    return self:ClassColorize(self.classId, self.className)
 end
 
 local _roleInlineIcons = {
@@ -114,7 +114,7 @@ local _roleInlineIcons = {
     ["DAMAGER"] = INLINE_DAMAGER_ICON
 }
 
-function Geary_Player:getSpecWithInlineIcon()
+function Geary_Player:GetSpecWithInlineIcon()
     if self.spec == nil then
         return "NoSpec"
     elseif self.spec.role ~= nil and _roleInlineIcons[self.spec.role] ~= nil then
@@ -126,7 +126,7 @@ end
 
 -- Fury warriors level 38 and higher have Titan's grip
 -- I wish there were Blizzard constants for these dang literals :(
-function Geary_Player:hasTitansGrip()
+function Geary_Player:HasTitansGrip()
     return self.classId ~= nil and self.classId == 1 and
         self.level ~= nil and self.level >= 38 and
         self.spec ~= nil and self.spec.id ~= nil and self.spec.id == 72
@@ -142,19 +142,19 @@ function Geary_Player:INSPECT_READY()
 
     local specId, specName, roleTag
     if self.unit == "player" then
-        local nonGlobSpecId = GetSpecialization()
-        if nonGlobSpecId == nil then
-            Geary:print(Geary.CC_ERROR .. "nonGlobSpecId is nil!" .. Geary.CC_END)
+        local specIndex = GetSpecialization()
+        if specIndex == nil then
+            Geary:DebugPrint(Geary.CC_FAILED .. "No specialization found" .. Geary.CC_END)
             return
         end
-        specId, specName, _, _, _, roleTag = GetSpecializationInfo(nonGlobSpecId)
+        specId, specName, _, _, _, roleTag = GetSpecializationInfo(specIndex)
     else
         local globSpecId = GetInspectSpecialization(self.unit)
         if globSpecId == nil then
-            Geary:print(Geary.CC_ERROR .. "globSpecId is nil!" .. Geary.CC_END)
+            Geary:Print(Geary.CC_ERROR .. "globSpecId is nil!" .. Geary.CC_END)
             return
         elseif globSpecId == 0 then
-            Geary:print(Geary.CC_ERROR .. "globSpecId is 0 -- server didn't send it" .. Geary.CC_END)
+            Geary:Print(Geary.CC_ERROR .. "globSpecId is 0 -- server didn't send it" .. Geary.CC_END)
             return
         end
         --
@@ -168,17 +168,17 @@ function Geary_Player:INSPECT_READY()
         --
         roleTag = GetSpecializationRoleByID(globSpecId)
         if roleTag == nil then
-            Geary:print(Geary.CC_ERROR .. "globSpecId " .. globSpecId .. " is invalid!" .. Geary.CC_END)
+            Geary:Print(Geary.CC_ERROR .. "globSpecId " .. globSpecId .. " is invalid!" .. Geary.CC_END)
             return
         end
         specId, specName, _, _, _, _, _ = GetSpecializationInfoByID(globSpecId)
     end
 
     if specName == nil then
-        Geary:print(Geary.CC_ERROR .. "specName is nil!" .. Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "specName is nil!" .. Geary.CC_END)
         return
     elseif roleTag == nil then
-        Geary:print(Geary.CC_ERROR .. "roleTag is nil!" .. Geary.CC_END)
+        Geary:Print(Geary.CC_ERROR .. "roleTag is nil!" .. Geary.CC_END)
         return
     end
 

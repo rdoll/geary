@@ -28,14 +28,14 @@ function Geary_Options:ADDON_LOADED()
 
     -- If a version exists, see if we need to upgrade it
     if Geary_Saved_Options.version ~= nil then
-        local verComp = Geary:versionCompare(Geary.version, Geary_Saved_Options.version)
+        local verComp = Geary:VersionCompare(Geary.version, Geary_Saved_Options.version)
         if verComp == -1 then
-            Geary:print("Upgrading options from " .. Geary_Saved_Options.version .. " to " .. Geary.version)
-            if Geary:versionCompare("5.1.17-beta", Geary_Saved_Options.version) == -1 then
-                self:_upgradeTo5_1_17_beta()
+            Geary:Print("Upgrading options from " .. Geary_Saved_Options.version .. " to " .. Geary.version)
+            if Geary:VersionCompare("5.1.17-beta", Geary_Saved_Options.version) == -1 then
+                self:_UpgradeTo5_1_17_beta()
             end
         elseif verComp == 1 then
-            Geary:print(Geary.CC_ERROR .. "Options version " .. Geary_Saved_Options.version ..
+            Geary:Print(Geary.CC_ERROR .. "Options version " .. Geary_Saved_Options.version ..
                 " is newer than Geary version " .. Geary.version .. ". Errors may occur!" .. Geary.CC_END)
         end
     end
@@ -52,7 +52,7 @@ function Geary_Options:ADDON_LOADED()
 end
 
 -- Moved .icon.shown and .icon.scale to .iconShown and .iconScale
-function Geary_Options:_upgradeTo5_1_17_beta()
+function Geary_Options:_UpgradeTo5_1_17_beta()
     -- Options will be this version when this method is done
     local newOptions = { version = "5.1.17-beta" }
 
@@ -72,19 +72,19 @@ end
 -- Icon shown
 --
 
-function Geary_Options:getDefaultIconShown()
+function Geary_Options:GetDefaultIconShown()
     return self.default.iconShown
 end
 
-function Geary_Options:isIconShown()
+function Geary_Options:IsIconShown()
     return Geary_Saved_Options.iconShown
 end
 
-function Geary_Options:setIconShown()
+function Geary_Options:SetIconShown()
     Geary_Saved_Options.iconShown = true
 end
 
-function Geary_Options:setIconHidden()
+function Geary_Options:SetIconHidden()
     Geary_Saved_Options.iconShown = false
 end
 
@@ -92,15 +92,15 @@ end
 -- Icon scale
 --
 
-function Geary_Options:getDefaultIconScale()
+function Geary_Options:GetDefaultIconScale()
     return self.default.iconScale
 end
 
-function Geary_Options:getIconScale()
+function Geary_Options:GetIconScale()
     return Geary_Saved_Options.iconScale
 end
 
-function Geary_Options:setIconScale(scale)
+function Geary_Options:SetIconScale(scale)
     Geary_Saved_Options.iconScale = scale
 end
 
@@ -108,15 +108,15 @@ end
 -- Log font filename
 --
 
-function Geary_Options:getDefaultLogFontFilename()
+function Geary_Options:GetDefaultLogFontFilename()
     return self.default.logFontFilename
 end
 
-function Geary_Options:getLogFontFilename()
+function Geary_Options:GetLogFontFilename()
     return Geary_Saved_Options.logFontFilename
 end
 
-function Geary_Options:setLogFontFilename(fontFilename)
+function Geary_Options:SetLogFontFilename(fontFilename)
     Geary_Saved_Options.logFontFilename = fontFilename
 end
 
@@ -124,15 +124,15 @@ end
 -- Log font height
 --
 
-function Geary_Options:getDefaultLogFontHeight()
+function Geary_Options:GetDefaultLogFontHeight()
     return self.default.logFontHeight
 end
 
-function Geary_Options:getLogFontHeight()
+function Geary_Options:GetLogFontHeight()
     return Geary_Saved_Options.logFontHeight
 end
 
-function Geary_Options:setLogFontHeight(fontHeight)
+function Geary_Options:SetLogFontHeight(fontHeight)
     Geary_Saved_Options.logFontHeight = fontHeight
 end
 
@@ -140,19 +140,19 @@ end
 -- Database enabled
 --
 
-function Geary_Options:getDefaultDatabaseEnabled()
+function Geary_Options:GetDefaultDatabaseEnabled()
     return self.default.databaseEnabled
 end
 
-function Geary_Options:isDatabaseEnabled()
+function Geary_Options:IsDatabaseEnabled()
     return Geary_Saved_Options.databaseEnabled
 end
 
-function Geary_Options:setDatabaseEnabled()
+function Geary_Options:SetDatabaseEnabled()
     Geary_Saved_Options.databaseEnabled = true
 end
 
-function Geary_Options:setDatabaseDisabled()
+function Geary_Options:SetDatabaseDisabled()
     Geary_Saved_Options.databaseEnabled = false
 end
 
@@ -160,14 +160,14 @@ end
 -- Database minimum character level to store
 --
 
-function Geary_Options:getDefaultDatabaseMinLevel()
+function Geary_Options:GetDefaultDatabaseMinLevel()
     return self.default.databaseMinLevel
 end
 
-function Geary_Options:getDatabaseMinLevel()
+function Geary_Options:GetDatabaseMinLevel()
     return Geary_Saved_Options.databaseMinLevel
 end
 
-function Geary_Options:setDatabaseMinLevel(minLevel)
+function Geary_Options:SetDatabaseMinLevel(minLevel)
     Geary_Saved_Options.databaseMinLevel = minLevel
 end

@@ -9,15 +9,14 @@ Ideas/Notes
 
 * Geary icon needs a tooltip
 
-* Geary options: If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
+* Geary options:
+** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
+** Sliders are floating point now
 
 * Store interface and icon positions so failures put the windows back in the same spot
 ** Need to watch for being off the screen and reset to the center of the screen
 
 * Use frame templates for repeat items (e.g. summary rows)?
-
-* Standardize on class:MethodName, class.functionName, and class.memberName
-** Copy to Looty
 
 * If inspecting yourself, you know your professions and can check for profession perks
 
@@ -31,6 +30,8 @@ Ideas/Notes
 
 * Replace custom timer frame onupdate handler with an Animation?
 * Use Cooldown for geary icon cooldown effect
+
+* With 300+ database entries, rendering database rows all at once is a noticeable delay
 
 
 Under Consideration

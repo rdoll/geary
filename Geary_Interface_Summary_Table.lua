@@ -33,11 +33,11 @@ function Geary_Interface_Summary_Table:new(config)
     }
     setmetatable(o, self)
     self.__index = self
-    o:createContents(config.parent)
+    o:_CreateContents(config.parent)
     return o
 end
 
-function Geary_Interface_Summary_Table:createContents(parent)
+function Geary_Interface_Summary_Table:_CreateContents(parent)
 
     -- Characteristics of the frame's contents
     local fontFilename = Geary_Interface_Summary_Table.fontFilename
@@ -81,7 +81,7 @@ function Geary_Interface_Summary_Table:createContents(parent)
     scrollFrame:SetScrollChild(self.rowsFrame)
 end
 
-function Geary_Interface_Summary_Table:getRow(rowNumber)
+function Geary_Interface_Summary_Table:GetRow(rowNumber)
 
     if self.rows[rowNumber] == nil then
 
@@ -90,14 +90,14 @@ function Geary_Interface_Summary_Table:getRow(rowNumber)
 
         -- Place row in the table
         -- Note: Assumes rows are always created in sequential order
-        row:getButton():SetPoint("LEFT", self.rowsFrame, "LEFT", 0, 0)
-        row:getButton():SetPoint("RIGHT", self.rowsFrame, "RIGHT", -0, 0)
+        row:GetButton():SetPoint("LEFT", self.rowsFrame, "LEFT", 0, 0)
+        row:GetButton():SetPoint("RIGHT", self.rowsFrame, "RIGHT", -0, 0)
         if rowNumber == 1 then
             -- First row is linked to top of rowsFrame
-            row:getButton():SetPoint("TOP", self.rowsFrame, "TOP", 0, -1)
+            row:GetButton():SetPoint("TOP", self.rowsFrame, "TOP", 0, -1)
         else
             -- Subsequent rows are beneath their predecessor
-            row:getButton():SetPoint("TOP", self.rows[rowNumber - 1]:getButton(), "BOTTOM", 0, -1)
+            row:GetButton():SetPoint("TOP", self.rows[rowNumber - 1]:GetButton(), "BOTTOM", 0, -1)
         end
 
         self.rows[rowNumber] = row
@@ -106,7 +106,7 @@ function Geary_Interface_Summary_Table:getRow(rowNumber)
     return self.rows[rowNumber]
 end
 
-function Geary_Interface_Summary_Table:hideAllRows()
+function Geary_Interface_Summary_Table:HideAllRows()
     for _, row in pairs(self.rows) do
         row:Hide()
     end
@@ -118,14 +118,14 @@ function Geary_Interface_Summary_Table:setNextSortOrder()
         self.sortOrderIndex = 1
     end
     if self.owner ~= nil then
-        self.owner:onChanged()
+        self.owner:OnChanged()
     end
 end
 
-function Geary_Interface_Summary_Table:getOrderedPairsFunc()
+function Geary_Interface_Summary_Table:GetOrderedPairsFunc()
     return Geary_Interface_Summary_Table.sortOrders[self.sortOrderIndex].orderedPairsFunc
 end
 
-function Geary_Interface_Summary_Table:isAscendingOrder()
+function Geary_Interface_Summary_Table:IsAscendingOrder()
     return Geary_Interface_Summary_Table.sortOrders[self.sortOrderIndex].ascendingOrder
 end

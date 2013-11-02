@@ -17,11 +17,11 @@ function Geary_Timer:Init()
 end
 
 function Geary_Timer.timerFrame:_StartTimer(timerId, seconds, callback)
-    Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Timer starting timer", timerId, "for", seconds, "seconds" .. Geary.CC_END)
+    Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Timer starting timer", timerId, "for", seconds, "seconds" .. Geary.CC_END)
 
-    if Geary:isTableEmpty(self.timers) then
+    if Geary:IsTableEmpty(self.timers) then
         self:SetScript("OnUpdate", self._OnUpdate)
-        Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Timer hooked OnUpdate" .. Geary.CC_END)
+        Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Timer hooked OnUpdate" .. Geary.CC_END)
     end
 
     self.timers[timerId] = {
@@ -36,7 +36,7 @@ function Geary_Timer.timerFrame:_OnUpdate(secondsSinceLastUpdate)
     for timerId, timerData in pairs(self.timers) do
         timerData.seconds = timerData.seconds - secondsSinceLastUpdate
         if timerData.seconds <= 0 then
-            Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Timer expired callback for", timerId, Geary.CC_END)
+            Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Timer expired callback for", timerId, Geary.CC_END)
             timerData.callback()
             expired[timerId] = 1  -- Defer timer removal from table until not iterating over table
         end
@@ -48,11 +48,11 @@ function Geary_Timer.timerFrame:_OnUpdate(secondsSinceLastUpdate)
 end
 
 function Geary_Timer.timerFrame:_StopTimer(timerId)
-    Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Timer stopping timer", timerId, Geary.CC_END)
+    Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Timer stopping timer", timerId, Geary.CC_END)
     self.timers[timerId] = nil
-    if Geary:isTableEmpty(self.timers) then
+    if Geary:IsTableEmpty(self.timers) then
         self:SetScript("OnUpdate", nil)
-        Geary:debugPrint(Geary.CC_DEBUG .. "Geary_Timer unhooked OnUpdate" .. Geary.CC_END)
+        Geary:DebugPrint(Geary.CC_DEBUG .. "Geary_Timer unhooked OnUpdate" .. Geary.CC_END)
     end
 end
 
