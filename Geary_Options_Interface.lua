@@ -43,6 +43,25 @@ function Geary_Options_Interface:Init()
     self.mainFrame = frame
 end
 
+--
+-- Starting in 5.4, sliders don't properly respect the step values and OnValueChanged events
+-- will receive fractional values. As detailed at http://www.wowwiki.com/Patch_5.4.0/API_changes#Slider,
+-- the following workaround honors the steps with a minimal impact to performance.
+--
+local function _sliderOnValueChangedFix(slider, value, valueSuffix)
+    -- start fix
+    if not slider._onsetting then  -- is single threaded
+        slider._onsetting = true
+        slider:SetValue(slider:GetValue())
+        value = slider:GetValue()  -- cant use original 'value' parameter
+        slider._onsetting = false
+    else
+        return  -- ignore recursion for actual event handler
+    end
+    -- end fix
+    slider.Value:SetText(valueSuffix ~= nil and (value .. valueSuffix) or value)  -- handle the event
+end
+
 function Geary_Options_Interface:_CreateContents()
 
     -- Title
@@ -96,6 +115,7 @@ function Geary_Options_Interface:_CreateIconSection(previousItem)
     slider:SetHeight(14)
     slider:SetMinMaxValues(10, 200)
     slider:SetValueStep(1)
+    slider:SetStepsPerPage(1)
     slider:SetOrientation("HORIZONTAL")
     slider:SetPoint("TOPLEFT", iconHeader, "BOTTOM", 0, -30)
     slider:Enable()
@@ -115,7 +135,7 @@ function Geary_Options_Interface:_CreateIconSection(previousItem)
     slider.Value:SetWidth(50)
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
-        self.Value:SetText(value .. "%")
+        _sliderOnValueChangedFix(self, value, "%")
     end)
     slider:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
@@ -170,6 +190,7 @@ function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
     slider:SetHeight(14)
     slider:SetMinMaxValues(8, 16)
     slider:SetValueStep(1)
+    slider:SetStepsPerPage(1)
     slider:SetOrientation("HORIZONTAL")
     slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOM", 0, -30)
     slider:Enable()
@@ -189,7 +210,7 @@ function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
     slider.Value:SetWidth(50)
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
-        self.Value:SetText(value)
+        _sliderOnValueChangedFix(self, value, nil)
     end)
     slider:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
@@ -230,6 +251,7 @@ function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
     slider:SetHeight(14)
     slider:SetMinMaxValues(1, Geary_Player.MAX_LEVEL)
     slider:SetValueStep(1)
+    slider:SetStepsPerPage(1)
     slider:SetOrientation("HORIZONTAL")
     slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOM", 0, -30)
     slider:Enable()
@@ -249,7 +271,7 @@ function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
     slider.Value:SetWidth(50)
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
-        self.Value:SetText(value)
+        _sliderOnValueChangedFix(self, value, nil)
     end)
     slider:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)

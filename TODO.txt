@@ -11,7 +11,7 @@ Ideas/Notes
 
 * Geary options:
 ** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
-** Sliders are floating point now
+** Icon position shouldn't change when icon size changes
 
 * Store interface and icon positions so failures put the windows back in the same spot
 ** Need to watch for being off the screen and reset to the center of the screen
