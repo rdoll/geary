@@ -163,6 +163,18 @@ function Geary_Inspect:INSPECT_READY(unitGuid)
 end
 
 --
+-- Inspection in progress indicator
+--
+
+function Geary_Inspect:_StartInProgress()
+    Geary_Icon:StartBusy(self.INSPECT_TIMEOUT / 1000)  -- Convert millis to seconds
+end
+
+function Geary_Inspect:_StopInProgress()
+    Geary_Icon:StopBusy()
+end
+
+--
 -- Business logic
 --
 
@@ -356,6 +368,7 @@ function Geary_Inspect:_InspectionOver()
     self.inProgress = false
     self:_StopTimer()
     self:_UnregisterInspectionEvents()
+    self:_StopInProgress()
     ClearInspectPlayer()
 end
 
@@ -390,6 +403,7 @@ function Geary_Inspect:_InspectUnitRequest(unit)
     self:_ResetInfo()
     self:_StopTimer()
     self:_UnregisterInspectionEvents()
+    self:_StopInProgress()
     Geary_Interface_Log:ClearIfTooLarge()
     Geary_Interface:Show()
 
@@ -423,6 +437,7 @@ function Geary_Inspect:_MakeInspectRequest()
     Geary_Interface_Player:InspectionStart(self)
     self:_StartTimer()
     self:_RegisterInspectionEvents()
+    self:_StartInProgress()
     NotifyInspect(self.player.unit)
 end
 

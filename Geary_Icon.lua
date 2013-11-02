@@ -12,6 +12,11 @@ Geary_Icon = {
 }
 
 function Geary_Icon:Init()
+    self.button = self:_CreateButton()
+    self:_CreateCooldown(self.button)
+end
+
+function Geary_Icon:_CreateButton()
     local button = CreateFrame("Button", "Geary_Ui_Icon_Button", UIParent)
     button:SetMovable(true)
     button:SetClampedToScreen(true)
@@ -33,15 +38,21 @@ function Geary_Icon:Init()
     button:SetScript("OnDragStart", button.StartMoving)
     button:SetScript("OnDragStop", button.StopMovingOrSizing)
     button:SetScript("OnHide", button.StopMovingOrSizing)
-    button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp",
-        "Button4Up", "Button5Up")
+    button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp", "Button4Up", "Button5Up")
     button:SetScript("OnClick", function(self, mouseButton, down) Geary_Icon:OnClick(mouseButton, down) end)
+
     if Geary_Options:IsIconShown() then
         button:Show()
     else
         button:Hide()
     end
-    self.button = button
+
+    return button
+end
+
+function Geary_Icon:_CreateCooldown(button)
+    button.cooldown = CreateFrame("Cooldown", button:GetName() .. "_Cooldown", button)
+    button.cooldown:SetAllPoints(button:GetName())
 end
 
 function Geary_Icon:OnClick(mouseButton, down)
@@ -77,4 +88,12 @@ end
 function Geary_Icon:SetScale(scale)
     self.button:SetScale(scale)
     Geary_Options:SetIconScale(scale)
+end
+
+function Geary_Icon:StartBusy(duration)
+    self.button.cooldown:SetCooldown(GetTime(), duration)
+end
+
+function Geary_Icon:StopBusy()
+    self.button.cooldown:SetCooldown(0, 0)
 end
