@@ -101,6 +101,10 @@ function Geary_Database_Entry:GetMissingOptionalCount()
     end
 end
 
+function Geary_Database_Entry:GetFullName()
+    return Geary_Player:FullPlayerName(self.playerName, self.playerRealm)
+end
+
 --
 -- Table of entries ordered pairs functions
 -- NOTE: These are member functions, NOT methods
@@ -121,7 +125,7 @@ function Geary_Database_Entry.orderedPairsByName(entries, ascending)
     for guid, entry in pairs(entries) do
         keys[kn] = {
             sourceKey = guid,
-            sortKey = Geary_Player:FullPlayerName(entry.playerName, entry.playerRealm)
+            sortKey = entry:GetFullName()
         }
         kn  = kn + 1
     end
@@ -144,4 +148,8 @@ function Geary_Database_Entry.orderedPairsByILevel(entries, ascending)
     end
     table.sort(keys, ascending and _orderByLt or _orderByGt)
     return _orderedNextPair, keys
+end
+
+function Geary_Database_Entry:GetInspectedAtDaysAgo()
+    return self.inspectedAt ~= nil and floor((time() - self.inspectedAt) / (24 * 60 * 60)) or 0
 end

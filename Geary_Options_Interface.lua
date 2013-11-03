@@ -13,7 +13,9 @@ Geary_Options_Interface = {
     iconShownCheckbox = nil,
     iconScaleSlider = nil,
     databaseEnabledCheckbox = nil,
-    databaseMinLevelSlider = nil
+    databaseMinLevelSlider = nil,
+    pruneButton = nil,
+    pruneDaysSlider = nil
 }
 
 local _fontFilenames = {
@@ -83,6 +85,7 @@ function Geary_Options_Interface:_CreateContents()
     local section = self:_CreateIconSection(subtitle)
     section = self:_CreateInterfaceSection(section)
     section = self:_CreateDatabaseSection(section)
+    section = self:_CreateDatabasePruneInputs(section)
 
     -- Mark created so we don't recreate everything
     self.contentsCreated = true
@@ -282,8 +285,71 @@ function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
     -- Save it
     self.databaseMinLevelSlider = slider
 
-    return self.databaseMinLevelSlider
+    return checkbox
 end
+
+function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
+
+    -- Pseudo-header for alignment
+    local interfaceHeader = CreateFrame("Frame", nil, previousItem)
+    interfaceHeader:SetHeight(1)
+    interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
+    interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -25)
+
+    -- Prune button
+    local button = CreateFrame("Button", "$parent_Prune_Now_Button", self.mainFrame, "OptionsButtonTemplate")
+    button:SetSize(100, 20)
+    button:SetText("Prune Now")
+    button:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 0, -10)
+    button:SetScript("OnClick", function(self)
+        local days = Geary_Options_Interface.pruneDaysSlider:GetValue()
+        Geary_Database:Prune(days)
+    end)
+    BlizzardOptionsPanel_RegisterControl(button, button:GetParent())
+    self.pruneButton = button
+
+    -- Days to prune old entries
+    local slider = CreateFrame("Slider", "$parent_Prune_Days_Slider", self.mainFrame, "OptionsSliderTemplate")
+    slider:SetWidth(190)
+    slider:SetHeight(14)
+    slider:SetMinMaxValues(1, 180)
+    slider:SetValueStep(1)
+    slider:SetStepsPerPage(1)
+    slider:SetOrientation("HORIZONTAL")
+    slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOM", 0, -30)
+    slider:Enable()
+    -- Label above
+    slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+    slider.Label:SetPoint("TOPLEFT", -5, 18)
+    slider.Label:SetText("Pruned Entries Older Than:")
+    -- Lowest value label
+    slider.Low = _G[slider:GetName() .. "Low"]
+    slider.Low:SetText("1")
+    -- Highest value label
+    slider.High = _G[slider:GetName() .. "High"]
+    slider.High:SetText("180")
+    -- Current value label
+    slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
+    slider.Value:SetPoint("BOTTOM", 0, -10)
+    slider.Value:SetWidth(100)
+    -- Handlers
+    slider:SetScript("OnValueChanged", function(self, value)
+        _sliderOnValueChangedFix(self, value, " days")
+    end)
+    slider:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
+        GameTooltip:SetText("Database entries greater than or equal to this are deleted when pruned")
+    end)
+    slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
+    -- Set an initial value (which is never saved in our options)
+    slider:SetValue(180)
+    -- Save it
+    self.pruneDaysSlider = slider
+
+    return self.pruneDaysSlider
+end
+
 
 function Geary_Options_Interface:_CreateHeader(parent, name)
 

@@ -58,6 +58,11 @@ function Geary_Database:_MakeObjects()
     end
 end
 
+function Geary_Database:_OnChanged()
+    Geary_Interface_Database:OnChanged()
+    Geary_Interface_Group:OnChanged()
+end
+
 function Geary_Database:GetAllEntries()
     self:_MakeObjects()
     return Geary_Saved_Database.results
@@ -69,8 +74,7 @@ end
 
 function Geary_Database:DeleteAll()
     wipe(Geary_Saved_Database.results)
-    Geary_Interface_Database:OnChanged()
-    Geary_Interface_Group:OnChanged()
+    self:_OnChanged()
 end
 
 function Geary_Database:StoreInspection(inspect)
@@ -78,14 +82,13 @@ function Geary_Database:StoreInspection(inspect)
         local entry = Geary_Database_Entry:CreateFromInspection(inspect)
         self:AddEntry(entry)
     else
-        Geary:DebugPrint("Not storing " .. inspect.player:GetFullNameLink())
+        Geary:DebugPrint(Geary.CC_DEBUG, "Not storing", inspect.player:GetFullNameLink(), Geary.CC_END)
     end
 end
 
 function Geary_Database:AddEntry(entry)
     Geary_Saved_Database.results[entry.playerGuid] = entry
-    Geary_Interface_Database:OnChanged()
-    Geary_Interface_Group:OnChanged()
+    self:_OnChanged()
 end
 
 function Geary_Database:GetEntry(guid)
@@ -100,23 +103,43 @@ end
 
 function Geary_Database:DeleteEntry(guid)
     Geary_Saved_Database.results[guid] = nil
-    Geary_Interface_Database:OnChanged()
-    Geary_Interface_Group:OnChanged()
+    self:_OnChanged()
 end
 
 function Geary_Database:Enable()
     Geary_Options:SetDatabaseEnabled()
-    -- Geary_Interface_Database:OnChanged()
 end
 
 function Geary_Database:Disable()
     Geary_Options:SetDatabaseDisabled()
-    -- TODO Should purge all entries?
-    -- Geary_Interface_Database:OnChanged()
 end
 
 function Geary_Database:SetMinLevel(minLevel)
     Geary_Options:SetDatabaseMinLevel(minLevel)
-    -- TODO Should purge all entries below minLevel?
-    -- Geary_Interface_Database:OnChanged()
+end
+
+function Geary_Database:Prune(pruneDaysAgo)
+
+    local pruned, total = 0, 0
+    for guid, entry in pairs(self:GetAllEntries()) do
+        total = total + 1
+        local entryDaysAgo = entry:GetInspectedAtDaysAgo()
+        if entryDaysAgo >= pruneDaysAgo then
+            Geary:DebugPrint(Geary.CC_DEBUG .. "Pruning", entry:GetFullName(), entryDaysAgo, "days old" .. Geary.CC_END)
+            Geary_Saved_Database.results[guid] = nil
+            pruned = pruned + 1
+        else
+            Geary:DebugPrint(Geary.CC_DEBUG .. "Keeping", entry:GetFullName(), entryDaysAgo, "days old" .. Geary.CC_END)
+        end
+    end
+
+    self:_OnChanged()
+
+    if total == 0 then
+        Geary:Print("No entries to prune")
+    elseif pruned == 0 then
+        Geary:Print("None of the", total, "entries were pruned")
+    else
+        Geary:Print("Pruned", pruned, "from", total, "entries leaving", total - pruned)
+    end
 end
