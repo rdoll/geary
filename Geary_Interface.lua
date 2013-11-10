@@ -14,7 +14,8 @@ Geary_Interface = {
         byId = {},
         byName = {},
         count = 0
-    }
+    },
+    wasShownBeforePetBattle = false
 }
 
 function Geary_Interface:Init()
@@ -34,6 +35,10 @@ function Geary_Interface:Init()
     self.mainFrame.selectedTab = self.tabs.byName["Player"]
     PanelTemplates_UpdateTabs(self.mainFrame)
     self:_TabOnClick(self.mainFrame.selectedTab)
+
+    -- Get notified when a pet battle starts or ends (ignore returned event handler IDs)
+    Geary_Event:RegisterEvent("PET_BATTLE_OPENING_START", function() Geary_Interface:PET_BATTLE_OPENING_START() end)
+    Geary_Event:RegisterEvent("PET_BATTLE_CLOSE", function() Geary_Interface:PET_BATTLE_CLOSE() end)
 end
 
 function Geary_Interface:_CreateMainFrame()
@@ -216,9 +221,23 @@ function Geary_Interface:_TabOnClick(clickedTabId)
     end
 end
 
+function Geary_Interface:PET_BATTLE_OPENING_START()
+    if self.mainFrame:IsShown() then
+        self.mainFrame:Hide()
+        self.wasShownBeforePetBattle = true
+    end
+end
+
+function Geary_Interface:PET_BATTLE_CLOSE()
+    if self.wasShownBeforePetBattle and not self.mainFrame:IsShown() then
+        self:Show()  -- Must call Show so we can re-render the shown tab
+    end
+end
+
 function Geary_Interface:Show()
 
     self.mainFrame:Show()
+    self.wasShownBeforePetBattle = true
 
     -- When the main interface is shown, let the current tab re-render to pick up any missed changes
     local selectedTab = self.mainFrame.selectedTab
@@ -231,6 +250,7 @@ end
 
 function Geary_Interface:Hide()
     self.mainFrame:Hide()
+    self.wasShownBeforePetBattle = false
 end
 
 function Geary_Interface:Toggle()

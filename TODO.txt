@@ -9,8 +9,6 @@ Ideas/Notes
 
 * Geary icon needs a tooltip
 
-* Hide Geary icon if in a pet battle
-
 * Geary options:
 ** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
 ** Icon position shouldn't change when icon size changes

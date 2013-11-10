@@ -8,12 +8,26 @@
 --]]
 
 Geary_Icon = {
-    button = nil
+    button = nil,
+    wasShownBeforePetBattle = false
 }
 
 function Geary_Icon:Init()
+
+    -- Create icon
     self.button = self:_CreateButton()
     self:_CreateCooldown(self.button)
+
+    -- Start it shown or hidden
+    if Geary_Options:IsIconShown() then
+        self:_Show()
+    else
+        self:_Hide()
+    end
+
+    -- Get notified when a pet battle starts or ends (ignore returned event handler IDs)
+    Geary_Event:RegisterEvent("PET_BATTLE_OPENING_START", function() Geary_Icon:PET_BATTLE_OPENING_START() end)
+    Geary_Event:RegisterEvent("PET_BATTLE_CLOSE", function() Geary_Icon:PET_BATTLE_CLOSE() end)
 end
 
 function Geary_Icon:_CreateButton()
@@ -41,18 +55,25 @@ function Geary_Icon:_CreateButton()
     button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp", "Button4Up", "Button5Up")
     button:SetScript("OnClick", function(self, mouseButton, down) Geary_Icon:OnClick(mouseButton, down) end)
 
-    if Geary_Options:IsIconShown() then
-        button:Show()
-    else
-        button:Hide()
-    end
-
     return button
 end
 
 function Geary_Icon:_CreateCooldown(button)
     button.cooldown = CreateFrame("Cooldown", button:GetName() .. "_Cooldown", button)
     button.cooldown:SetAllPoints(button:GetName())
+end
+
+function Geary_Icon:PET_BATTLE_OPENING_START()
+    if self.button:IsShown() then
+        self.button:Hide()
+        self.wasShownBeforePetBattle = true
+    end
+end
+
+function Geary_Icon:PET_BATTLE_CLOSE()
+    if self.wasShownBeforePetBattle and not self.button:IsShown() then
+        self.button:Show()
+    end
 end
 
 function Geary_Icon:OnClick(mouseButton, down)
@@ -67,13 +88,23 @@ function Geary_Icon:OnClick(mouseButton, down)
     end
 end
 
-function Geary_Icon:Show()
+function Geary_Icon:_Show()
     self.button:Show()
+    self.wasShownBeforePetBattle = true  -- Track here in case user uses key binding or slash command to show
+end
+
+function Geary_Icon:Show()
+    self:_Show()
     Geary_Options:SetIconShown(true)
 end
 
-function Geary_Icon:Hide()
+function Geary_Icon:_Hide()
     self.button:Hide()
+    self.wasShownBeforePetBattle = false  -- Track here in case user uses key binding or slash command to hide
+end
+
+function Geary_Icon:Hide()
+    self:_Hide()
     Geary_Options:SetIconShown(false)
 end
 
