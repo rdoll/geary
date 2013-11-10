@@ -69,12 +69,12 @@ end
 
 function Geary_Icon:Show()
     self.button:Show()
-    Geary_Options:SetIconShown()
+    Geary_Options:SetIconShown(true)
 end
 
 function Geary_Icon:Hide()
     self.button:Hide()
-    Geary_Options:SetIconHidden()
+    Geary_Options:SetIconShown(false)
 end
 
 function Geary_Icon:Toggle()

@@ -99,6 +99,9 @@ function Geary:ADDON_LOADED(addOnName)
         Geary_Interface:Init()
         Geary_Icon:Init()
         Geary_Options_Interface:Init()
+
+        -- All is loaded, so do on load actions
+        Geary_Database:PruneOnLoad()
     end
 end
 

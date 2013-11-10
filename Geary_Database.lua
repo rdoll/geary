@@ -107,24 +107,32 @@ function Geary_Database:DeleteEntry(guid)
 end
 
 function Geary_Database:Enable()
-    Geary_Options:SetDatabaseEnabled()
+    Geary_Options:SetDatabaseEnabled(true)
 end
 
 function Geary_Database:Disable()
-    Geary_Options:SetDatabaseDisabled()
+    Geary_Options:SetDatabaseEnabled(false)
 end
 
 function Geary_Database:SetMinLevel(minLevel)
     Geary_Options:SetDatabaseMinLevel(minLevel)
 end
 
-function Geary_Database:Prune(pruneDaysAgo)
+function Geary_Database:SetPruneOnLoad(pruneOnLoad)
+    Geary_Options:SetDatabasePruneOnLoad(pruneOnLoad)
+end
 
+function Geary_Database:SetPruneDays(pruneDays)
+    Geary_Options:SetDatabasePruneDays(pruneDays)
+end
+
+function Geary_Database:_Prune(pruneDays)
     local pruned, total = 0, 0
+
     for guid, entry in pairs(self:GetAllEntries()) do
         total = total + 1
         local entryDaysAgo = entry:GetInspectedAtDaysAgo()
-        if entryDaysAgo >= pruneDaysAgo then
+        if entryDaysAgo >= pruneDays then
             Geary:DebugPrint(Geary.CC_DEBUG .. "Pruning", entry:GetFullName(), entryDaysAgo, "days old" .. Geary.CC_END)
             Geary_Saved_Database.results[guid] = nil
             pruned = pruned + 1
@@ -133,13 +141,30 @@ function Geary_Database:Prune(pruneDaysAgo)
         end
     end
 
-    self:_OnChanged()
+    if pruned > 0 then
+        self:_OnChanged()
+    end
 
+    return pruned, total
+end
+
+function Geary_Database:PruneOnLoad()
+    if Geary_Options:IsDatabasePruneOnLoad() then
+        local pruneDays = Geary_Options:GetDatabasePruneDays()
+        local pruned, _ = self:_Prune(pruneDays)
+        if pruned > 0 then
+            Geary:Print("Pruned", pruned, "database entries", pruneDays, "days old or older")
+        end
+    end
+end
+
+function Geary_Database:PruneNow(pruneDays)
+    local pruned, total = self:_Prune(pruneDays)
     if total == 0 then
-        Geary:Print("No entries to prune")
+        Geary:Print("No database entries to prune")
     elseif pruned == 0 then
-        Geary:Print("None of the", total, "entries were pruned")
+        Geary:Print("None of the", total, "database entries were pruned")
     else
-        Geary:Print("Pruned", pruned, "from", total, "entries leaving", total - pruned)
+        Geary:Print("Pruned", pruned, "from", total, "leaving", total - pruned, "database entries")
     end
 end

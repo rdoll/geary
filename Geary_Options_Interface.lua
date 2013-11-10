@@ -14,8 +14,9 @@ Geary_Options_Interface = {
     iconScaleSlider = nil,
     databaseEnabledCheckbox = nil,
     databaseMinLevelSlider = nil,
-    pruneButton = nil,
-    pruneDaysSlider = nil
+    databasePruneOnLoadCheckbox = nil,
+    databasePruneNowButton = nil,
+    databasePruneDaysSlider = nil
 }
 
 local _fontFilenames = {
@@ -296,20 +297,34 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
     interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -25)
 
-    -- Prune button
-    local button = CreateFrame("Button", "$parent_Prune_Now_Button", self.mainFrame, "OptionsButtonTemplate")
+    -- Database prune on load checkbox
+    local checkbox = CreateFrame("CheckButton", "$parent_Database_Prune_On_Load_Checkbox", self.mainFrame,
+        "InterfaceOptionsCheckButtonTemplate")
+    checkbox:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 0, -5)
+    checkbox.Label = _G[checkbox:GetName() .. "Text"]
+    checkbox.Label:SetText("Auto Prune On Load")
+    checkbox:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
+        GameTooltip:SetText("Automatically prune old database entries when loaded")
+    end)
+    checkbox:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
+    self.databasePruneOnLoadCheckbox = checkbox
+
+    -- Database prune now button
+    local button = CreateFrame("Button", "$parent_Database_Prune_Now_Button", self.mainFrame, "OptionsButtonTemplate")
     button:SetSize(100, 20)
     button:SetText("Prune Now")
-    button:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 0, -10)
+    button:SetPoint("TOPLEFT", checkbox, "BOTTOMLEFT", 2, -3)
     button:SetScript("OnClick", function(self)
-        local days = Geary_Options_Interface.pruneDaysSlider:GetValue()
-        Geary_Database:Prune(days)
+        local pruneDays = Geary_Options_Interface.databasePruneDaysSlider:GetValue()
+        Geary_Database:PruneNow(pruneDays)
     end)
     BlizzardOptionsPanel_RegisterControl(button, button:GetParent())
-    self.pruneButton = button
+    self.databasePruneNowButton = button
 
-    -- Days to prune old entries
-    local slider = CreateFrame("Slider", "$parent_Prune_Days_Slider", self.mainFrame, "OptionsSliderTemplate")
+    -- Database days to prune old entries
+    local slider = CreateFrame("Slider", "$parent_Database_Prune_Days_Slider", self.mainFrame, "OptionsSliderTemplate")
     slider:SetWidth(190)
     slider:SetHeight(14)
     slider:SetMinMaxValues(1, 180)
@@ -321,7 +336,7 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     -- Label above
     slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
     slider.Label:SetPoint("TOPLEFT", -5, 18)
-    slider.Label:SetText("Pruned Entries Older Than:")
+    slider.Label:SetText("Prune Entries Older Than:")
     -- Lowest value label
     slider.Low = _G[slider:GetName() .. "Low"]
     slider.Low:SetText("1")
@@ -338,16 +353,16 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     end)
     slider:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Database entries greater than or equal to this are deleted when pruned")
+        GameTooltip:SetText("Database entries this old or older are deleted when pruned")
     end)
     slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
     -- Set an initial value (which is never saved in our options)
     slider:SetValue(180)
     -- Save it
-    self.pruneDaysSlider = slider
+    self.databasePruneDaysSlider = slider
 
-    return self.pruneDaysSlider
+    return self.databasePruneDaysSlider
 end
 
 
@@ -422,6 +437,8 @@ function Geary_Options_Interface:OnShow(frame)
     self.logFontHeightSlider:SetValue(Geary_Options:GetLogFontHeight())
     self.databaseEnabledCheckbox:SetChecked(Geary_Options:IsDatabaseEnabled())
     self.databaseMinLevelSlider:SetValue(Geary_Options:GetDatabaseMinLevel())
+    self.databasePruneOnLoadCheckbox:SetChecked(Geary_Options:IsDatabasePruneOnLoad())
+    self.databasePruneDaysSlider:SetValue(Geary_Options:GetDatabasePruneDays())
 end
 
 function Geary_Options_Interface:OnDefault(frame)
@@ -434,21 +451,28 @@ function Geary_Options_Interface:OnDefault(frame)
     self.logFontHeightSlider:SetValue(Geary_Options:GetDefaultLogFontHeight())
     self.databaseEnabledCheckbox:SetChecked(Geary_Options:GetDefaultDatabaseEnabled())
     self.databaseMinLevelSlider:SetValue(Geary_Options:GetDefaultDatabaseMinLevel())
+    self.databasePruneOnLoadCheckbox:SetChecked(Geary_Options:GetDefaultDatabasePruneOnLoad())
+    self.databasePruneDaysSlider:SetValue(Geary_Options:GetDefaultDatabasePruneDays())
 end
 
 function Geary_Options_Interface:OnOkay(frame)
+
     if self.iconShownCheckbox:GetChecked() then
         Geary_Icon:Show()
     else
         Geary_Icon:Hide()
     end
     Geary_Icon:SetScale(self.iconScaleSlider:GetValue() / 100)
+
     Geary_Interface_Log:SetFont(_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
         self.logFontHeightSlider:GetValue())
+
     if self.databaseEnabledCheckbox:GetChecked() then
         Geary_Database:Enable()
     else
         Geary_Database:Disable()
     end
     Geary_Database:SetMinLevel(self.databaseMinLevelSlider:GetValue())
+    Geary_Database:SetPruneOnLoad(self.databasePruneOnLoadCheckbox:GetChecked() and true or false)
+    Geary_Database:SetPruneDays(self.databasePruneDaysSlider:GetValue())
 end

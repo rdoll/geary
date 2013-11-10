@@ -9,12 +9,11 @@ Ideas/Notes
 
 * Geary icon needs a tooltip
 
+* Hide Geary icon if in a pet battle
+
 * Geary options:
 ** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
 ** Icon position shouldn't change when icon size changes
-
-* Store interface and icon positions so failures put the windows back in the same spot
-** Need to watch for being off the screen and reset to the center of the screen
 
 * Use frame templates for repeat items (e.g. summary rows)?
 
@@ -29,7 +28,6 @@ Ideas/Notes
 ** Is related to being in combat when assigning onhover/onclick handlers?
 
 * Replace custom timer frame onupdate handler with an Animation?
-* Use Cooldown for geary icon cooldown effect
 
 * With 300+ database entries, rendering database rows all at once is a noticeable delay
 
@@ -38,12 +36,10 @@ Under Consideration
 -------------------
 * Database:
 ** Show details of inspection on hover/click
-** From settings, ability to prune inspections old than x days
 ** //Maybe:// Sort by clicking on any column header
 ** //Maybe:// Filter results by Faction, Class, Level, etc
-** //Maybe:// Option for automatically pruning entries older than x days
 ** //Maybe:// Ability to remove individual database entries
-** //Maybe:// Sync database entries with group, guild members, or specific players
+** //Doubtful:// Sync database entries with group, guild members, or specific players
 ** //Doubtful:// Store results for multiple specs
 * Group:
 ** Show details of inspection on hover/click
@@ -52,7 +48,7 @@ Under Consideration
 ** //Maybe:// Show ^ and v icons for players above and below group's average iLevel
 * Player:
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text
-** //Maybe:// Add options to control the font of the summary text
+** //Doubtful:// Add options to control the font of the summary text
 ** //Doubtful:// Show empty sockets shown with their graphic
 ** //Doubtful:// In item tooltips, show set pieces worn and empty extra sockets of the inspected character
 * Options:
@@ -70,7 +66,7 @@ Under Consideration
 ** //Maybe:// Store window locations in options so addon load failures don't force you to reposition them
 ** //Maybe:// Add non-English client support via localizations
 ** //Maybe:// Inspection results added to player tooltips
-** //Maybe:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
+** //Doubtful:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
 ** //Doubtful:// Resizing of Geary interface
 ** //Doubtful:// Detecting empty extra sockets from a belt buckle/EotBP instead of extra gems
 

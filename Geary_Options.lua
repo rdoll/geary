@@ -14,7 +14,9 @@ Geary_Options = {
         logFontFilename = "Fonts\\FRIZQT__.TTF",
         logFontHeight = 10,
         databaseEnabled = true,
-        databaseMinLevel = Geary_Player.MAX_LEVEL
+        databaseMinLevel = Geary_Player.MAX_LEVEL,
+        databasePruneOnLoad = false,
+        databasePruneDays = 180
     }
 }
 
@@ -90,12 +92,8 @@ function Geary_Options:IsIconShown()
     return Geary_Saved_Options.iconShown
 end
 
-function Geary_Options:SetIconShown()
-    Geary_Saved_Options.iconShown = true
-end
-
-function Geary_Options:SetIconHidden()
-    Geary_Saved_Options.iconShown = false
+function Geary_Options:SetIconShown(iconShown)
+    Geary_Saved_Options.iconShown = iconShown
 end
 
 --
@@ -158,12 +156,8 @@ function Geary_Options:IsDatabaseEnabled()
     return Geary_Saved_Options.databaseEnabled
 end
 
-function Geary_Options:SetDatabaseEnabled()
-    Geary_Saved_Options.databaseEnabled = true
-end
-
-function Geary_Options:SetDatabaseDisabled()
-    Geary_Saved_Options.databaseEnabled = false
+function Geary_Options:SetDatabaseEnabled(enabled)
+    Geary_Saved_Options.databaseEnabled = enabled
 end
 
 --
@@ -180,4 +174,36 @@ end
 
 function Geary_Options:SetDatabaseMinLevel(minLevel)
     Geary_Saved_Options.databaseMinLevel = minLevel
+end
+
+--
+-- Database prune on load
+--
+
+function Geary_Options:GetDefaultDatabasePruneOnLoad()
+    return self.default.databasePruneOnLoad
+end
+
+function Geary_Options:IsDatabasePruneOnLoad()
+    return Geary_Saved_Options.databasePruneOnLoad
+end
+
+function Geary_Options:SetDatabasePruneOnLoad(pruneOnLoad)
+    Geary_Saved_Options.databasePruneOnLoad = pruneOnLoad
+end
+
+--
+-- Database prune after days
+--
+
+function Geary_Options:GetDefaultDatabasePruneDays()
+    return self.default.databasePruneDays
+end
+
+function Geary_Options:GetDatabasePruneDays()
+    return Geary_Saved_Options.databasePruneDays
+end
+
+function Geary_Options:SetDatabasePruneDays(pruneDays)
+    Geary_Saved_Options.databasePruneDays = pruneDays
 end
