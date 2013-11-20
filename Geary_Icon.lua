@@ -8,8 +8,7 @@
 --]]
 
 Geary_Icon = {
-    button = nil,
-    wasShownBeforePetBattle = false
+    button = nil
 }
 
 function Geary_Icon:Init()
@@ -64,14 +63,15 @@ function Geary_Icon:_CreateCooldown(button)
 end
 
 function Geary_Icon:PET_BATTLE_OPENING_START()
+    -- Hide if shown
     if self.button:IsShown() then
         self.button:Hide()
-        self.wasShownBeforePetBattle = true
     end
 end
 
 function Geary_Icon:PET_BATTLE_CLOSE()
-    if self.wasShownBeforePetBattle and not self.button:IsShown() then
+    -- Show if supposed to be shown
+    if Geary_Options:IsIconShown() and not self.button:IsShown() then
         self.button:Show()
     end
 end
@@ -90,7 +90,6 @@ end
 
 function Geary_Icon:_Show()
     self.button:Show()
-    self.wasShownBeforePetBattle = true  -- Track here in case user uses key binding or slash command to show
 end
 
 function Geary_Icon:Show()
@@ -100,7 +99,6 @@ end
 
 function Geary_Icon:_Hide()
     self.button:Hide()
-    self.wasShownBeforePetBattle = false  -- Track here in case user uses key binding or slash command to hide
 end
 
 function Geary_Icon:Hide()

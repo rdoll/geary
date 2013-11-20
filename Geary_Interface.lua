@@ -14,8 +14,7 @@ Geary_Interface = {
         byId = {},
         byName = {},
         count = 0
-    },
-    wasShownBeforePetBattle = false
+    }
 }
 
 function Geary_Interface:Init()
@@ -36,9 +35,8 @@ function Geary_Interface:Init()
     PanelTemplates_UpdateTabs(self.mainFrame)
     self:_TabOnClick(self.mainFrame.selectedTab)
 
-    -- Get notified when a pet battle starts or ends (ignore returned event handler IDs)
+    -- Get notified when a pet battle starts (ignore returned event handler ID)
     Geary_Event:RegisterEvent("PET_BATTLE_OPENING_START", function() Geary_Interface:PET_BATTLE_OPENING_START() end)
-    Geary_Event:RegisterEvent("PET_BATTLE_CLOSE", function() Geary_Interface:PET_BATTLE_CLOSE() end)
 end
 
 function Geary_Interface:_CreateMainFrame()
@@ -49,7 +47,7 @@ function Geary_Interface:_CreateMainFrame()
     frame:SetClampedToScreen(true)
     frame:SetResizable(false)
     frame:SetToplevel(true)
-    frame:SetSize(507, 330) -- 66% smaller than AchievementFrame
+    frame:SetSize(507, 330)  -- 66% smaller than AchievementFrame
     frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     frame:SetBackdrop({
         bgFile   = "Interface\\AchievementFrame\\UI-Achievement-StatsBackground",
@@ -222,22 +220,15 @@ function Geary_Interface:_TabOnClick(clickedTabId)
 end
 
 function Geary_Interface:PET_BATTLE_OPENING_START()
+    -- Hide if shown
     if self.mainFrame:IsShown() then
-        self.mainFrame:Hide()
-        self.wasShownBeforePetBattle = true
-    end
-end
-
-function Geary_Interface:PET_BATTLE_CLOSE()
-    if self.wasShownBeforePetBattle and not self.mainFrame:IsShown() then
-        self:Show()  -- Must call Show so we can re-render the shown tab
+        self:Hide()
     end
 end
 
 function Geary_Interface:Show()
 
     self.mainFrame:Show()
-    self.wasShownBeforePetBattle = true
 
     -- When the main interface is shown, let the current tab re-render to pick up any missed changes
     local selectedTab = self.mainFrame.selectedTab
@@ -250,7 +241,6 @@ end
 
 function Geary_Interface:Hide()
     self.mainFrame:Hide()
-    self.wasShownBeforePetBattle = false
 end
 
 function Geary_Interface:Toggle()
