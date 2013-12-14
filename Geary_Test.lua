@@ -26,6 +26,7 @@ function Geary_Test:All()
     self:Entries()
     self:Versions()
     self:ClassColors()
+    self:Queue()
 end
 
 function Geary_Test:Dates()
@@ -214,6 +215,48 @@ function Geary_Test:Tab()
     -- Show the newly created tab
     Geary_Interface:Show()
     Geary_Interface:SelectTab("Test")
+end
+
+function Geary_Test:Queue()
+    self:_Header("Queue")
+
+    print("Starting count", Geary_Inspect_Queue:GetCount())  -- 0
+    print("Next guid", Geary_Inspect_Queue:NextGuid())       -- nil
+
+    Geary_Inspect_Queue:Clear()
+    print("Cleared count", Geary_Inspect_Queue:GetCount())  -- 0
+    print("Next guid", Geary_Inspect_Queue:NextGuid())      -- nil
+
+    Geary_Inspect_Queue:AddGuid("test1")
+    print("After test1 count", Geary_Inspect_Queue:GetCount())      -- 1
+    Geary_Inspect_Queue:AddGuid("test1")
+    print("After 2nd test1 count", Geary_Inspect_Queue:GetCount())  -- 1
+    print("Next guid", Geary_Inspect_Queue:NextGuid())              -- test1
+    print("After nextguid count", Geary_Inspect_Queue:GetCount())   -- 0
+
+    Geary_Inspect_Queue:AddGuid("test1")
+    Geary_Inspect_Queue:AddGuid("test2")
+    print("After test1/2 count", Geary_Inspect_Queue:GetCount())   -- 2
+    print("Next guid", Geary_Inspect_Queue:NextGuid())             -- test1
+    print("After nextguid count", Geary_Inspect_Queue:GetCount())  -- 1
+    print("Next guid", Geary_Inspect_Queue:NextGuid())             -- test2
+    print("After nextguid count", Geary_Inspect_Queue:GetCount())  -- 0
+
+    Geary_Inspect_Queue:AddGuid("test1")
+    Geary_Inspect_Queue:AddGuid("test2")
+    Geary_Inspect_Queue:AddGuid("test3")
+    print("After test1/2/3 count", Geary_Inspect_Queue:GetCount())     -- 3
+    Geary_Inspect_Queue:RemoveGuid("test2")
+    print("After remove test2 count", Geary_Inspect_Queue:GetCount())  -- 2
+
+    Geary_Inspect_Queue:AddGuid("test4")
+    print("After test4 count", Geary_Inspect_Queue:GetCount())         -- 3
+    Geary_Inspect_Queue:RemoveGuid("test4")
+    print("After remove test4 count", Geary_Inspect_Queue:GetCount())  -- 2
+    print("Next guid", Geary_Inspect_Queue:NextGuid())                 -- test1
+    print("After nextguid count", Geary_Inspect_Queue:GetCount())      -- 1
+    print("Next guid", Geary_Inspect_Queue:NextGuid())                 -- test3
+    print("After nextguid count", Geary_Inspect_Queue:GetCount())      -- 0
 end
 
 --[ [

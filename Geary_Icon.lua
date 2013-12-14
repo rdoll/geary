@@ -83,8 +83,10 @@ function Geary_Icon:OnClick(mouseButton, down)
         Geary_Interface:Toggle()
     elseif mouseButton == "RightButton" then
         Geary_Inspect:InspectSelf()
-    elseif mouseButton == "Button4" or mouseButton == "Button5" then
+    elseif mouseButton == "Button4" then
         Geary_Options_Interface:Toggle()
+    elseif mouseButton == "Button5" then
+        Geary_Inspect:InspectGroup()
     end
 end
 

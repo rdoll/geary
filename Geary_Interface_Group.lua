@@ -104,12 +104,12 @@ function Geary_Interface_Group:UpdateGroupEntries()
     local unitPrefix, unitLimit, entry, guid
     if IsInRaid() then
         -- Player is included in raid units
-        Geary:DebugPrint("In a raid")
+        Geary:DebugPrint(Geary.CC_DEBUG .. "In a raid" .. Geary.CC_END)
         unitPrefix = "raid"
         unitLimit = 40
     elseif IsInGroup() then
         -- Player is not included in party units
-        Geary:DebugPrint("In a party")
+        Geary:DebugPrint(Geary.CC_DEBUG .. "In a party" .. Geary.CC_END)
         guid = UnitGUID("player")
         local entry = Geary_Database:GetEntry(guid)
         self.groupEntries[guid] = entry and entry or Geary_Database_Entry:CreateFromUnit("player")
@@ -117,7 +117,7 @@ function Geary_Interface_Group:UpdateGroupEntries()
         unitLimit = 4
     else
         -- Not in any kind of group
-        Geary:DebugPrint("Not in a group")
+        Geary:DebugPrint(Geary.CC_DEBUG .. "Not in a group" .. Geary.CC_END)
         return
     end
 

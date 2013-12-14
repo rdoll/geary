@@ -383,12 +383,21 @@ end
 function Geary_Inspect:_InspectionFailed()
     self:_InspectionOver()
     Geary_Interface_Player:InspectionFailed(self)
+    self:_InspectNextInQueue()
 end
 
 function Geary_Inspect:_InspectionPassed()
     self:_InspectionOver()
     Geary_Interface_Player:InspectionEnd(self)
     Geary_Database:StoreInspection(self)
+    self:_InspectNextInQueue()
+end
+
+function Geary_Inspect:_InspectNextInQueue()
+    local guid = Geary_Inspect_Queue:NextGuid()
+    if guid ~= nil then
+        self:InspectGuid(guid)
+    end
 end
 
 function Geary_Inspect:_InspectUnitRequest(unit)
@@ -462,7 +471,39 @@ function Geary_Inspect:InspectTarget()
 end
 
 function Geary_Inspect:InspectGroup()
-    Geary:Print(Geary.CC_ERROR .. "Group inspection is not yet implemented." .. Geary.CC_END)
+
+    -- Cannot do two inspections at once
+    if self.inProgress then
+        Geary:Print(Geary.CC_FAILED .. "Cannot inspect group while inspection of", self.player:GetFullNameLink(),
+            "still in progress." .. Geary.CC_END)
+        return
+    end
+
+    local unitPrefix, unitLimit
+    if IsInRaid() then
+        -- Player is included in raid units
+        unitPrefix = "raid"
+        unitLimit = 40
+    elseif IsInGroup() then
+        -- Player is not included in party units
+        Geary_Inspect_Queue:AddGuid(UnitGUID("player"))
+        unitPrefix = "party"
+        unitLimit = 4
+    else
+        Geary:Print(Geary.CC_ERROR .. "Not in a group to inspect." .. Geary.CC_END)
+        return
+    end
+
+    local unit, guid
+    for unitNumber = 1, unitLimit do
+        unit = unitPrefix .. unitNumber
+        guid = UnitGUID(unit)
+        if guid ~= nil then
+            Geary_Inspect_Queue:AddGuid(guid)
+        end
+    end
+
+    self:_InspectNextInQueue()
 end
 
 function Geary_Inspect:InspectGuid(guid)

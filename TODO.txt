@@ -33,16 +33,15 @@ Ideas/Notes
 Under Consideration
 -------------------
 * Database:
-** Show details of inspection on hover/click
+** //Maybe:// Show details of inspection on hover/click
 ** //Maybe:// Sort by clicking on any column header
 ** //Maybe:// Filter results by Faction, Class, Level, etc
 ** //Maybe:// Ability to remove individual database entries
 ** //Doubtful:// Sync database entries with group, guild members, or specific players
 ** //Doubtful:// Store results for multiple specs
 * Group:
-** Show details of inspection on hover/click
+** //Maybe:// Show details of inspection on hover/click
 ** //Maybe:// Sort by clicking on any column header
-** //Maybe:// Inspect all members of your group with one click
 ** //Maybe:// Show ^ and v icons for players above and below group's average iLevel
 * Player:
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text
