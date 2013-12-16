@@ -394,9 +394,14 @@ function Geary_Inspect:_InspectionPassed()
 end
 
 function Geary_Inspect:_InspectNextInQueue()
-    local guid = Geary_Inspect_Queue:NextGuid()
-    if guid ~= nil then
+    while Geary_Inspect_Queue:GetCount() > 0 do
+        local guid = Geary_Inspect_Queue:NextGuid()
         self:InspectGuid(guid)
+        if self.inProgress then
+            return  -- Inspecting next
+        else
+            -- This guid could not be inspected, so try next
+        end
     end
 end
 

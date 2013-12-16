@@ -30,6 +30,30 @@ Ideas/Notes
 * With 300+ database entries, rendering database rows all at once is a noticeable delay
 
 
+--
+after inspect group finished and most people were inspected, subsequent inspect group popped this
+only saw it once so far tho
+--
+Date: 2013-12-15 18:59:38
+ID: 1
+Error occured in: Global
+Count: 2
+Message: invalid key to 'next'
+Debug:
+   [C]: (for generator)()
+   Geary\Geary_Timer.lua:36:
+      Geary\Geary_Timer.lua:33
+Locals:
+(*temporary) = <table> {
+ 57 = <table> {
+ }
+}
+(*temporary) = 56
+
+AddOns:
+  Swatter, v5.18.5433 (PassionatePhascogale)
+---
+
 Under Consideration
 -------------------
 * Database:
