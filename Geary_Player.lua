@@ -144,17 +144,17 @@ function Geary_Player:INSPECT_READY()
     if self.unit == "player" then
         local specIndex = GetSpecialization()
         if specIndex == nil then
-            Geary:DebugPrint(Geary.CC_FAILED .. "No specialization found" .. Geary.CC_END)
+            Geary:DebugPrint(Geary.CC_FAILED .. "No specialization found for " .. self.unit .. Geary.CC_END)
             return
         end
         specId, specName, _, _, _, roleTag = GetSpecializationInfo(specIndex)
     else
         local globSpecId = GetInspectSpecialization(self.unit)
         if globSpecId == nil then
-            Geary:Print(Geary.CC_ERROR .. "globSpecId is nil!" .. Geary.CC_END)
+            Geary:Print(Geary.CC_ERROR .. "globSpecId for", self.unit, "is nil!" .. Geary.CC_END)
             return
         elseif globSpecId == 0 then
-            Geary:Print(Geary.CC_ERROR .. "globSpecId is 0 -- server didn't send it" .. Geary.CC_END)
+            Geary:Print(Geary.CC_ERROR .. "globSpecId for", self.unit, "is 0 -- server didn't send it" .. Geary.CC_END)
             return
         end
         --
@@ -168,7 +168,7 @@ function Geary_Player:INSPECT_READY()
         --
         roleTag = GetSpecializationRoleByID(globSpecId)
         if roleTag == nil then
-            Geary:Print(Geary.CC_ERROR .. "globSpecId " .. globSpecId .. " is invalid!" .. Geary.CC_END)
+            Geary:Print(Geary.CC_ERROR .. "globSpecId", globSpecId, "for", self.unit, "is invalid!" .. Geary.CC_END)
             return
         end
         specId, specName, _, _, _, _, _ = GetSpecializationInfoByID(globSpecId)

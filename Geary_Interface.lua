@@ -20,8 +20,8 @@ Geary_Interface = {
 function Geary_Interface:Init()
 
     -- Create the main interface elements
-    self:_CreateMainFrame()
-    self:_CreateContentFrame(self.mainFrame)
+    self.mainFrame = self:_CreateMainFrame()
+    self.contentFrame = self:_CreateContentFrame(self.mainFrame)
 
     -- Init interface tab modules
     Geary_Interface_Player:Init(self.contentFrame)
@@ -37,6 +37,9 @@ function Geary_Interface:Init()
 
     -- Get notified when a pet battle starts (ignore returned event handler ID)
     Geary_Event:RegisterEvent("PET_BATTLE_OPENING_START", function() Geary_Interface:PET_BATTLE_OPENING_START() end)
+
+    -- Register as a "UI special frame" to allow Esc to hide the entire interface
+    tinsert(UISpecialFrames, self.mainFrame:GetName())
 end
 
 function Geary_Interface:_CreateMainFrame()
@@ -66,7 +69,6 @@ function Geary_Interface:_CreateMainFrame()
         PlaySound("AchievementMenuClose")
         self:StopMovingOrSizing()
     end)
-    self.mainFrame = frame
 
     local texture
     texture = frame:CreateTexture("$parent_Metal_Border_Left", "ARTWORK")
@@ -149,18 +151,20 @@ function Geary_Interface:_CreateMainFrame()
 
     local fontString = frame:CreateFontString("$parent_Title", "OVERLAY", "GameFontNormal")
     fontString:SetText(Geary.title .. " v" .. Geary.version)
-    fontString:SetPoint("TOP", self.mainFrame, "TOP", 0, -4)
+    fontString:SetPoint("TOP", frame, "TOP", 0, -4)
 
-    local button = CreateFrame("Button", "$parent_Close_Button", self.mainFrame, "UIPanelCloseButton")
-    button:SetPoint("TOPRIGHT", self.mainFrame, "TOPRIGHT", 3, 4)
+    local button = CreateFrame("Button", "$parent_Close_Button", frame, "UIPanelCloseButton")
+    button:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 3, 4)
     button:SetScript("OnClick", function(self) HideParentPanel(self) end)
+
+    return frame
 end
 
 function Geary_Interface:_CreateContentFrame(parent)
     local frame = CreateFrame("Frame", "$parent_Content", parent)
     frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 22, -21)
     frame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -22, 24)
-    self.contentFrame = frame
+    return frame
 end
 
 -- NOTE: AchievementFrameTabButtonTemplate is defined in the Blizzard_AchievementUI AddOn

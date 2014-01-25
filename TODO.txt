@@ -25,14 +25,16 @@ Ideas/Notes
 ** No one in group
 ** Is related to being in combat when assigning onhover/onclick handlers?
 
-* Replace custom timer frame onupdate handler with an Animation?
-
 * With 300+ database entries, rendering database rows all at once is a noticeable delay
 
-
 --
-after inspect group finished and most people were inspected, subsequent inspect group popped this
-only saw it once so far tho
+After inspect group finished and most people were inspected, subsequent inspect group popped this.
+Happens alot. An issue modifying a for pairs(t) table while still in a for loop?
+Not sure if the issue is a delete from the table or an insert into the table -- or both?
+Maybe should go through table, capture expired ids and callbacks, then go through expired ids,
+  delete them from timers, then call callback???
+Take a look at how AceTimers and other addons do this.
+Replace custom timer frame onupdate handler with an Animation?
 --
 Date: 2013-12-15 18:59:38
 ID: 1
@@ -54,6 +56,7 @@ AddOns:
   Swatter, v5.18.5433 (PassionatePhascogale)
 ---
 
+
 Under Consideration
 -------------------
 * Database:
@@ -70,7 +73,7 @@ Under Consideration
 * Player:
 ** //Maybe:// Add hyperlinks explaining what's missing in summary text
 ** //Doubtful:// Add options to control the font of the summary text
-** //Doubtful:// Show empty sockets shown with their graphic
+** //Doubtful:// Empty sockets shown with their graphic
 ** //Doubtful:// In item tooltips, show set pieces worn and empty extra sockets of the inspected character
 * Options:
 ** //Maybe:// Make options take effect immediately and have cancel revert to previous values
@@ -81,12 +84,13 @@ Under Consideration
 ** //Maybe:// Show items with PvP stats
 ** //Maybe:// Show items with inappropriate stats (e.g. Prot Paladin wearing Intellect gear)
 ** //Maybe:// Detect unspent talent points
-** //Maybe:// Don't allow inspection while in combat and abort inspection if combat starts
 ** //Doubtful:// Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
 * UI:
+** //Probably:// Scaling of Geary interface
+** //Maybe:// LibDataBroker compatibility (display results and clicks for operations)
 ** //Maybe:// Store window locations in options so addon load failures don't force you to reposition them
 ** //Maybe:// Add non-English client support via localizations
-** //Maybe:// Inspection results added to player tooltips
+** //Doubtful:// Inspection results added to player tooltips
 ** //Doubtful:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
 ** //Doubtful:// Resizing of Geary interface
 ** //Doubtful:// Detecting empty extra sockets from a belt buckle/EotBP instead of extra gems

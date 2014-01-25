@@ -406,6 +406,7 @@ function Geary_Inspect:_InspectNextInQueue()
 end
 
 function Geary_Inspect:_InspectUnitRequest(unit)
+
     -- Cannot do two inspections at once
     if self.inProgress then
         Geary:Print(Geary.CC_FAILED .. "Cannot inspect", unit, "while inspection of", self.player:GetFullNameLink(),
@@ -479,8 +480,14 @@ function Geary_Inspect:InspectGroup()
 
     -- Cannot do two inspections at once
     if self.inProgress then
-        Geary:Print(Geary.CC_FAILED .. "Cannot inspect group while inspection of", self.player:GetFullNameLink(),
-            "still in progress." .. Geary.CC_END)
+        local count = Geary_Inspect_Queue:GetCount()
+        if count > 0 then
+            Geary:Print(Geary.CC_FAILED .. "Aborting inspection of remaining", count, "group members." .. Geary.CC_END)
+            Geary_Inspect_Queue:Clear()
+        else
+            Geary:Print(Geary.CC_FAILED .. "Cannot inspect group while inspection of", self.player:GetFullNameLink(),
+                "still in progress." .. Geary.CC_END)
+        end
         return
     end
 

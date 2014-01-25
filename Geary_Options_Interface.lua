@@ -365,7 +365,6 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     return self.databasePruneDaysSlider
 end
 
-
 function Geary_Options_Interface:_CreateHeader(parent, name)
 
     local frame = CreateFrame("Frame", nil, parent)
