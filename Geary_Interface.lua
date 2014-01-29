@@ -254,3 +254,8 @@ function Geary_Interface:Toggle()
         self:Show()
     end
 end
+
+function Geary_Interface:SetScale(scale)
+    self.mainFrame:SetScale(scale)
+    Geary_Options:SetInterfaceScale(scale)
+end

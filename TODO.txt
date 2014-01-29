@@ -86,7 +86,6 @@ Under Consideration
 ** //Maybe:// Detect unspent talent points
 ** //Doubtful:// Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
 * UI:
-** //Probably:// Scaling of Geary interface
 ** //Maybe:// LibDataBroker compatibility (display results and clicks for operations)
 ** //Maybe:// Store window locations in options so addon load failures don't force you to reposition them
 ** //Maybe:// Add non-English client support via localizations

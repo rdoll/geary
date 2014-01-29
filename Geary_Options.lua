@@ -11,6 +11,7 @@ Geary_Options = {
     default = {
         iconShown = true,
         iconScale = 1.0,
+        interfaceScale = 1.0,
         logFontFilename = "Fonts\\FRIZQT__.TTF",
         logFontHeight = 10,
         databaseEnabled = true,
@@ -75,7 +76,7 @@ end
 
 -- Due to a slider bug in 5.4, we could have inappropriate floating point numbers, so fix them
 function Geary_Options:_UpgradeTo5_4_4_alpha_5()
-    Geary_Saved_Options.iconScale= floor(Geary_Saved_Options.iconScale * 100) / 100
+    Geary_Saved_Options.iconScale = floor(Geary_Saved_Options.iconScale * 100) / 100
     Geary_Saved_Options.logFontHeight = floor(Geary_Saved_Options.logFontHeight)
     Geary_Saved_Options.databaseMinLevel = floor(Geary_Saved_Options.databaseMinLevel)
 end
@@ -110,6 +111,22 @@ end
 
 function Geary_Options:SetIconScale(scale)
     Geary_Saved_Options.iconScale = scale
+end
+
+--
+-- Interface scale
+--
+
+function Geary_Options:GetDefaultInterfaceScale()
+    return self.default.interfaceScale
+end
+
+function Geary_Options:GetInterfaceScale()
+    return Geary_Saved_Options.interfaceScale
+end
+
+function Geary_Options:SetInterfaceScale(scale)
+    Geary_Saved_Options.interfaceScale = scale
 end
 
 --

@@ -8,10 +8,17 @@
 --]]
 
 Geary_Options_Interface = {
-    mainFrame = nil,
     contentsCreated = false,
+
+    mainFrame = nil,
+
     iconShownCheckbox = nil,
     iconScaleSlider = nil,
+
+    interfaceScaleSlider = nil,
+    logFontHeightSlider = nil,
+    logFontFilenameDropdown = nil,
+
     databaseEnabledCheckbox = nil,
     databaseMinLevelSlider = nil,
     databasePruneOnLoadCheckbox = nil,
@@ -90,6 +97,34 @@ function Geary_Options_Interface:_CreateContents()
 
     -- Mark created so we don't recreate everything
     self.contentsCreated = true
+end
+
+function Geary_Options_Interface:_CreateHeader(parent, name)
+
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetHeight(16)
+
+    local text = frame:CreateFontString(nil, "BACKGROUND", "GameFontNormal")
+    text:SetPoint("TOP")
+    text:SetPoint("BOTTOM")
+    text:SetJustifyH("CENTER")
+    text:SetText(name)
+
+    local leftLine = frame:CreateTexture(nil, "BACKGROUND")
+    leftLine:SetHeight(8)
+    leftLine:SetPoint("LEFT", 3, 0)
+    leftLine:SetPoint("RIGHT", text, "LEFT", -5, 0)
+    leftLine:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
+    leftLine:SetTexCoord(0.81, 0.94, 0.5, 1)
+
+    local rightLine = frame:CreateTexture(nil, "BACKGROUND")
+    rightLine:SetHeight(8)
+    rightLine:SetPoint("RIGHT", -3, 0)
+    rightLine:SetPoint("LEFT", text, "RIGHT", 5, 0)
+    rightLine:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
+    rightLine:SetTexCoord(0.81, 0.94, 0.5, 1)
+
+    return frame
 end
 
 function Geary_Options_Interface:_CreateIconSection(previousItem)
@@ -173,20 +208,42 @@ function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
     interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
     interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -45)
 
-    -- Log font filename dropdown
-    local label = self.mainFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
-    label:SetText("Log Font:")
-    label:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 5, -15)
-
-    local dropdown = CreateFrame("Button", "$parent_Log_Font_Filename_Dropdown", self.mainFrame,
-        "UIDropDownMenuTemplate")
-    dropdown:SetPoint("LEFT", label, "RIGHT", 0, -3)
-    self.logFontFilenameDropdown = dropdown  -- Required by initialize function
-    UIDropDownMenu_Initialize(dropdown, _logFontFilenameDropdownInitialize)
-    UIDropDownMenu_SetWidth(dropdown, 100)
-    UIDropDownMenu_SetButtonWidth(dropdown, 124)
-    UIDropDownMenu_SetSelectedID(dropdown, _fontFilenames.byFilename[Geary_Options.GetLogFontFilename()].id)
-    UIDropDownMenu_JustifyText(dropdown, "LEFT")
+    -- Interface scale slider
+    local slider = CreateFrame("Slider", "$parent_Interface_Scale_Slider", self.mainFrame, "OptionsSliderTemplate")
+    slider:SetWidth(190)
+    slider:SetHeight(14)
+    slider:SetMinMaxValues(50, 200)
+    slider:SetValueStep(1)
+    slider:SetStepsPerPage(1)
+    slider:SetOrientation("HORIZONTAL")
+    slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 10, -30)
+    slider:Enable()
+    -- Label above
+    slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+    slider.Label:SetPoint("TOPLEFT", -5, 18)
+    slider.Label:SetText("Interface Scale:")
+    -- Lowest value label
+    slider.Low = _G[slider:GetName() .. "Low"]
+    slider.Low:SetText("50%")
+    -- Highest value label
+    slider.High = _G[slider:GetName() .. "High"]
+    slider.High:SetText("200%")
+    -- Current value label
+    slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
+    slider.Value:SetPoint("BOTTOM", 0, -10)
+    slider.Value:SetWidth(50)
+    -- Handlers
+    slider:SetScript("OnValueChanged", function(self, value)
+        _sliderOnValueChangedFix(self, value, "%")
+    end)
+    slider:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
+        GameTooltip:SetText("Scale of the interface window")
+    end)
+    slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
+    -- Save it
+    self.interfaceScaleSlider = slider
 
     -- Log font height slider
     local slider = CreateFrame("Slider", "$parent_Log_Font_Height_Slider", self.mainFrame, "OptionsSliderTemplate")
@@ -201,7 +258,7 @@ function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
     -- Label above
     slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
     slider.Label:SetPoint("TOPLEFT", -5, 18)
-    slider.Label:SetText("Log Font Height:")
+    slider.Label:SetText("Log Font Size:")
     -- Lowest value label
     slider.Low = _G[slider:GetName() .. "Low"]
     slider.Low:SetText("8")
@@ -218,14 +275,29 @@ function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
     end)
     slider:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Height of the font in the log interface")
+        GameTooltip:SetText("Size of the font in the log interface")
     end)
     slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
     -- Save it
     self.logFontHeightSlider = slider
 
-    return label
+    -- Log font filename dropdown
+    local label = self.mainFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+    label:SetText("Log Font:")
+    label:SetPoint("TOPLEFT", self.logFontHeightSlider, "BOTTOMLEFT", 0, -25)
+
+    local dropdown = CreateFrame("Button", "$parent_Log_Font_Filename_Dropdown", self.mainFrame,
+        "UIDropDownMenuTemplate")
+    dropdown:SetPoint("LEFT", label, "RIGHT", 0, -3)
+    self.logFontFilenameDropdown = dropdown  -- Required by initialize function
+    UIDropDownMenu_Initialize(dropdown, _logFontFilenameDropdownInitialize)
+    UIDropDownMenu_SetWidth(dropdown, 100)
+    UIDropDownMenu_SetButtonWidth(dropdown, 124)
+    UIDropDownMenu_SetSelectedID(dropdown, _fontFilenames.byFilename[Geary_Options.GetLogFontFilename()].id)
+    UIDropDownMenu_JustifyText(dropdown, "LEFT")
+
+    return self.interfaceScaleSlider
 end
 
 function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
@@ -233,7 +305,7 @@ function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
     -- Geary database header
     local interfaceHeader = self:_CreateHeader(self.mainFrame, "Geary Database")
     interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
-    interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -5, -45)
+    interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -10, -60)
 
     -- Database enabled
     local checkbox = CreateFrame("CheckButton", "$parent_Database_Enabled_Checkbox", self.mainFrame,
@@ -365,34 +437,6 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     return self.databasePruneDaysSlider
 end
 
-function Geary_Options_Interface:_CreateHeader(parent, name)
-
-    local frame = CreateFrame("Frame", nil, parent)
-    frame:SetHeight(16)
-
-    local text = frame:CreateFontString(nil, "BACKGROUND", "GameFontNormal")
-    text:SetPoint("TOP")
-    text:SetPoint("BOTTOM")
-    text:SetJustifyH("CENTER")
-    text:SetText(name)
-
-    local leftLine = frame:CreateTexture(nil, "BACKGROUND")
-    leftLine:SetHeight(8)
-    leftLine:SetPoint("LEFT", 3, 0)
-    leftLine:SetPoint("RIGHT", text, "LEFT", -5, 0)
-    leftLine:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
-    leftLine:SetTexCoord(0.81, 0.94, 0.5, 1)
-
-    local rightLine = frame:CreateTexture(nil, "BACKGROUND")
-    rightLine:SetHeight(8)
-    rightLine:SetPoint("RIGHT", -3, 0)
-    rightLine:SetPoint("LEFT", text, "RIGHT", 5, 0)
-    rightLine:SetTexture("Interface\\Tooltips\\UI-Tooltip-Border")
-    rightLine:SetTexCoord(0.81, 0.94, 0.5, 1)
-
-    return frame
-end
-
 function Geary_Options_Interface:Show()
     InterfaceOptionsFrame_OpenToCategory(self.mainFrame)
     -- Per http://www.wowpedia.org/Patch_5.3.0/API_changes
@@ -429,6 +473,7 @@ function Geary_Options_Interface:OnShow(frame)
     -- Make the options match the current settings
     self.iconShownCheckbox:SetChecked(Geary_Options:IsIconShown())
     self.iconScaleSlider:SetValue(ceil(Geary_Options:GetIconScale() * 100))
+    self.interfaceScaleSlider:SetValue(ceil(Geary_Options:GetInterfaceScale() * 100))
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
@@ -443,6 +488,7 @@ end
 function Geary_Options_Interface:OnDefault(frame)
     self.iconShownCheckbox:SetChecked(Geary_Options:GetDefaultIconShown())
     self.iconScaleSlider:SetValue(ceil(Geary_Options:GetDefaultIconScale() * 100))
+    self.interfaceScaleSlider:SetValue(ceil(Geary_Options:GetDefaultInterfaceScale() * 100))
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
@@ -463,6 +509,7 @@ function Geary_Options_Interface:OnOkay(frame)
     end
     Geary_Icon:SetScale(self.iconScaleSlider:GetValue() / 100)
 
+    Geary_Interface:SetScale(self.interfaceScaleSlider:GetValue() / 100)
     Geary_Interface_Log:SetFont(_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
         self.logFontHeightSlider:GetValue())
 
