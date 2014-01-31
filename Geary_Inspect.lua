@@ -9,7 +9,7 @@
 
 Geary_Inspect = {
     items                      = {},    -- Make table once and wipe it in reset
-    timerId                    = nil,   -- Inspection in progress timer ID
+    timer                      = nil,   -- Inspection in progress timer
     playerLogoutEventHandlerId = nil,   -- Event handler ID for PLAYER_LOGOUT event
     inspectReadyEventHandlerId = nil,   -- Event handler ID for INSPECT_READY event
     INSPECT_TIMEOUT            = 3000,  -- Time in ms to wait before assuming an inspect failed
@@ -21,8 +21,15 @@ Geary_Inspect = {
 --
 
 function Geary_Inspect:Init()
-    Geary_Inspect.playerLogoutEventHandlerId =
-        Geary_Event:RegisterEvent("PLAYER_LOGOUT", function() Geary_Inspect:PLAYER_LOGOUT() end)
+    self.timer = Geary_Timer:new{
+        durationMillis = self.INSPECT_TIMEOUT,
+        callback = function(timer)
+            Geary_Inspect:_TimerExpired()
+        end
+    }
+    self.playerLogoutEventHandlerId = Geary_Event:RegisterEvent("PLAYER_LOGOUT", function()
+        Geary_Inspect:PLAYER_LOGOUT()
+    end)
 end
 
 function Geary_Inspect:_ResetInfo()
@@ -62,26 +69,15 @@ function Geary_Inspect:_ResetData()
 end
 
 --
--- Timers
+-- Timer
 --
-
-function Geary_Inspect:_StartTimer()
-    self.timerId = Geary_Timer:Start(self.INSPECT_TIMEOUT, function() Geary_Inspect:_TimerExpired() end)
-end
-
-function Geary_Inspect:_StopTimer()
-    if self.timerId ~= nil then
-        Geary_Timer:Stop(self.timerId)
-        self.timerId = nil
-    end
-end
 
 function Geary_Inspect:_TimerExpired()
     if self.inspectTry < self.INSPECT_TRIES then
         self:_ReinspectRequest()
     else
         self:_InspectionFailed()
-        Geary:Log(Geary.CC_FAILED .. "Inspection failed after " .. self.INSPECT_TRIES .. " tries." .. Geary.CC_END)
+        Geary:Log(Geary.CC_FAILED .. "Inspection failed after", self.INSPECT_TRIES, "tries." .. Geary.CC_END)
     end
 end
 
@@ -104,6 +100,7 @@ function Geary_Inspect:_UnregisterInspectionEvents()
 end
 
 function Geary_Inspect:PLAYER_LOGOUT()
+    self.timer:Stop()
     if self.inProgress then
         self:_InspectionOver()
         Geary_Event:UnregisterEvent(Geary_Inspect.playerLogoutEventHandlerId)
@@ -366,7 +363,7 @@ end
 
 function Geary_Inspect:_InspectionOver()
     self.inProgress = false
-    self:_StopTimer()
+    self.timer:Stop()
     self:_UnregisterInspectionEvents()
     self:_StopInProgress()
     ClearInspectPlayer()
@@ -416,7 +413,7 @@ function Geary_Inspect:_InspectUnitRequest(unit)
 
     -- Reset everything and show the UI for results
     self:_ResetInfo()
-    self:_StopTimer()
+    self.timer:Stop()
     self:_UnregisterInspectionEvents()
     self:_StopInProgress()
     Geary_Interface_Log:ClearIfTooLarge()
@@ -450,7 +447,7 @@ function Geary_Inspect:_MakeInspectRequest()
         self.player:GetFullNameLink(), self.player.level, self.player:GetColorizedClassName(), self.player.guid))
     self.inspectTry = self.inspectTry + 1
     Geary_Interface_Player:InspectionStart(self)
-    self:_StartTimer()
+    self.timer:Restart()
     self:_RegisterInspectionEvents()
     self:_StartInProgress()
     NotifyInspect(self.player.unit)

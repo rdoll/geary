@@ -259,6 +259,55 @@ function Geary_Test:Queue()
     print("After nextguid count", Geary_Inspect_Queue:GetCount())      -- 0
 end
 
+function Geary_Test:Timers()
+    self:_Header("Timers")
+
+    -- Fails with no callback
+    local t1 = Geary_Timer:new{}
+    t1:Start()
+
+    -- single timer with no duration and callback that just sets "did it"
+    local t1start = GetTime()
+    local t1 = Geary_Timer:new{}
+    t1:Start(nil, function(timer)
+        Geary:Print("t1 expired after", GetTime() - t1start)
+    end)
+
+    -- single timer with callback that restarts it once
+    local t2start = GetTime()
+    local t2 = Geary_Timer:new{}
+    t2.expiredCount = 0
+    t2:Start(555, function(timer)
+        if timer.expiredCount == 0 then
+            Geary:Print("t2 expired after", GetTime() - t2start, "restarting")
+            t2start = GetTime()
+            timer.expiredCount = timer.expiredCount + 1
+            timer:Restart()
+        else
+            Geary:Print("t2 expired after", GetTime() - t2start, "not restarting")
+        end
+    end)
+
+    -- single timer that is stopped before expiration
+    local t3 = Geary_Timer:new{}
+    t3:Start(2000, function(timer)
+        Geary:Print("t3 expired!")
+    end)
+    t3:Stop()
+
+    -- two timers; short one restarts long one
+    local t4start = GetTime()
+    local t4 = Geary_Timer:new{}
+    t4:Start(2000, function(timer)
+        Geary:Print("t4 expired after", GetTime() - t4start)  -- should be 2.5 secs total
+    end)
+    local t5 = Geary_Timer:new{}
+    t5:Start(500, function(timer)
+        Geary:Print("t5 expired, restarting t4")
+        t4:Restart()
+    end)
+end
+
 --[ [
     End of commenting out entire file
 --]]

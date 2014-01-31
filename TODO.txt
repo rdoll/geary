@@ -27,34 +27,7 @@ Ideas/Notes
 
 * With 300+ database entries, rendering database rows all at once is a noticeable delay
 
---
-After inspect group finished and most people were inspected, subsequent inspect group popped this.
-Happens alot. An issue modifying a for pairs(t) table while still in a for loop?
-Not sure if the issue is a delete from the table or an insert into the table -- or both?
-Maybe should go through table, capture expired ids and callbacks, then go through expired ids,
-  delete them from timers, then call callback???
-Take a look at how AceTimers and other addons do this.
-Replace custom timer frame onupdate handler with an Animation?
---
-Date: 2013-12-15 18:59:38
-ID: 1
-Error occured in: Global
-Count: 2
-Message: invalid key to 'next'
-Debug:
-   [C]: (for generator)()
-   Geary\Geary_Timer.lua:36:
-      Geary\Geary_Timer.lua:33
-Locals:
-(*temporary) = <table> {
- 57 = <table> {
- }
-}
-(*temporary) = 56
-
-AddOns:
-  Swatter, v5.18.5433 (PassionatePhascogale)
----
+* Use tostring(blah) in prints to prevent nil accesses
 
 
 Under Consideration
@@ -86,6 +59,7 @@ Under Consideration
 ** //Maybe:// Detect unspent talent points
 ** //Doubtful:// Detection of profession perks (e.g. enchants on rings, sockets in bracers/hands, etc)
 * UI:
+** //Maybe:// Ability to lock the position of the icon and interface
 ** //Maybe:// LibDataBroker compatibility (display results and clicks for operations)
 ** //Maybe:// Store window locations in options so addon load failures don't force you to reposition them
 ** //Maybe:// Add non-English client support via localizations

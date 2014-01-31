@@ -94,8 +94,8 @@ function Geary:ADDON_LOADED(addOnName)
         Geary_Database:ADDON_LOADED()
 
         -- Init other modules
-        Geary_Timer:Init()
         Geary_Item:Init() -- Must be before Geary_Interface_Player
+        Geary_Inspect:Init()
         Geary_Interface:Init()
         Geary_Icon:Init()
         Geary_Options_Interface:Init()
