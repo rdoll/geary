@@ -83,14 +83,14 @@ end
 --   + Sha-Touched
 --   + T15 LFR (502, 506, 510)
 --   + T15 Normal (522, 526, 530)
---   + T15 Normal Thunderforged (528, 532, 536)  ** Conflicts with T16 LFR **
+--   + T15 Normal Thunderforged (528, 532, 536)  ** 528/532/536 conflicts with T16 LFR **
 --   + T15 Heroic (535, 539, 543)
 --   + T15 Heroic Thunderforged (541, 545, 549)
 --
 -- But is NOT:
 --   + Heroic scenario (516, 520, 524)
---   + T16 LFR (528, 532, 536)  ** Conflicts with T15 Normal Thunderforged **
---   + T16 Flex (540, 544, 548)
+--   + T16 LFR (528, 532, 536, 540, 544)  ** 528/532/536 conflicts with T15 Normal Thunderforged **
+--   + T16 Flex (540, 544, 548, 552, 556)
 --
 -- For the conflicting T15 Normal Thunderforged and T16 LFR item levels, use item IDs.
 --

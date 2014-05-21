@@ -29,6 +29,12 @@ Ideas/Notes
 
 * Use tostring(blah) in prints to prevent nil accesses
 
+* Convert from parsing "Upgrade Level: x/y" from tooltip to parsing to using the unknown value
+* of the item ID string per http://us.battle.net/wow/en/forum/topic/7199032730
+* This would deprecate the hard coding of upgrades for Blue/Purple items being 8/4 per upgrade level
+* No need to update EotBP checks because only Tier 16 (SoO) and Timeless Isle gear can be upgraded
+* 4 times and TI gear has no weapons and the T16 gear new ilevels don't overlap T15.
+
 
 Under Consideration
 -------------------
@@ -37,7 +43,6 @@ Under Consideration
 ** //Maybe:// Sort by clicking on any column header
 ** //Maybe:// Filter results by Faction, Class, Level, etc
 ** //Maybe:// Ability to remove individual database entries
-** //Doubtful:// Sync database entries with group, guild members, or specific players
 ** //Doubtful:// Store results for multiple specs
 * Group:
 ** //Maybe:// Show details of inspection on hover/click
@@ -67,6 +72,10 @@ Under Consideration
 ** //Doubtful:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
 ** //Doubtful:// Resizing of Geary interface
 ** //Doubtful:// Detecting empty extra sockets from a belt buckle/EotBP instead of extra gems
+* Sync/Report:
+** //Doubtful:// Sync database entries with group, guild members, or specific players
+** //Doubtful:// Sync current group entries with group, guild members, or specific players
+** //Doubtful:// Report current group details and/or summary to officer, guild, raid, or specific players
 
 
 Detecting extra sockets without gems
