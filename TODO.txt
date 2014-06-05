@@ -12,6 +12,8 @@ Ideas/Notes
 * Geary options:
 ** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
 ** Icon position shouldn't change when icon size changes
+** ceil(Geary_Options:GetIconScale() * 100) returns 56 when Geary_Saved_Options.iconScale = 0.55
+** Makes no sense. ceil(... * 1000) == 550, so no idea why * 100 returns 56
 
 * Use frame templates for repeat items (e.g. summary rows)?
 
@@ -26,8 +28,6 @@ Ideas/Notes
 ** Is related to being in combat when assigning onhover/onclick handlers?
 
 * With 300+ database entries, rendering database rows all at once is a noticeable delay
-
-* Use tostring(blah) in prints to prevent nil accesses
 
 * Convert from parsing "Upgrade Level: x/y" from tooltip to parsing to using the unknown value
 * of the item ID string per http://us.battle.net/wow/en/forum/topic/7199032730

@@ -35,6 +35,9 @@ function Geary_Interface:Init()
     PanelTemplates_UpdateTabs(self.mainFrame)
     self:_TabOnClick(self.mainFrame.selectedTab)
 
+    -- Scale freshly built interface to user's desired size
+    self.mainFrame:SetScale(Geary_Options:GetInterfaceScale())
+
     -- Get notified when a pet battle starts (ignore returned event handler ID)
     Geary_Event:RegisterEvent("PET_BATTLE_OPENING_START", function() Geary_Interface:PET_BATTLE_OPENING_START() end)
 
@@ -237,7 +240,7 @@ function Geary_Interface:Show()
     -- When the main interface is shown, let the current tab re-render to pick up any missed changes
     local selectedTab = self.mainFrame.selectedTab
     if self.tabs.byId[selectedTab] == nil then
-        Geary:DebugPrint("Cannot reshow unknown selected tab " .. (selectedTab ~= nil and selectedTab or "nil"))
+        Geary:DebugPrint("Cannot reshow unknown selected tab " .. tostring(selectedTab))
     else
         self.tabs.byId[selectedTab].show()
     end

@@ -216,8 +216,7 @@ function Geary_Interface_Player:_InitSlots(parent)
                 elseif self.side == "right" then
                     GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
                 else
-                    Geary:Print(Geary.CC_ERROR .. "Unknown info side '" ..
-                        (self.side == nil and "nil" or self.side) .. "'" .. Geary.CC_END)
+                    Geary:Print(Geary.CC_ERROR .. "Unknown info side '" .. tostring(self.side) .. "'" .. Geary.CC_END)
                 end
                 GameTooltip:SetText(self.tooltip)
             end
@@ -244,14 +243,13 @@ function Geary_Interface_Player:_InitSlots(parent)
 
         -- When entering a slot, show item tooltip (if any) and set dressing room or regular cursor
         frame:SetScript("OnEnter", function(self)
-        -- Anchor the tooltip to the left or right of the icon so it doesn't cover the paper doll
+            -- Anchor the tooltip to the left or right of the icon so it doesn't cover the paper doll
             if self.paperDollSide == "left" then
                 GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT", 0, self:GetHeight())
             elseif self.paperDollSide == "right" then
                 GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 0, self:GetHeight())
             else
-                Geary:Print(Geary.CC_ERROR .. "Unknown paperDollSide '" ..
-                    (self.paperDollSide == nil and "nil" or self.paperDollSide) .. "'" .. Geary.CC_END)
+                Geary:Print(Geary.CC_ERROR .. "Unknown paperDollSide '" .. tostring(self.paperDollSide) .. "'" .. Geary.CC_END)
                 GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
             end
             ResetCursor() -- Default to normal cursor
