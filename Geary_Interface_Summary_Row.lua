@@ -48,30 +48,33 @@ function Geary_Interface_Summary_Row:_CreateContents(parent)
     -- Outermost container for row (points set by caller)
     self.rowButton = CreateFrame("Button", "$parent_SummaryRow_" .. Geary_Interface_Summary_Row.summaryRowNumber, parent)
     self.rowButton:SetHeight(rowHeight)
+    self.rowButton.row = self
 
-    -- Start with the backdrop hidden and show/hide it on enter/leave
+    -- Start with the backdrop hidden and show/hide it and tooltip on enter/leave
     self.rowButton:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Background",
         tile = true,
         tileSize = 32
     })
     self.rowButton:SetBackdropColor(0, 0, 0, 0)
-    self.rowButton:SetScript("OnEnter", function(frame, motion)
-        frame:SetBackdropColor(1, 1, 1, 1)
+    self.rowButton:SetScript("OnEnter", function(button, motion)
+        button:SetBackdropColor(1, 1, 1, 1)
+        button.row:_ShowTooltip()
     end)
-    self.rowButton:SetScript("OnLeave", function(frame, motion)
-        frame:SetBackdropColor(0, 0, 0, 0)
+    self.rowButton:SetScript("OnLeave", function(button, motion)
+        button:SetBackdropColor(0, 0, 0, 0)
+        button.row:_HideTooltip()
     end)
-    self.rowButton:SetScript("OnHide", function(frame, motion)
-        frame:SetBackdropColor(0, 0, 0, 0)
+    self.rowButton:SetScript("OnHide", function(button, motion)
+        button:SetBackdropColor(0, 0, 0, 0)
+        button.row:_HideTooltip()
     end)
 
     -- Trap clicks we care about
-    self.rowButton.row = self
     self.rowButton:RegisterForClicks("RightButtonUp")
-    self.rowButton:SetScript("OnClick", function(self, mouseButton, down)
+    self.rowButton:SetScript("OnClick", function(button, mouseButton, down)
         if mouseButton == "RightButton" then
-            self.row:OnClick(mouseButton, down)
+            button.row:OnClick(mouseButton, down)
         end
     end)
 
@@ -264,6 +267,7 @@ function Geary_Interface_Summary_Row:SetInspected(inspected)
 end
 
 function Geary_Interface_Summary_Row:SetFromEntry(entry)
+    -- Set row values
     self:SetGuid(entry.playerGuid)
     self:SetFaction(entry.playerFaction)
     self:SetClass(entry.playerClassId)
@@ -274,4 +278,84 @@ function Geary_Interface_Summary_Row:SetFromEntry(entry)
     self:SetName(entry.playerName, entry.playerRealm, entry.playerClassId)
     self:SetMissing(entry:GetMissingRequiredCount(), entry:GetMissingOptionalCount())
     self:SetInspected(entry.inspectedAt)
+
+    -- Store tooltip values
+    self.missingItems      = entry.missingItems
+    self.missingGems       = entry.missingGems
+    self.missingEnchants   = entry.missingEnchants
+    self.missingBeltBuckle = entry.missingBeltBuckle
+    self.missingUpgrades   = entry.missingUpgrades
+    self.missingEotbp      = entry.missingEotbp
+    self.missingCoh        = entry.missingCoh
+    self.missingCov        = entry.missingCov
+    self.missingLegCloak   = entry.missingLegCloak
+
+    if entry.playerSpecId ~= nil and entry.playerSpecId > 0 then
+        local _, specName = GetSpecializationInfoByID(entry.playerSpecId)
+        self.specName = Geary_Player:ClassColorize(entry.playerClassId, specName)
+    else
+        self.specName = _unknownTextureInline
+    end
+end
+
+function Geary_Interface_Summary_Row:_ShowTooltip()
+
+    GameTooltip:SetOwner(self.rowButton, "ANCHOR_CURSOR", 0, 0)
+    GameTooltip:ClearLines()
+
+    GameTooltip:AddDoubleLine(self.nameFontString:GetText(), self.iLevelFontString:GetText())
+    GameTooltip:AddLine(self.levelFontString:GetText() .. " " .. self.specName)
+
+    local isSomethingMissing = false
+    GameTooltip:AddLine(" ")
+
+    if self.missingItems ~= nil and self.missingItems > 0 then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_ERROR .. "Missing " .. self.missingItems .. " items" .. Geary.CC_END)
+    end
+    if self.missingGems ~= nil and self.missingGems > 0 then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_ERROR .. "Missing " .. self.missingGems .. " gems".. Geary.CC_END)
+    end
+    if self.missingEnchants ~= nil and self.missingEnchants > 0 then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_ERROR .. "Missing " .. self.missingEnchants .. " enchants" .. Geary.CC_END)
+    end
+    if self.missingBeltBuckle then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_ERROR .. "Missing belt buckle" .. Geary.CC_END)
+    end
+
+    if self.missingUpgrades ~= nil and self.missingUpgrades > 0 then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing " .. self.missingUpgrades .. " upgrades" .. Geary.CC_END)
+    end
+
+    if self.missingEotbp ~= nil and self.missingEotbp > 0 then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing " .. self.missingEotbp .. " EotBP" .. Geary.CC_END)
+    end
+    if self.missingCoh then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing CoH Meta" .. Geary.CC_END)
+    end
+    if self.missingCov then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing CoV" .. Geary.CC_END)
+    elseif self.missingLegCloak then
+        isSomethingMissing = true
+        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing Leg Cloak" .. Geary.CC_END)
+    end
+
+    if isSomethingMissing then
+        GameTooltip:AddLine(" ")
+    end
+
+    GameTooltip:AddDoubleLine("Inspected", self.inspectedFontString:GetText())
+
+    GameTooltip:Show()
+end
+
+function Geary_Interface_Summary_Row:_HideTooltip()
+    GameTooltip:Hide()
 end

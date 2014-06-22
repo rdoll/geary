@@ -5,7 +5,7 @@ Ideas/Notes
 ** Show "-" and tooltip of "must be level 90" if too low.
 ** What would be shown in log?
 ** What would be shown if passed all milestones?
-** Note: Not sure if this inside can be done inside an EditBox
+** Note: Not sure if this can be done inside an EditBox
 
 * Geary icon needs a tooltip
 
@@ -39,13 +39,11 @@ Ideas/Notes
 Under Consideration
 -------------------
 * Database:
-** //Maybe:// Show details of inspection on hover/click
 ** //Maybe:// Sort by clicking on any column header
 ** //Maybe:// Filter results by Faction, Class, Level, etc
 ** //Maybe:// Ability to remove individual database entries
 ** //Doubtful:// Store results for multiple specs
 * Group:
-** //Maybe:// Show details of inspection on hover/click
 ** //Maybe:// Sort by clicking on any column header
 ** //Maybe:// Show ^ and v icons for players above and below group's average iLevel
 * Player:
