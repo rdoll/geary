@@ -17,7 +17,8 @@ Geary_Options = {
         databaseEnabled = true,
         databaseMinLevel = Geary_Player.MAX_LEVEL,
         databasePruneOnLoad = false,
-        databasePruneDays = 180
+        databasePruneDays = 180,
+        showMopLegProgress = true
     }
 }
 
@@ -223,4 +224,20 @@ end
 
 function Geary_Options:SetDatabasePruneDays(pruneDays)
     Geary_Saved_Options.databasePruneDays = pruneDays
+end
+
+--
+-- Show Mists of Pandaria legendary quest progress
+--
+
+function Geary_Options:GetDefaultShowMopLegProgress()
+    return self.default.showMopLegProgress
+end
+
+function Geary_Options:GetShowMopLegProgress()
+    return Geary_Saved_Options.showMopLegProgress
+end
+
+function Geary_Options:SetShowMopLegProgress(shown)
+    Geary_Saved_Options.showMopLegProgress = shown
 end

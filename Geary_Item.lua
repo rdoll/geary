@@ -96,7 +96,7 @@ end
 --
 function Geary_Item:CanHaveEotbp(player)
 
-    if not player:IsMaxLevel() then
+    if not player:CanDoMopLegQuest() then
         return false  -- Player ineligible for legendary
     end
 
@@ -171,14 +171,14 @@ end
 
 -- Player can do legendary quest and has a head item with sockets
 function Geary_Item:CanHaveCohMeta(player)
-    return player:IsMaxLevel() and self.slot == "HeadSlot" and
+    return player:CanDoMopLegQuest() and self.slot == "HeadSlot" and
         (not Geary:IsTableEmpty(self.filledSockets) or
             not Geary:IsTableEmpty(self.emptySockets) or not Geary:IsTableEmpty(self.failedJewelIds))
 end
 
 -- Player can do legendary quest
 function Geary_Item:CanHaveCovOrLegCloak(player)
-    return player:IsMaxLevel()
+    return player:CanDoMopLegQuest()
 end
 
 -- Determines if the item is a cloak with an item ID of the 6 Cloaks of Virtue
@@ -200,8 +200,8 @@ function Geary_Item:IsMissingRequired()
 end
 
 function Geary_Item:IsMissingOptional()
-    return self.upgradeItemLevelMissing > 0 or self.isMissingEotbp or self.isMissingCohMeta or
-        self.isMissingCov
+    return self.upgradeItemLevelMissing > 0 or
+        (Geary_Options:GetShowMopLegProgress() and (self.isMissingEotbp or self.isMissingCohMeta or self.isMissingCov))
 end
 
 function Geary_Item:ILevelWithUpgrades()
@@ -392,16 +392,19 @@ function Geary_Item:Probe(player)
     if self.isMissingBeltBuckle then
         Geary:Log(Geary.CC_MISSING .. "   Missing " .. self:GetBeltBuckleItemWithTexture() .. Geary.CC_END)
     end
-    if self.isMissingEotbp then
-        Geary:Log(Geary.CC_OPTIONAL .. "   Missing " .. self:GetEotbpItemWithTexture() .. Geary.CC_END)
-    end
-    if self.isMissingCohMeta then
-        Geary:Log(Geary.CC_OPTIONAL .. "   Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
-    end
-    if self.isMissingCov then
-        Geary:Log(Geary.CC_OPTIONAL .. "   Missing Cloak of Virtue" .. Geary.CC_END)
-    elseif self.isMissingLegCloak then
-        Geary:Log(Geary.CC_OPTIONAL .. "   Missing legendary cloak" .. Geary.CC_END)
+
+    if Geary_Options:GetShowMopLegProgress() then
+        if self.isMissingEotbp then
+            Geary:Log(Geary.CC_OPTIONAL .. "   Missing " .. self:GetEotbpItemWithTexture() .. Geary.CC_END)
+        end
+        if self.isMissingCohMeta then
+            Geary:Log(Geary.CC_OPTIONAL .. "   Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
+        end
+        if self.isMissingCov then
+            Geary:Log(Geary.CC_OPTIONAL .. "   Missing Cloak of Virtue" .. Geary.CC_END)
+        elseif self.isMissingLegCloak then
+            Geary:Log(Geary.CC_OPTIONAL .. "   Missing legendary cloak" .. Geary.CC_END)
+        end
     end
 
     return true

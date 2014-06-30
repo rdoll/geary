@@ -418,41 +418,47 @@ function Geary_Interface_Player:InspectionEnd(inspect)
     end
 
     local eotbpColor, eotbpCounts = Geary.CC_NA, "-"
-    if inspect.eotbpFilled > 0 or inspect.eotbpMissing > 0 then
-        eotbpColor = inspect.eotbpMissing > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT
-        eotbpCounts = inspect.eotbpFilled .. "/" .. (inspect.eotbpFilled + inspect.eotbpMissing)
+    if Geary_Options:GetShowMopLegProgress() then
+        if inspect.eotbpFilled > 0 or inspect.eotbpMissing > 0 then
+            eotbpColor = inspect.eotbpMissing > 0 and Geary.CC_OPTIONAL or Geary.CC_CORRECT
+            eotbpCounts = inspect.eotbpFilled .. "/" .. (inspect.eotbpFilled + inspect.eotbpMissing)
+        end
     end
 
     local cohColor, cohString = Geary.CC_NA, "-"
-    if inspect.hasCohMeta or inspect.isMissingCohMeta then
-        if inspect.hasCohMeta then
-            cohColor = Geary.CC_CORRECT
-            cohString = "Yes"
-        else
-            cohColor = Geary.CC_OPTIONAL
-            cohString = "No"
+    if Geary_Options:GetShowMopLegProgress() then
+        if inspect.hasCohMeta or inspect.isMissingCohMeta then
+            if inspect.hasCohMeta then
+                cohColor = Geary.CC_CORRECT
+                cohString = "Yes"
+            else
+                cohColor = Geary.CC_OPTIONAL
+                cohString = "No"
+            end
         end
     end
 
     local covColor, covString = Geary.CC_NA, "-"
     local legCloakColor, legCloakString = Geary.CC_NA, "-"
-    if inspect.hasCov or inspect.isMissingCov then
-        -- Has or is missing CoV, so leg cloak is n/a
-        if inspect.hasCov then
-            covColor = Geary.CC_CORRECT
-            covString = "Yes"
-        else
-            covColor = Geary.CC_OPTIONAL
-            covString = "No"
-        end
-    elseif inspect.hasLegCloak or inspect.isMissingLegCloak then
-        -- Does not have CoV, but has or is missing leg cloak
-        if inspect.hasLegCloak then
-            legCloakColor = Geary.CC_CORRECT
-            legCloakString = "Yes"
-        else
-            legCloakColor = Geary.CC_OPTIONAL
-            legCloakString = "No"
+    if Geary_Options:GetShowMopLegProgress() then
+        if inspect.hasCov or inspect.isMissingCov then
+            -- Has or is missing CoV, so leg cloak is n/a
+            if inspect.hasCov then
+                covColor = Geary.CC_CORRECT
+                covString = "Yes"
+            else
+                covColor = Geary.CC_OPTIONAL
+                covString = "No"
+            end
+        elseif inspect.hasLegCloak or inspect.isMissingLegCloak then
+            -- Does not have CoV, but has or is missing leg cloak
+            if inspect.hasLegCloak then
+                legCloakColor = Geary.CC_CORRECT
+                legCloakString = "Yes"
+            else
+                legCloakColor = Geary.CC_OPTIONAL
+                legCloakString = "No"
+            end
         end
     end
 
@@ -483,7 +489,17 @@ function Geary_Interface_Player:InspectionEnd(inspect)
             "|h" .. inspect.maxItem:ILevelWithUpgrades() .. " " .. inspect.maxItem.inlineTexture .. "|h")
     end
 
-    self.summary.statsEditBox:SetText(itemColor .. "Items: " .. itemCounts .. itemTwoHand .. Geary.CC_END .. "\n" ..
+    local mopLegProgress = ""
+    if Geary_Options:GetShowMopLegProgress() then
+        mopLegProgress =
+            eotbpColor .. "EotBP: " .. eotbpCounts .. Geary.CC_END .. "\n" ..
+            cohColor .. "CoH Meta: " .. cohString .. Geary.CC_END .. "\n" ..
+            covColor .. "CoV: " .. covString .. Geary.CC_END .. "\n" ..
+            legCloakColor .. "Leg Cloak: " .. legCloakString .. Geary.CC_END .. "\n"
+    end
+
+    self.summary.statsEditBox:SetText(
+        itemColor .. "Items: " .. itemCounts .. itemTwoHand .. Geary.CC_END .. "\n" ..
         upgradeColor .. "Upgrades: " .. upgradeCounts .. Geary.CC_END .. "\n" ..
         "\n" ..
         enchantColor .. "Enchants: " .. enchantCounts .. Geary.CC_END .. "\n" ..
@@ -491,10 +507,7 @@ function Geary_Interface_Player:InspectionEnd(inspect)
         "\n" ..
         gemColor .. "Gems: " .. gemCounts .. Geary.CC_END .. "\n" ..
         "\n" ..
-        eotbpColor .. "EotBP: " .. eotbpCounts .. Geary.CC_END .. "\n" ..
-        cohColor .. "CoH Meta: " .. cohString .. Geary.CC_END .. "\n" ..
-        covColor .. "CoV: " .. covString .. Geary.CC_END .. "\n" ..
-        legCloakColor .. "Leg Cloak: " .. legCloakString .. Geary.CC_END .. "\n" ..
+        mopLegProgress ..
         "\n" ..
         "Equipped iLevel: " .. ("%.2f"):format(inspect.iLevelEquipped) .. "\n" ..
         upgradedColor .. "Upgraded iLevel: " .. upgradedILevel .. Geary.CC_END .. "\n" ..
@@ -526,19 +539,19 @@ function Geary_Interface_Player:SetItem(slotName, item)
     slotData.icon:Show()
     self:_SetItemBorder(slotName, item)
 
-    self:_AddInfoTooltipText(slotData.info, item:ILevelWithUpgrades() .. " " ..
-        item:GetItemLinkWithInlineTexture())
+    self:_AddInfoTooltipText(slotData.info, item:ILevelWithUpgrades() .. " " .. item:GetItemLinkWithInlineTexture())
     slotData.info.fontString:SetText(item:ILevelWithUpgrades())
     self:_SetEnchantIcon(slotData.info, item)
     self:_SetGemIcons(slotData.info, item)
 
-    if item.isMissingCohMeta then
-        self:_AddInfoTooltipText(slotData.info,
-            Geary.CC_OPTIONAL .. "Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
-    end
-
-    if item.isMissingCov then
-        self:_AddInfoTooltipText(slotData.info, Geary.CC_OPTIONAL .. "Missing Cloak of Virtue" .. Geary.CC_END)
+    if Geary_Options:GetShowMopLegProgress() then
+        if item.isMissingCohMeta then
+            self:_AddInfoTooltipText(slotData.info,
+                Geary.CC_OPTIONAL .. "Missing Crown of Heaven legendary meta gem" .. Geary.CC_END)
+        end
+        if item.isMissingCov then
+            self:_AddInfoTooltipText(slotData.info, Geary.CC_OPTIONAL .. "Missing Cloak of Virtue" .. Geary.CC_END)
+        end
     end
 
     -- Set the background color based on any issues with this item
@@ -619,7 +632,7 @@ function Geary_Interface_Player:_SetGemIcons(info, item)
     end
 
     -- Missing Eye of the Black Prince
-    if item.isMissingEotbp then
+    if Geary_Options:GetShowMopLegProgress() and item.isMissingEotbp then
         info.gemTextures[gemTextureIndex]:SetTexture("Interface\\COMMON\\Indicator-Yellow")
         info.gemTextures[gemTextureIndex]:SetTexCoord(0.125, 0.875, 0.125, 0.875)
         self:_AddInfoTooltipText(info, Geary.CC_OPTIONAL .. "Missing " .. Geary_Item:GetEotbpItemWithTexture() ..

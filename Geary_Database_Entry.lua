@@ -93,12 +93,15 @@ function Geary_Database_Entry:GetMissingRequiredCount()
 end
 
 function Geary_Database_Entry:GetMissingOptionalCount()
-    if self.missingUpgrades == nil and self.missingEotbp == nil then
-        return nil
-    else
-        return (self.missingUpgrades or 0) + (self.missingEotbp or 0) + (self.missingCoh and 1 or 0)
+    local count = self.missingUpgrades  -- nil or # missing
+
+    -- If showing MoP legendary progress and progress has been tracked
+    if Geary_Options:GetShowMopLegProgress() and self.missingEotbp ~= nil then
+        count = (count or 0) + (self.missingEotbp or 0) + (self.missingCoh and 1 or 0)
             + (self.missingCov and 1 or (self.missingLegCloak and 1 or 0))
     end
+
+    return count
 end
 
 function Geary_Database_Entry:GetFullName()

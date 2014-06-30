@@ -331,20 +331,22 @@ function Geary_Interface_Summary_Row:_ShowTooltip()
         GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing " .. self.missingUpgrades .. " upgrades" .. Geary.CC_END)
     end
 
-    if self.missingEotbp ~= nil and self.missingEotbp > 0 then
-        isSomethingMissing = true
-        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing " .. self.missingEotbp .. " EotBP" .. Geary.CC_END)
-    end
-    if self.missingCoh then
-        isSomethingMissing = true
-        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing CoH Meta" .. Geary.CC_END)
-    end
-    if self.missingCov then
-        isSomethingMissing = true
-        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing CoV" .. Geary.CC_END)
-    elseif self.missingLegCloak then
-        isSomethingMissing = true
-        GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing Leg Cloak" .. Geary.CC_END)
+    if Geary_Options:GetShowMopLegProgress() then
+        if self.missingEotbp ~= nil and self.missingEotbp > 0 then
+            isSomethingMissing = true
+            GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing " .. self.missingEotbp .. " EotBP" .. Geary.CC_END)
+        end
+        if self.missingCoh then
+            isSomethingMissing = true
+            GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing CoH Meta" .. Geary.CC_END)
+        end
+        if self.missingCov then
+            isSomethingMissing = true
+            GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing CoV" .. Geary.CC_END)
+        elseif self.missingLegCloak then
+            isSomethingMissing = true
+            GameTooltip:AddLine(Geary.CC_OPTIONAL .. "Missing Leg Cloak" .. Geary.CC_END)
+        end
     end
 
     if isSomethingMissing then

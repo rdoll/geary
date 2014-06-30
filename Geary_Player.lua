@@ -21,7 +21,9 @@ Geary_Player = {
     },
 
     -- Why oh why isn't there a constant for this?
-    MAX_LEVEL = 90
+    MAX_LEVEL = 90,
+
+    MOP_LEG_MIN_LEVEL = 90
 }
 
 --
@@ -67,6 +69,10 @@ end
 
 function Geary_Player:IsMaxLevel()
     return self.level == self.MAX_LEVEL
+end
+
+function Geary_Player:CanDoMopLegQuest()
+    return self.level >= self.MOP_LEG_MIN_LEVEL
 end
 
 function Geary_Player:Probe()

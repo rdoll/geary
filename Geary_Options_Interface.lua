@@ -23,14 +23,16 @@ Geary_Options_Interface = {
     databaseMinLevelSlider = nil,
     databasePruneOnLoadCheckbox = nil,
     databasePruneNowButton = nil,
-    databasePruneDaysSlider = nil
+    databasePruneDaysSlider = nil,
+
+    showMopLegProgressCheckbox = nil
 }
 
-local _fontFilenames = {
+local _FONT_FILENAMES = {
     byFilename = {
         ["Fonts\\FRIZQT__.TTF"] = { id = 1, name = "Friz Quadrata" },
-        ["Fonts\\ARIALN.TTF"] = { id = 2, name = "Arial Narrow" },
-        ["Fonts\\SKURRI.ttf"] = { id = 3, name = "Skurri" },
+        ["Fonts\\ARIALN.TTF"]   = { id = 2, name = "Arial Narrow" },
+        ["Fonts\\SKURRI.ttf"]   = { id = 3, name = "Skurri" },
         ["Fonts\\MORPHEUS.ttf"] = { id = 4, name = "Morpheus" }
     },
     byId = {
@@ -40,6 +42,8 @@ local _fontFilenames = {
         [4] = "Fonts\\MORPHEUS.ttf"
     }
 }
+
+local _SCROLL_BAR_SPACE = 32
 
 function Geary_Options_Interface:Init()
     -- Add our options frame to the Interface Addon Options GUI
@@ -56,7 +60,7 @@ end
 --
 -- Starting in 5.4, sliders don't properly respect the step values and OnValueChanged events
 -- will receive fractional values. As detailed at http://www.wowwiki.com/Patch_5.4.0/API_changes#Slider,
--- the following workaround honors the steps with a minimal impact to performance.
+-- the following workaround honors the steps with minimal impact to performance.
 --
 local function _sliderOnValueChangedFix(slider, value, valueSuffix)
     -- start fix
@@ -83,17 +87,17 @@ function Geary_Options_Interface:_CreateContents()
     local subtitle = self.mainFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     subtitle:SetHeight(32)
     subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
-    subtitle:SetPoint("RIGHT", self.mainFrame, -32, 0)
+    subtitle:SetPoint("RIGHT", self.mainFrame, _SCROLL_BAR_SPACE, 0)
     subtitle:SetNonSpaceWrap(true)
     subtitle:SetJustifyH("LEFT")
     subtitle:SetJustifyV("TOP")
     subtitle:SetText("Version: " .. Geary.version .. "\n" .. Geary.notes)
 
     -- Create sections
-    local section = self:_CreateIconSection(subtitle)
-    section = self:_CreateInterfaceSection(section)
-    section = self:_CreateDatabaseSection(section)
-    section = self:_CreateDatabasePruneInputs(section)
+    local section = self:_CreateIconSection(self.mainFrame, subtitle)
+    section = self:_CreateInterfaceSection(self.mainFrame, section)
+    section = self:_CreateDatabaseSection(self.mainFrame, section)
+    section = self:_CreateInspectionSection(self.mainFrame, section)
 
     -- Mark created so we don't recreate everything
     self.contentsCreated = true
@@ -127,15 +131,20 @@ function Geary_Options_Interface:_CreateHeader(parent, name)
     return frame
 end
 
-function Geary_Options_Interface:_CreateIconSection(previousItem)
+function Geary_Options_Interface:_CreateIconSection(parent, previousSection)
+
+    -- Section container
+    local section = CreateFrame("Frame", "$parent_Icon_Section", parent)
+    section:SetSize(parent:GetWidth() - _SCROLL_BAR_SPACE, 70)
+    section:SetPoint("TOPLEFT", previousSection, "BOTTOMLEFT", 0, -5)
 
     -- Icon header
-    local iconHeader = self:_CreateHeader(self.mainFrame, "Geary Icon Button")
-    iconHeader:SetWidth(self.mainFrame:GetWidth() - 32)
-    iconHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -2, -5)
+    local iconHeader = self:_CreateHeader(section, "Geary Icon Button")
+    iconHeader:SetWidth(section:GetWidth())
+    iconHeader:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 
     -- Icon shown
-    local checkbox = CreateFrame("CheckButton", "$parent_Icon_Shown_Checkbox", self.mainFrame,
+    local checkbox = CreateFrame("CheckButton", "$parent_Icon_Shown_Checkbox", section,
         "InterfaceOptionsCheckButtonTemplate")
     checkbox:SetPoint("TOPLEFT", iconHeader, "BOTTOMLEFT", 0, -5)
     checkbox.Label = _G[checkbox:GetName() .. "Text"]
@@ -149,7 +158,7 @@ function Geary_Options_Interface:_CreateIconSection(previousItem)
     self.iconShownCheckbox = checkbox
 
     -- Icon scale
-    local slider = CreateFrame("Slider", "$parent_Icon_Scale_Slider", self.mainFrame, "OptionsSliderTemplate")
+    local slider = CreateFrame("Slider", "$parent_Icon_Scale_Slider", section, "OptionsSliderTemplate")
     slider:SetWidth(190)
     slider:SetHeight(14)
     slider:SetMinMaxValues(10, 200)
@@ -185,14 +194,14 @@ function Geary_Options_Interface:_CreateIconSection(previousItem)
     -- Save it
     self.iconScaleSlider = slider
 
-    return self.iconShownCheckbox
+    return section
 end
 
 local function _logFontFilenameDropdownInitialize(self, level)
     local info
-    for id, filename in ipairs(_fontFilenames.byId) do
+    for id, filename in ipairs(_FONT_FILENAMES.byId) do
         info = UIDropDownMenu_CreateInfo()
-        info.text = _fontFilenames.byFilename[filename].name
+        info.text = _FONT_FILENAMES.byFilename[filename].name
         info.value = filename
         info.func = function(self)
             UIDropDownMenu_SetSelectedID(Geary_Options_Interface.logFontFilenameDropdown, self:GetID())
@@ -201,15 +210,20 @@ local function _logFontFilenameDropdownInitialize(self, level)
     end
 end
 
-function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
+function Geary_Options_Interface:_CreateInterfaceSection(parent, previousSection)
+
+    -- Section container
+    local section = CreateFrame("Frame", "$parent_Interface_Section", parent)
+    section:SetSize(parent:GetWidth() - _SCROLL_BAR_SPACE, 100)
+    section:SetPoint("TOPLEFT", previousSection, "BOTTOMLEFT", 0, -10)
 
     -- Geary interface header
-    local interfaceHeader = self:_CreateHeader(self.mainFrame, "Geary Interface")
-    interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
-    interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -45)
+    local interfaceHeader = self:_CreateHeader(section, "Geary Interface")
+    interfaceHeader:SetWidth(section:GetWidth())
+    interfaceHeader:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 
     -- Interface scale slider
-    local slider = CreateFrame("Slider", "$parent_Interface_Scale_Slider", self.mainFrame, "OptionsSliderTemplate")
+    local slider = CreateFrame("Slider", "$parent_Interface_Scale_Slider", section, "OptionsSliderTemplate")
     slider:SetWidth(190)
     slider:SetHeight(14)
     slider:SetMinMaxValues(50, 200)
@@ -246,7 +260,7 @@ function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
     self.interfaceScaleSlider = slider
 
     -- Log font height slider
-    local slider = CreateFrame("Slider", "$parent_Log_Font_Height_Slider", self.mainFrame, "OptionsSliderTemplate")
+    local slider = CreateFrame("Slider", "$parent_Log_Font_Height_Slider", section, "OptionsSliderTemplate")
     slider:SetWidth(190)
     slider:SetHeight(14)
     slider:SetMinMaxValues(8, 16)
@@ -283,34 +297,38 @@ function Geary_Options_Interface:_CreateInterfaceSection(previousItem)
     self.logFontHeightSlider = slider
 
     -- Log font filename dropdown
-    local label = self.mainFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
+    local label = section:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
     label:SetText("Log Font:")
     label:SetPoint("TOPLEFT", self.logFontHeightSlider, "BOTTOMLEFT", 0, -25)
 
-    local dropdown = CreateFrame("Button", "$parent_Log_Font_Filename_Dropdown", self.mainFrame,
-        "UIDropDownMenuTemplate")
+    local dropdown = CreateFrame("Button", "$parent_Log_Font_Filename_Dropdown", section, "UIDropDownMenuTemplate")
     dropdown:SetPoint("LEFT", label, "RIGHT", 0, -3)
     self.logFontFilenameDropdown = dropdown  -- Required by initialize function
     UIDropDownMenu_Initialize(dropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetWidth(dropdown, 100)
     UIDropDownMenu_SetButtonWidth(dropdown, 124)
-    UIDropDownMenu_SetSelectedID(dropdown, _fontFilenames.byFilename[Geary_Options.GetLogFontFilename()].id)
+    UIDropDownMenu_SetSelectedID(dropdown, _FONT_FILENAMES.byFilename[Geary_Options.GetLogFontFilename()].id)
     UIDropDownMenu_JustifyText(dropdown, "LEFT")
 
-    return self.interfaceScaleSlider
+    return section
 end
 
-function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
+function Geary_Options_Interface:_CreateDatabaseSection(parent, previousSection)
+
+    -- Section container
+    local section = CreateFrame("Frame", "$parent_Database_Section", parent)
+    section:SetSize(parent:GetWidth() - _SCROLL_BAR_SPACE, 140)
+    section:SetPoint("TOPLEFT", previousSection, "BOTTOMLEFT", 0, -10)
 
     -- Geary database header
-    local interfaceHeader = self:_CreateHeader(self.mainFrame, "Geary Database")
-    interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
-    interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", -10, -60)
+    local databaseHeader = self:_CreateHeader(section, "Geary Interface")
+    databaseHeader:SetWidth(section:GetWidth())
+    databaseHeader:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 
     -- Database enabled
-    local checkbox = CreateFrame("CheckButton", "$parent_Database_Enabled_Checkbox", self.mainFrame,
+    local checkbox = CreateFrame("CheckButton", "$parent_Database_Enabled_Checkbox", section,
         "InterfaceOptionsCheckButtonTemplate")
-    checkbox:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 0, -5)
+    checkbox:SetPoint("TOPLEFT", databaseHeader, "BOTTOMLEFT", 0, -5)
     checkbox.Label = _G[checkbox:GetName() .. "Text"]
     checkbox.Label:SetText("Database Enabled")
     checkbox:SetScript("OnEnter", function(self)
@@ -322,14 +340,14 @@ function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
     self.databaseEnabledCheckbox = checkbox
 
     -- Database storage character minimum level slider
-    local slider = CreateFrame("Slider", "$parent_Database_Min_Level_Slider", self.mainFrame, "OptionsSliderTemplate")
+    local slider = CreateFrame("Slider", "$parent_Database_Min_Level_Slider", section, "OptionsSliderTemplate")
     slider:SetWidth(190)
     slider:SetHeight(14)
     slider:SetMinMaxValues(1, Geary_Player.MAX_LEVEL)
     slider:SetValueStep(1)
     slider:SetStepsPerPage(1)
     slider:SetOrientation("HORIZONTAL")
-    slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOM", 0, -30)
+    slider:SetPoint("TOPLEFT", databaseHeader, "BOTTOM", 0, -30)
     slider:Enable()
     -- Label above
     slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
@@ -358,21 +376,16 @@ function Geary_Options_Interface:_CreateDatabaseSection(previousItem)
     -- Save it
     self.databaseMinLevelSlider = slider
 
-    return checkbox
-end
-
-function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
-
     -- Pseudo-header for alignment
-    local interfaceHeader = CreateFrame("Frame", nil, previousItem)
-    interfaceHeader:SetHeight(1)
-    interfaceHeader:SetWidth(self.mainFrame:GetWidth() - 32)
-    interfaceHeader:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -25)
+    local rowAligner = CreateFrame("Frame", nil, section)
+    rowAligner:SetHeight(1)
+    rowAligner:SetWidth(parent:GetWidth() - _SCROLL_BAR_SPACE)
+    rowAligner:SetPoint("TOPLEFT", section, "TOPLEFT", 0, -80)
 
     -- Database prune on load checkbox
-    local checkbox = CreateFrame("CheckButton", "$parent_Database_Prune_On_Load_Checkbox", self.mainFrame,
+    local checkbox = CreateFrame("CheckButton", "$parent_Database_Prune_On_Load_Checkbox", section,
         "InterfaceOptionsCheckButtonTemplate")
-    checkbox:SetPoint("TOPLEFT", interfaceHeader, "BOTTOMLEFT", 0, -5)
+    checkbox:SetPoint("TOPLEFT", rowAligner, "BOTTOMLEFT", 0, -5)
     checkbox.Label = _G[checkbox:GetName() .. "Text"]
     checkbox.Label:SetText("Auto Prune On Load")
     checkbox:SetScript("OnEnter", function(self)
@@ -384,7 +397,7 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     self.databasePruneOnLoadCheckbox = checkbox
 
     -- Database prune now button
-    local button = CreateFrame("Button", "$parent_Database_Prune_Now_Button", self.mainFrame, "OptionsButtonTemplate")
+    local button = CreateFrame("Button", "$parent_Database_Prune_Now_Button", section, "OptionsButtonTemplate")
     button:SetSize(100, 20)
     button:SetText("Prune Now")
     button:SetPoint("TOPLEFT", checkbox, "BOTTOMLEFT", 2, -3)
@@ -396,14 +409,14 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     self.databasePruneNowButton = button
 
     -- Database days to prune old entries
-    local slider = CreateFrame("Slider", "$parent_Database_Prune_Days_Slider", self.mainFrame, "OptionsSliderTemplate")
+    local slider = CreateFrame("Slider", "$parent_Database_Prune_Days_Slider", section, "OptionsSliderTemplate")
     slider:SetWidth(190)
     slider:SetHeight(14)
     slider:SetMinMaxValues(1, 180)
     slider:SetValueStep(1)
     slider:SetStepsPerPage(1)
     slider:SetOrientation("HORIZONTAL")
-    slider:SetPoint("TOPLEFT", interfaceHeader, "BOTTOM", 0, -30)
+    slider:SetPoint("TOPLEFT", rowAligner, "BOTTOM", 0, -30)
     slider:Enable()
     -- Label above
     slider.Label = slider:CreateFontString(nil, 'ARTWORK', 'GameFontNormal')
@@ -434,7 +447,36 @@ function Geary_Options_Interface:_CreateDatabasePruneInputs(previousItem)
     -- Save it
     self.databasePruneDaysSlider = slider
 
-    return self.databasePruneDaysSlider
+    return section
+end
+
+function Geary_Options_Interface:_CreateInspectionSection(parent, previousSection)
+
+    -- Section container
+    local section = CreateFrame("Frame", "$parent_Inspection_Section", parent)
+    section:SetSize(parent:GetWidth() - _SCROLL_BAR_SPACE, 50)
+    section:SetPoint("TOPLEFT", previousSection, "BOTTOMLEFT", 0, -10)
+
+    -- Geary inspection header
+    local inspectionHeader = self:_CreateHeader(section, "Geary Inspection")
+    inspectionHeader:SetWidth(section:GetWidth())
+    inspectionHeader:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
+
+    -- Show MoP legendary quest progress
+    local checkbox = CreateFrame("CheckButton", "$parent_Show_Mop_Leg_Progress_Checkbox", section,
+        "InterfaceOptionsCheckButtonTemplate")
+    checkbox:SetPoint("TOPLEFT", inspectionHeader, "BOTTOMLEFT", 0, -5)
+    checkbox.Label = _G[checkbox:GetName() .. "Text"]
+    checkbox.Label:SetText("Show MoP Legendary Progress")
+    checkbox:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
+        GameTooltip:SetText("Show Mists of Pandaria legendary cloak quest progress")
+    end)
+    checkbox:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
+    self.showMopLegProgressCheckbox = checkbox
+
+    return section
 end
 
 function Geary_Options_Interface:Show()
@@ -477,12 +519,13 @@ function Geary_Options_Interface:OnShow(frame)
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
-        _fontFilenames.byFilename[Geary_Options:GetLogFontFilename()].id)
+        _FONT_FILENAMES.byFilename[Geary_Options:GetLogFontFilename()].id)
     self.logFontHeightSlider:SetValue(Geary_Options:GetLogFontHeight())
     self.databaseEnabledCheckbox:SetChecked(Geary_Options:IsDatabaseEnabled())
     self.databaseMinLevelSlider:SetValue(Geary_Options:GetDatabaseMinLevel())
     self.databasePruneOnLoadCheckbox:SetChecked(Geary_Options:IsDatabasePruneOnLoad())
     self.databasePruneDaysSlider:SetValue(Geary_Options:GetDatabasePruneDays())
+    self.showMopLegProgressCheckbox:SetChecked(Geary_Options:GetShowMopLegProgress())
 end
 
 function Geary_Options_Interface:OnDefault(frame)
@@ -492,12 +535,13 @@ function Geary_Options_Interface:OnDefault(frame)
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
-        _fontFilenames.byFilename[Geary_Options:GetDefaultLogFontFilename()].id)
+        _FONT_FILENAMES.byFilename[Geary_Options:GetDefaultLogFontFilename()].id)
     self.logFontHeightSlider:SetValue(Geary_Options:GetDefaultLogFontHeight())
     self.databaseEnabledCheckbox:SetChecked(Geary_Options:GetDefaultDatabaseEnabled())
     self.databaseMinLevelSlider:SetValue(Geary_Options:GetDefaultDatabaseMinLevel())
     self.databasePruneOnLoadCheckbox:SetChecked(Geary_Options:GetDefaultDatabasePruneOnLoad())
     self.databasePruneDaysSlider:SetValue(Geary_Options:GetDefaultDatabasePruneDays())
+    self.showMopLegProgressCheckbox:SetChecked(Geary_Options:GetDefaultShowMopLegProgress())
 end
 
 function Geary_Options_Interface:OnOkay(frame)
@@ -510,7 +554,7 @@ function Geary_Options_Interface:OnOkay(frame)
     Geary_Icon:SetScale(self.iconScaleSlider:GetValue() / 100)
 
     Geary_Interface:SetScale(self.interfaceScaleSlider:GetValue() / 100)
-    Geary_Interface_Log:SetFont(_fontFilenames.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
+    Geary_Interface_Log:SetFont(_FONT_FILENAMES.byId[UIDropDownMenu_GetSelectedID(self.logFontFilenameDropdown)],
         self.logFontHeightSlider:GetValue())
 
     if self.databaseEnabledCheckbox:GetChecked() then
@@ -521,4 +565,6 @@ function Geary_Options_Interface:OnOkay(frame)
     Geary_Database:SetMinLevel(self.databaseMinLevelSlider:GetValue())
     Geary_Database:SetPruneOnLoad(self.databasePruneOnLoadCheckbox:GetChecked() and true or false)
     Geary_Database:SetPruneDays(self.databasePruneDaysSlider:GetValue())
+
+    Geary_Options:SetShowMopLegProgress(self.showMopLegProgressCheckbox:GetChecked() and true or false)
 end
