@@ -1,3 +1,4 @@
 ignore:
-    - .idea      # ignore the IntelliJ project directory
-    - Geary.iml  # ignore the IntelliJ project settings file
+    - .idea       # ignore the IntelliJ project directory
+    - Geary.iml   # ignore the IntelliJ project settings file
+    - .gitignore  # ignore the git ignore list file

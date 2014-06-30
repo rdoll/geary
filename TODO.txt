@@ -35,8 +35,6 @@ Ideas/Notes
 * No need to update EotBP checks because only Tier 16 (SoO) and Timeless Isle gear can be upgraded
 * 4 times and TI gear has no weapons and the T16 gear new ilevels don't overlap T15.
 
-* Convert from svn to git
-
 * Warlords of Draenor prep
 ** Add level to milestones so can have 90 and 100 milestones
 
