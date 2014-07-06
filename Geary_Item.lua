@@ -438,14 +438,15 @@ function Geary_Item:_ItemLinkSuffixIdBugWorkaround(link)
 end
 
 -- Build search strings using Blizzard localized strings outside of functions so they are done once
+-- Convert non-positional %d and positional %#$d print marker with (%d+) for regex
 -- ITEM_LEVEL = "Item Level %d"
-local _itemLevelRegex = "^%s*" .. ITEM_LEVEL:gsub("%%d", "(%%d+)")
+local _itemLevelRegex = "^%s*" .. ITEM_LEVEL:gsub("%%d", "(%%d+)"):gsub("%%%d+%$d", "(%%d+)")
 -- ITEM_UPGRADE_TOOLTIP_FORMAT = "Upgrade Level: %d/%d"
-local _upgradeLevelRegex = "^%s*" .. ITEM_UPGRADE_TOOLTIP_FORMAT:gsub("%%d", "(%%d+)")
+local _upgradeLevelRegex = "^%s*" .. ITEM_UPGRADE_TOOLTIP_FORMAT:gsub("%%d", "(%%d+)"):gsub("%%%d+%$d", "(%%d+)")
 -- EMPTY_SOCKET_HYDRAULIC = "Sha-Touched"
 local _shaTouchedString = '"' .. EMPTY_SOCKET_HYDRAULIC .. '"'
 -- ENCHANTED_TOOLTIP_LINE = "Enchanted: %s"
-local _enchantedRegex = "^%s*" .. ENCHANTED_TOOLTIP_LINE:gsub("%%s", "")
+local _enchantedRegexHead = "^%s*" .. ENCHANTED_TOOLTIP_LINE:gsub("%%s", "")
 
 function Geary_Item:_ParseTooltip()
 
@@ -478,7 +479,7 @@ function Geary_Item:_ParseTooltip()
                 return  -- "continue"
             end
 
-            if text:match(_enchantedRegex) then
+            if text:match(_enchantedRegexHead) then
                 self:_SetEnchantText(text)
                 return  -- "continue"
             end
