@@ -144,16 +144,11 @@ function Geary_Options_Interface:_CreateIconSection(parent, previousSection)
     iconHeader:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 
     -- Icon shown
-    local checkbox = CreateFrame("CheckButton", "$parent_Icon_Shown_Checkbox", section,
-        "InterfaceOptionsCheckButtonTemplate")
+    local checkbox = CreateFrame("CheckButton", "$parent_Icon_Shown_Checkbox", section, "InterfaceOptionsCheckButtonTemplate")
     checkbox:SetPoint("TOPLEFT", iconHeader, "BOTTOMLEFT", 0, -5)
     checkbox.Label = _G[checkbox:GetName() .. "Text"]
     checkbox.Label:SetText("Show Icon Button")
-    checkbox:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Shows the Geary quick access icon")
-    end)
-    checkbox:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    checkbox.tooltipText = "Shows the Geary quick access icon"
     BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
     self.iconShownCheckbox = checkbox
 
@@ -181,15 +176,12 @@ function Geary_Options_Interface:_CreateIconSection(parent, previousSection)
     slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
     slider.Value:SetPoint("BOTTOM", 0, -10)
     slider.Value:SetWidth(50)
+    slider.tooltipText = "Scale of the Geary quick access icon"
+    slider.tooltipOwnerPoint = "ANCHOR_TOP"
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
         _sliderOnValueChangedFix(self, value, "%")
     end)
-    slider:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Scale of the Geary quick access icon")
-    end)
-    slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
     -- Save it
     self.iconScaleSlider = slider
@@ -246,15 +238,12 @@ function Geary_Options_Interface:_CreateInterfaceSection(parent, previousSection
     slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
     slider.Value:SetPoint("BOTTOM", 0, -10)
     slider.Value:SetWidth(50)
+    slider.tooltipText = "Scale of the interface window"
+    slider.tooltipOwnerPoint = "ANCHOR_TOP"
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
         _sliderOnValueChangedFix(self, value, "%")
     end)
-    slider:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Scale of the interface window")
-    end)
-    slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
     -- Save it
     self.interfaceScaleSlider = slider
@@ -283,15 +272,12 @@ function Geary_Options_Interface:_CreateInterfaceSection(parent, previousSection
     slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
     slider.Value:SetPoint("BOTTOM", 0, -10)
     slider.Value:SetWidth(50)
+    slider.tooltipText = "Size of the font in the log interface"
+    slider.tooltipOwnerPoint = "ANCHOR_TOP"
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
         _sliderOnValueChangedFix(self, value, nil)
     end)
-    slider:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Size of the font in the log interface")
-    end)
-    slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
     -- Save it
     self.logFontHeightSlider = slider
@@ -331,11 +317,7 @@ function Geary_Options_Interface:_CreateDatabaseSection(parent, previousSection)
     checkbox:SetPoint("TOPLEFT", databaseHeader, "BOTTOMLEFT", 0, -5)
     checkbox.Label = _G[checkbox:GetName() .. "Text"]
     checkbox.Label:SetText("Database Enabled")
-    checkbox:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Enable Database storage of character inspections")
-    end)
-    checkbox:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    checkbox.tooltipText = "Enable Database storage of character inspections"
     BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
     self.databaseEnabledCheckbox = checkbox
 
@@ -363,15 +345,12 @@ function Geary_Options_Interface:_CreateDatabaseSection(parent, previousSection)
     slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
     slider.Value:SetPoint("BOTTOM", 0, -10)
     slider.Value:SetWidth(50)
+    slider.tooltipText = "Minimum character level stored in the database"
+    slider.tooltipOwnerPoint = "ANCHOR_TOP"
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
         _sliderOnValueChangedFix(self, value, nil)
     end)
-    slider:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Minimum character level stored in the database")
-    end)
-    slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
     -- Save it
     self.databaseMinLevelSlider = slider
@@ -388,11 +367,7 @@ function Geary_Options_Interface:_CreateDatabaseSection(parent, previousSection)
     checkbox:SetPoint("TOPLEFT", rowAligner, "BOTTOMLEFT", 0, -5)
     checkbox.Label = _G[checkbox:GetName() .. "Text"]
     checkbox.Label:SetText("Auto Prune On Load")
-    checkbox:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Automatically prune old database entries when loaded")
-    end)
-    checkbox:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    checkbox.tooltipText = "Automatically prune old database entries when loaded"
     BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
     self.databasePruneOnLoadCheckbox = checkbox
 
@@ -432,15 +407,12 @@ function Geary_Options_Interface:_CreateDatabaseSection(parent, previousSection)
     slider.Value = slider:CreateFontString(nil, 'ARTWORK', 'GameFontWhite')
     slider.Value:SetPoint("BOTTOM", 0, -10)
     slider.Value:SetWidth(100)
+    slider.tooltipText = "Database entries this old or older are deleted when pruned"
+    slider.tooltipOwnerPoint = "ANCHOR_TOP"
     -- Handlers
     slider:SetScript("OnValueChanged", function(self, value)
         _sliderOnValueChangedFix(self, value, " days")
     end)
-    slider:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Database entries this old or older are deleted when pruned")
-    end)
-    slider:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     BlizzardOptionsPanel_RegisterControl(slider, slider:GetParent())
     -- Set an initial value (which is never saved in our options)
     slider:SetValue(180)
@@ -468,11 +440,7 @@ function Geary_Options_Interface:_CreateInspectionSection(parent, previousSectio
     checkbox:SetPoint("TOPLEFT", inspectionHeader, "BOTTOMLEFT", 0, -5)
     checkbox.Label = _G[checkbox:GetName() .. "Text"]
     checkbox.Label:SetText("Show MoP Legendary Progress")
-    checkbox:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 16, 4)
-        GameTooltip:SetText("Show Mists of Pandaria legendary cloak quest progress")
-    end)
-    checkbox:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    checkbox.tooltipText = "Show Mists of Pandaria legendary cloak quest progress"
     BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
     self.showMopLegProgressCheckbox = checkbox
 

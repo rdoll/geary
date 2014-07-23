@@ -55,10 +55,10 @@ Under Consideration
 ** //Doubtful:// Empty sockets shown with their graphic
 ** //Doubtful:// In item tooltips, show set pieces worn and empty extra sockets of the inspected character
 * Options:
-** //Maybe:// Make options take effect immediately and have cancel revert to previous values
 ** //Maybe:// Options to configure mouse clicks for icon and Group/Database tab actions
+** //Doubtful:// Make options take effect immediately and have cancel revert to previous values
 * Detection:
-** //Maybe:// When item level is scaled down, show true max as well as current scaled down
+** //Maybe:// When item level is scaled down, show true max as well as current scaled down values
 ** //Maybe:// Detect non-rare MoP gems and non-MoP enchants
 ** //Maybe:// Show items with PvP stats
 ** //Maybe:// Show items with inappropriate stats (e.g. Prot Paladin wearing Intellect gear)
