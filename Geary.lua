@@ -98,6 +98,7 @@ function Geary:ADDON_LOADED(addOnName)
         Geary_Inspect:Init()
         Geary_Interface:Init()
         Geary_Icon:Init()
+        Geary_Tooltip:Init()
         Geary_Options_Interface:Init()
 
         -- All is loaded, so do on load actions
@@ -247,31 +248,42 @@ end
 -- Date/time utilities
 --
 
-function Geary:ColorizedRelativeDateTime(timestamp)
+function Geary:ColorizedRelativeDateTime(timestamp, terse)
 
     if timestamp == nil or timestamp < 1 then
         return self.CC_NA .. "never" .. self.CC_END
     end
 
+    local minutesLabel, hoursLabel, daysLabel
+    if terse then
+        minutesLabel = "m ago"
+        hoursLabel = "h ago"
+        daysLabel = "d ago"
+    else
+        minutesLabel = " minutes ago"
+        hoursLabel = " hours ago"
+        daysLabel = " days ago"
+    end
+
     local timeDiff = time() - timestamp
     if timeDiff < 5 * 60 then
         -- Less than 5 minutes
-        return GREEN_FONT_COLOR_CODE .. "< 5 minutes ago" .. self.CC_END
+        return GREEN_FONT_COLOR_CODE .. "< 5" .. minutesLabel .. self.CC_END
     elseif timeDiff < 60 * 60 then
         -- 2 to 59 minutes
-        return "|cff20bb20" .. floor(timeDiff / 60) .. " minutes ago" .. self.CC_END
+        return "|cff20bb20" .. floor(timeDiff / 60) .. minutesLabel .. self.CC_END
     elseif timeDiff < 7 * 60 * 60 then
         -- 1 to 6 hours
-        return "|cff20bbbb" .. floor(timeDiff / (60 * 60)) .. " hours ago" .. self.CC_END
+        return "|cff20bbbb" .. floor(timeDiff / (60 * 60)) .. hoursLabel .. self.CC_END
     elseif timeDiff < 24 * 60 * 60 then
         -- 6 to 23 hours
-        return YELLOW_FONT_COLOR_CODE .. floor(timeDiff / (60 * 60)) .. " hours ago" .. self.CC_END
+        return YELLOW_FONT_COLOR_CODE .. floor(timeDiff / (60 * 60)) .. hoursLabel .. self.CC_END
     elseif timeDiff < 7 * 24 * 60 * 60 then
         -- 1 to 7 days
-        return ORANGE_FONT_COLOR_CODE .. floor(timeDiff / (24 * 60 * 60)) .. " days ago" .. self.CC_END
+        return ORANGE_FONT_COLOR_CODE .. floor(timeDiff / (24 * 60 * 60)) .. daysLabel .. self.CC_END
     else
         -- More than 7 days
-        return RED_FONT_COLOR_CODE .. floor(timeDiff / (24 * 60 * 60)) .. " days ago" .. self.CC_END
+        return RED_FONT_COLOR_CODE .. floor(timeDiff / (24 * 60 * 60)) .. daysLabel .. self.CC_END
     end
 end
 

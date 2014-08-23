@@ -231,9 +231,9 @@ function Geary_Interface_Summary_Row:SetLevel(level)
     self.levelFontString:SetText(level or _unknownTextureInline)
 end
 
-function Geary_Interface_Summary_Row:SetILevel(itemCount, iLevelTotal)
-    if itemCount and iLevelTotal and itemCount > 0 then
-        self.iLevelFontString:SetFormattedText("%6.2f", iLevelTotal / itemCount)
+function Geary_Interface_Summary_Row:SetILevel(iLevel)
+    if iLevel then
+        self.iLevelFontString:SetFormattedText("%6.2f", iLevel)
     else
         self.iLevelFontString:SetText(_unknownTextureInline)
     end
@@ -274,7 +274,7 @@ function Geary_Interface_Summary_Row:SetFromEntry(entry)
     self:SetSpec(entry.playerSpecId)
     self:SetRole(entry.playerSpecId)
     self:SetLevel(entry.playerLevel)
-    self:SetILevel(entry.itemCount, entry.iLevelTotal)
+    self:SetILevel(entry:GetILevel())
     self:SetName(entry.playerName, entry.playerRealm, entry.playerClassId)
     self:SetMissing(entry:GetMissingRequiredCount(), entry:GetMissingOptionalCount())
     self:SetInspected(entry.inspectedAt)

@@ -20,6 +20,7 @@ Geary_Options_Interface = {
     logFontFilenameDropdown = nil,
 
     databaseEnabledCheckbox = nil,
+    databaseEntryInTooltipCheckbox = nil,
     databaseMinLevelSlider = nil,
     databasePruneOnLoadCheckbox = nil,
     databasePruneNowButton = nil,
@@ -311,15 +312,26 @@ function Geary_Options_Interface:_CreateDatabaseSection(parent, previousSection)
     databaseHeader:SetWidth(section:GetWidth())
     databaseHeader:SetPoint("TOPLEFT", section, "TOPLEFT", 0, 0)
 
-    -- Database enabled
-    local checkbox = CreateFrame("CheckButton", "$parent_Database_Enabled_Checkbox", section,
+    -- Database enabled checkbox
+    local enabledCheckbox = CreateFrame("CheckButton", "$parent_Database_Enabled_Checkbox", section,
         "InterfaceOptionsCheckButtonTemplate")
-    checkbox:SetPoint("TOPLEFT", databaseHeader, "BOTTOMLEFT", 0, -5)
-    checkbox.Label = _G[checkbox:GetName() .. "Text"]
-    checkbox.Label:SetText("Database Enabled")
-    checkbox.tooltipText = "Enable Database storage of character inspections"
-    BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
-    self.databaseEnabledCheckbox = checkbox
+    enabledCheckbox:SetPoint("TOPLEFT", databaseHeader, "BOTTOMLEFT", 0, -5)
+    enabledCheckbox.Label = _G[enabledCheckbox:GetName() .. "Text"]
+    enabledCheckbox.Label:SetText("Database Enabled")
+    enabledCheckbox.tooltipText = "Enable Database storage of character inspections"
+    BlizzardOptionsPanel_RegisterControl(enabledCheckbox, enabledCheckbox:GetParent())
+    self.databaseEnabledCheckbox = enabledCheckbox
+
+    -- Show database entriy summary in unit tooltips checkbox
+    local tooltipCheckbox = CreateFrame("CheckButton", "$parent_Database_Entry_In_Tooltip_Checkbox", section,
+        "InterfaceOptionsSmallCheckButtonTemplate")
+    tooltipCheckbox:SetPoint("TOPLEFT", enabledCheckbox, "BOTTOMLEFT", 10, 0)
+    tooltipCheckbox.Label = _G[tooltipCheckbox:GetName() .. "Text"]
+    tooltipCheckbox.Label:SetText("Show entry in tooltips")
+    tooltipCheckbox.tooltipText = "Show summary of database entry in player tooltips"
+    BlizzardOptionsPanel_RegisterControl(tooltipCheckbox, tooltipCheckbox:GetParent())
+    BlizzardOptionsPanel_SetupDependentControl(enabledCheckbox, tooltipCheckbox)
+    self.databaseEntryInTooltipCheckbox = tooltipCheckbox
 
     -- Database storage character minimum level slider
     local slider = CreateFrame("Slider", "$parent_Database_Min_Level_Slider", section, "OptionsSliderTemplate")
@@ -362,20 +374,20 @@ function Geary_Options_Interface:_CreateDatabaseSection(parent, previousSection)
     rowAligner:SetPoint("TOPLEFT", section, "TOPLEFT", 0, -80)
 
     -- Database prune on load checkbox
-    local checkbox = CreateFrame("CheckButton", "$parent_Database_Prune_On_Load_Checkbox", section,
+    local pruneCheckbox = CreateFrame("CheckButton", "$parent_Database_Prune_On_Load_Checkbox", section,
         "InterfaceOptionsCheckButtonTemplate")
-    checkbox:SetPoint("TOPLEFT", rowAligner, "BOTTOMLEFT", 0, -5)
-    checkbox.Label = _G[checkbox:GetName() .. "Text"]
-    checkbox.Label:SetText("Auto Prune On Load")
-    checkbox.tooltipText = "Automatically prune old database entries when loaded"
-    BlizzardOptionsPanel_RegisterControl(checkbox, checkbox:GetParent())
-    self.databasePruneOnLoadCheckbox = checkbox
+    pruneCheckbox:SetPoint("TOPLEFT", rowAligner, "BOTTOMLEFT", 0, -5)
+    pruneCheckbox.Label = _G[pruneCheckbox:GetName() .. "Text"]
+    pruneCheckbox.Label:SetText("Auto Prune On Load")
+    pruneCheckbox.tooltipText = "Automatically prune old database entries when loaded"
+    BlizzardOptionsPanel_RegisterControl(pruneCheckbox, pruneCheckbox:GetParent())
+    self.databasePruneOnLoadCheckbox = pruneCheckbox
 
     -- Database prune now button
     local button = CreateFrame("Button", "$parent_Database_Prune_Now_Button", section, "OptionsButtonTemplate")
     button:SetSize(100, 20)
     button:SetText("Prune Now")
-    button:SetPoint("TOPLEFT", checkbox, "BOTTOMLEFT", 2, -3)
+    button:SetPoint("TOPLEFT", pruneCheckbox, "BOTTOMLEFT", 2, -3)
     button:SetScript("OnClick", function(self)
         local pruneDays = Geary_Options_Interface.databasePruneDaysSlider:GetValue()
         Geary_Database:PruneNow(pruneDays)
@@ -490,6 +502,7 @@ function Geary_Options_Interface:OnShow(frame)
         _FONT_FILENAMES.byFilename[Geary_Options:GetLogFontFilename()].id)
     self.logFontHeightSlider:SetValue(Geary_Options:GetLogFontHeight())
     self.databaseEnabledCheckbox:SetChecked(Geary_Options:IsDatabaseEnabled())
+    self.databaseEntryInTooltipCheckbox:SetChecked(Geary_Options:IsShowDatabaseEntryInTooltips())
     self.databaseMinLevelSlider:SetValue(Geary_Options:GetDatabaseMinLevel())
     self.databasePruneOnLoadCheckbox:SetChecked(Geary_Options:IsDatabasePruneOnLoad())
     self.databasePruneDaysSlider:SetValue(Geary_Options:GetDatabasePruneDays())
@@ -506,6 +519,7 @@ function Geary_Options_Interface:OnDefault(frame)
         _FONT_FILENAMES.byFilename[Geary_Options:GetDefaultLogFontFilename()].id)
     self.logFontHeightSlider:SetValue(Geary_Options:GetDefaultLogFontHeight())
     self.databaseEnabledCheckbox:SetChecked(Geary_Options:GetDefaultDatabaseEnabled())
+    self.databaseEntryInTooltipCheckbox:SetChecked(Geary_Options:GetDefaultShowDatabaseEntryInTooltips())
     self.databaseMinLevelSlider:SetValue(Geary_Options:GetDefaultDatabaseMinLevel())
     self.databasePruneOnLoadCheckbox:SetChecked(Geary_Options:GetDefaultDatabasePruneOnLoad())
     self.databasePruneDaysSlider:SetValue(Geary_Options:GetDefaultDatabasePruneDays())
@@ -529,6 +543,11 @@ function Geary_Options_Interface:OnOkay(frame)
         Geary_Database:Enable()
     else
         Geary_Database:Disable()
+    end
+    if self.databaseEntryInTooltipCheckbox:GetChecked() then
+        Geary_Tooltip:Enable()
+    else
+        Geary_Tooltip:Disable()
     end
     Geary_Database:SetMinLevel(self.databaseMinLevelSlider:GetValue())
     Geary_Database:SetPruneOnLoad(self.databasePruneOnLoadCheckbox:GetChecked() and true or false)

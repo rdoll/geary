@@ -18,7 +18,8 @@ Geary_Options = {
         databaseMinLevel = Geary_Player.MAX_LEVEL,
         databasePruneOnLoad = false,
         databasePruneDays = 180,
-        showMopLegProgress = true
+        showMopLegProgress = true,
+        showDatabaseEntryInTooltips = true
     }
 }
 
@@ -240,4 +241,20 @@ end
 
 function Geary_Options:SetShowMopLegProgress(shown)
     Geary_Saved_Options.showMopLegProgress = shown
+end
+
+--
+-- Show database entry summary in unit tooltips
+--
+
+function Geary_Options:GetDefaultShowDatabaseEntryInTooltips()
+    return self.default.showDatabaseEntryInTooltips
+end
+
+function Geary_Options:IsShowDatabaseEntryInTooltips()
+    return Geary_Saved_Options.showDatabaseEntryInTooltips
+end
+
+function Geary_Options:SetShowDatabaseEntryInTooltips(enabled)
+    Geary_Saved_Options.showDatabaseEntryInTooltips = enabled
 end

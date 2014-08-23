@@ -69,7 +69,6 @@ Under Consideration
 ** //Maybe:// LibDataBroker compatibility (display results and clicks for operations)
 ** //Maybe:// Store window locations in options so addon load failures don't force you to reposition them
 ** //Maybe:// Add non-English client support via localizations
-** //Doubtful:// Inspection results added to player tooltips
 ** //Doubtful:// An optional minimap button that works like the icon and can integrate with Norganna SlideBar
 ** //Doubtful:// Resizing of Geary interface
 ** //Doubtful:// Detecting empty extra sockets from a belt buckle/EotBP instead of extra gems

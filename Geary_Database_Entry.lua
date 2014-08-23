@@ -83,6 +83,12 @@ function Geary_Database_Entry:CreateFromUnit(unit)
     }
 end
 
+function Geary_Database_Entry:GetILevel()
+    return (self.itemCount and self.itemCount > 0 and self.iLevelTotal)
+        and tonumber(format("%.2f", self.iLevelTotal / self.itemCount))
+        or nil
+end
+
 function Geary_Database_Entry:GetMissingRequiredCount()
     if self.missingItems == nil and self.missingGems == nil and self.missingEnchants == nil then
         return nil
