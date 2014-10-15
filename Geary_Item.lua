@@ -354,7 +354,7 @@ function Geary_Item:Probe(player)
     end
 
     if self.slot == "BackSlot" and self:CanHaveCovOrLegCloak(player) then
-        if self.quality == ITEM_QUALITY_LEGENDARY then
+        if self.quality == LE_ITEM_QUALITY_LEGENDARY then
             self.hasCov = false
             self.isMissingCov = false
             self.hasLegCloak = true
@@ -528,7 +528,7 @@ function Geary_Item:_GetGems(slot)
                     self.failedJewelIds[socketIndex] = jewelId[socketIndex]
                     Geary:DebugLog("Failed to get item quality from gem", itemLink)
                 else
-                    if gemQuality == ITEM_QUALITY_LEGENDARY then
+                    if gemQuality == LE_ITEM_QUALITY_LEGENDARY then
                         self.hasCohMeta = true
                     end
                     tinsert(self.filledSockets, itemLink)
@@ -555,7 +555,7 @@ function Geary_Item:_SetUpgrades(upgradeLevel, upgradeMax)
         self.upgradeLevel = upgradeLevel
         self.upgradeMax = upgradeMax
         if upgradeLevel < upgradeMax then
-            if self.quality <= ITEM_QUALITY_RARE then
+            if self.quality <= LE_ITEM_QUALITY_RARE then
                 -- Rare quality items cost 750 Justice Points to upgrade 8 levels
                 self.upgradeItemLevelMissing = (upgradeMax - upgradeLevel) * 8
             else
