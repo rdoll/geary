@@ -106,3 +106,16 @@ they inspected and that target is in range. In this case, either all data for th
 would have to be removed (like the way the Blizzard inspection UI just vanishes) or Geary
 could report an item is missing a gem (in an extra socket) but the tooltip wouldn't show it
 (because it has to revert to SetHyperlink which doesn't show the extra socket).
+
+
+git Commit Procedure
+--------------------
+With git, releases must be tagged from a git push, not via curseforge's web interface.
+To tag and push the changes and the tag all in one:
+
+$ git commit
+$ vi z  # add commit message with newlines
+$ git tag TAGNAME --file z
+$ git push --follow-tags
+$ rm z
+
