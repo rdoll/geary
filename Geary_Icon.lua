@@ -58,9 +58,11 @@ function Geary_Icon:_CreateButton()
 end
 
 function Geary_Icon:_CreateCooldown(button)
-    button.cooldown = CreateFrame("Cooldown", button:GetName() .. "_Cooldown", button)
+    button.cooldown = CreateFrame("Cooldown", button:GetName() .. "_Cooldown", button, "CooldownFrameTemplate")
     button.cooldown:SetPoint("TOPLEFT", button, "TOPLEFT", 6, -6)
     button.cooldown:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -6, 6)
+    button.cooldown:SetDrawEdge(true)
+    button.cooldown:SetDrawSwipe(true)
 end
 
 function Geary_Icon:PET_BATTLE_OPENING_START()

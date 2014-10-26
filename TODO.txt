@@ -6,8 +6,9 @@ Ideas/Notes
 ** What would be shown in log?
 ** What would be shown if passed all milestones?
 ** Note: Not sure if this can be done inside an EditBox
+** Add level to milestones so can have 90 and 100 milestones
 
-* Geary icon needs a tooltip
+* Tooltip for the Geary icon?
 
 * Geary options:
 ** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
@@ -34,9 +35,6 @@ Ideas/Notes
 * This would deprecate the hard coding of upgrades for Blue/Purple items being 8/4 per upgrade level
 * No need to update EotBP checks because only Tier 16 (SoO) and Timeless Isle gear can be upgraded
 * 4 times and TI gear has no weapons and the T16 gear new ilevels don't overlap T15.
-
-* Warlords of Draenor prep
-** Add level to milestones so can have 90 and 100 milestones
 
 
 Under Consideration
