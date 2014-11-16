@@ -94,6 +94,7 @@ function Geary:ADDON_LOADED(addOnName)
         Geary_Database:ADDON_LOADED()
 
         -- Init other modules
+        Geary_Player:Init()
         Geary_Item:Init() -- Must be before Geary_Interface_Player
         Geary_Inspect:Init()
         Geary_Interface:Init()
@@ -181,9 +182,9 @@ end
 
 -- Smartly compare full version strings
 -- Returns:
---   -1 if version1 is less than version2
+--   -1 if version1 is greater than version2
 --    0 if version1 equals version2
---    1 if version1 is greater than version2
+--    1 if version1 is less than version2
 function Geary:VersionCompare(version1, version2)
 
     -- Split versions into a table of parts
@@ -203,9 +204,9 @@ end
 
 -- Smartly compare a single version string
 -- Returns:
---   -1 if v1Part is less than v2Part
+--   -1 if v1Part is greater than v2Part
 --    0 if v1Part equals v2Part
---    1 if v1Part is greater than v2Part
+--    1 if v1Part is less than v2Part
 function Geary:_VersionPartCompare(v1Part, v2Part)
 
     -- Check lengths first

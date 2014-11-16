@@ -1,5 +1,11 @@
 Ideas/Notes
 -----------
+* WoD support
+- Enchants changed; need pre-WoD and post-WoD enchant support (ilevel 600 is delimiter?)
+- Instead of showing gear tooltips for your class, show them for the target player's class
+  + Needed in Player and Log tabs. Player tab is probably easy, but Log tab can have links for
+    multiple classes in it -- can tooltip classes be set per tooltip?
+
 * Change next milestone in interface from "Next: 70 to HoF/ToES LFR" to "Next: 70 until 470"
   with a tooltip that shows all milestones and how long until reaching them.
 ** Show "-" and tooltip of "must be level 90" if too low.
@@ -118,4 +124,3 @@ $ vi z  # add commit message with newlines
 $ git tag TAGNAME --file z
 $ git push --follow-tags
 $ rm z
-

@@ -20,15 +20,23 @@ Geary_Player = {
         spec      = nil
     },
 
-    -- Why oh why isn't there a constant for this?
-    MAX_LEVEL = 90,
+    MAX_LEVEL = 0,
 
-    MOP_LEG_MIN_LEVEL = 90
+    MOP_LEG_MIN_LEVEL = MAX_PLAYER_LEVEL_TABLE[EXPANSION_LEVEL_MISTS_OF_PANDARIA]
 }
 
 --
 -- Business logic methods not tied to a player instance
 --
+
+function Geary_Player:Init()
+    -- Hopefully future proof way to determine max level
+    for _, level in pairs(MAX_PLAYER_LEVEL_TABLE) do
+        if level > Geary_Player.MAX_LEVEL then
+            Geary_Player.MAX_LEVEL = level
+        end
+    end
+end
 
 function Geary_Player:ClassColorize(classId, text)
     local _, classTag, _ = GetClassInfo(classId or 0) -- translate nil to zero to prevent errors

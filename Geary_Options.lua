@@ -42,6 +42,9 @@ function Geary_Options:ADDON_LOADED()
             if Geary:VersionCompare("5.4.4-alpha-5", Geary_Saved_Options.version) == -1 then
                 self:_UpgradeTo5_4_4_alpha_5()
             end
+            if Geary:VersionCompare("6.0.3-release", Geary_Saved_Options.version) == -1 then
+                self:_UpgradeTo6_0_3_release()
+            end
         elseif verComp == 1 then
             Geary:Print(Geary.CC_ERROR .. "Options version " .. Geary_Saved_Options.version ..
                 " is newer than Geary version " .. Geary.version .. ". Errors may occur!" .. Geary.CC_END)
@@ -81,6 +84,13 @@ function Geary_Options:_UpgradeTo5_4_4_alpha_5()
     Geary_Saved_Options.iconScale = floor(Geary_Saved_Options.iconScale * 100) / 100
     Geary_Saved_Options.logFontHeight = floor(Geary_Saved_Options.logFontHeight)
     Geary_Saved_Options.databaseMinLevel = floor(Geary_Saved_Options.databaseMinLevel)
+end
+
+-- Assume players who used Geary in MoP with a min level of 90 want a min level of 100 in WoD
+function Geary_Options:_UpgradeTo6_0_3_release()
+    if Geary_Saved_Options.databaseMinLevel == 90 then
+        Geary_Saved_Options.databaseMinLevel = 100
+    end
 end
 
 --
