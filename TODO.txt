@@ -1,7 +1,8 @@
 Ideas/Notes
 -----------
 * WoD support
-- Enchants changed; need pre-WoD and post-WoD enchant support (ilevel 600 is delimiter?)
+- Tooltip insertion of database stored ilevel doesn't work
+- Enchants changed; need pre-WoD and post-WoD enchant support (ilevel 600 is delimiter)
 - Instead of showing gear tooltips for your class, show them for the target player's class
   + Needed in Player and Log tabs. Player tab is probably easy, but Log tab can have links for
     multiple classes in it -- can tooltip classes be set per tooltip?

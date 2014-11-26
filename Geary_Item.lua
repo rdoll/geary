@@ -78,6 +78,18 @@ function Geary_Item:IsTwoHandWeapon()
         (self.invType == "INVTYPE_2HWEAPON" or self.invType == "INVTYPE_RANGED" or self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
+function Geary_Item:CanEnchant()
+    return self.canEnchant
+end
+
+function Geary_Item:IsEnchanted()
+    return self.enchantText ~= nil
+end
+
+function Geary_Item:GetEnchantText()
+    return self.enchantText or ""
+end
+
 --
 -- Player can do legendary quest and item is a weapon that is one of the following:
 --   + Sha-Touched
@@ -195,7 +207,7 @@ end
 
 function Geary_Item:IsMissingRequired()
     return self.iLevel == 0 or not Geary:IsTableEmpty(self.emptySockets) or
-        not Geary:IsTableEmpty(self.failedJewelIds) or (self.canEnchant and self.enchantText == nil) or
+        not Geary:IsTableEmpty(self.failedJewelIds) or (self:CanEnchant() and not self:IsEnchanted()) or
         self.isMissingBeltBuckle
 end
 
@@ -383,9 +395,9 @@ function Geary_Item:Probe(player)
         Geary:Log(Geary.CC_FAILED .. "   Failed to get gem in socket " .. socketIndex .. Geary.CC_END)
     end
 
-    if self.enchantText ~= nil then
-        Geary:Log(Geary.CC_CORRECT .. "   " .. self.enchantText .. Geary.CC_END)
-    elseif self.canEnchant then
+    if self:IsEnchanted() then
+        Geary:Log(Geary.CC_CORRECT .. "   " .. self:GetEnchantText() .. Geary.CC_END)
+    elseif self:CanEnchant() then
         Geary:Log(Geary.CC_MISSING .. "   Missing enchant!" .. Geary.CC_END)
     end
 

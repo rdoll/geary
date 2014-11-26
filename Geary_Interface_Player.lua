@@ -565,17 +565,17 @@ function Geary_Interface_Player:SetItem(slotName, item)
 end
 
 function Geary_Interface_Player:_SetEnchantIcon(info, item)
-    if item.enchantText == nil then
-        if item.canEnchant then
+    if item:IsEnchanted() then
+        info.enchantTexture:SetTexture("Interface\\ICONS\\inv_misc_enchantedscroll")
+        self:_AddInfoTooltipText(info, Geary.CC_CORRECT .. item:GetEnchantText() .. Geary.CC_END)
+    else
+        if item:CanEnchant() then
             info.enchantTexture:SetTexture("Interface\\COMMON\\Indicator-Red")
             info.enchantTexture:SetTexCoord(0.125, 0.875, 0.125, 0.875)
             self:_AddInfoTooltipText(info, Geary.CC_ERROR .. "Missing enchant" .. Geary.CC_END)
         else
             info.enchantTexture:SetTexture(0, 0, 0, 0)
         end
-    else
-        info.enchantTexture:SetTexture("Interface\\ICONS\\inv_misc_enchantedscroll")
-        self:_AddInfoTooltipText(info, Geary.CC_CORRECT .. item.enchantText .. Geary.CC_END)
     end
 end
 
