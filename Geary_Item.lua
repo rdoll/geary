@@ -15,23 +15,25 @@ Geary_Item = {
 }
 
 -- Details of all slots and what they can contain (slotNumber filled in during init)
+-- Enchant min: nil = not enchantable, 1 = MoP and WoD or just WoD enchant avail
+-- Enchant max: 599 = MoP items and lower only, nil = no limit up through WoD items
 local _slotDetails = {
-    HeadSlot          = { order = 1,  slotNumber = nil, canEnchant = false },
-    NeckSlot          = { order = 2,  slotNumber = nil, canEnchant = false },
-    ShoulderSlot      = { order = 3,  slotNumber = nil, canEnchant = true  },
-    BackSlot          = { order = 4,  slotNumber = nil, canEnchant = true  },
-    ChestSlot         = { order = 5,  slotNumber = nil, canEnchant = true  },
-    WristSlot         = { order = 6,  slotNumber = nil, canEnchant = true  },
-    HandsSlot         = { order = 7,  slotNumber = nil, canEnchant = true  },
-    WaistSlot         = { order = 8,  slotNumber = nil, canEnchant = false },
-    LegsSlot          = { order = 9,  slotNumber = nil, canEnchant = true  },
-    FeetSlot          = { order = 10, slotNumber = nil, canEnchant = true  },
-    Finger0Slot       = { order = 11, slotNumber = nil, canEnchant = false },
-    Finger1Slot       = { order = 12, slotNumber = nil, canEnchant = false },
-    Trinket0Slot      = { order = 13, slotNumber = nil, canEnchant = false },
-    Trinket1Slot      = { order = 14, slotNumber = nil, canEnchant = false },
-    MainHandSlot      = { order = 15, slotNumber = nil, canEnchant = true  },
-    SecondaryHandSlot = { order = 16, slotNumber = nil, canEnchant = true  }
+    HeadSlot          = { order = 1,  slotNumber = nil, enchantMinILevel = nil, enchantMaxILevel = nil },
+    NeckSlot          = { order = 2,  slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = nil },
+    ShoulderSlot      = { order = 3,  slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = 599 },
+    BackSlot          = { order = 4,  slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = nil },
+    ChestSlot         = { order = 5,  slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = 599 },
+    WristSlot         = { order = 6,  slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = 599 },
+    HandsSlot         = { order = 7,  slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = 599 },
+    WaistSlot         = { order = 8,  slotNumber = nil, enchantMinILevel = nil, enchantMaxILevel = nil },
+    LegsSlot          = { order = 9,  slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = 599 },
+    FeetSlot          = { order = 10, slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = 599 },
+    Finger0Slot       = { order = 11, slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = nil },
+    Finger1Slot       = { order = 12, slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = nil },
+    Trinket0Slot      = { order = 13, slotNumber = nil, enchantMinILevel = nil, enchantMaxILevel = nil },
+    Trinket1Slot      = { order = 14, slotNumber = nil, enchantMinILevel = nil, enchantMaxILevel = nil },
+    MainHandSlot      = { order = 15, slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = nil },
+    SecondaryHandSlot = { order = 16, slotNumber = nil, enchantMinILevel = 1,   enchantMaxILevel = 599 }
 }
 
 -- Index = order of slots, value = { slotName = "slot name", slotNumber = # }
@@ -78,7 +80,7 @@ function Geary_Item:IsTwoHandWeapon()
         (self.invType == "INVTYPE_2HWEAPON" or self.invType == "INVTYPE_RANGED" or self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
-function Geary_Item:CanEnchant()
+function Geary_Item:GetCanEnchant()
     return self.canEnchant
 end
 
@@ -207,7 +209,7 @@ end
 
 function Geary_Item:IsMissingRequired()
     return self.iLevel == 0 or not Geary:IsTableEmpty(self.emptySockets) or
-        not Geary:IsTableEmpty(self.failedJewelIds) or (self:CanEnchant() and not self:IsEnchanted()) or
+        not Geary:IsTableEmpty(self.failedJewelIds) or (self:GetCanEnchant() and not self:IsEnchanted()) or
         self.isMissingBeltBuckle
 end
 
@@ -334,7 +336,6 @@ function Geary_Item:Probe(player)
 
     -- Get base item info
     self.id = tonumber(self.link:match("|Hitem:(%d+):"))
-    self.canEnchant = _slotDetails[self.slot].canEnchant
     self.name, _, self.quality, _, _, self.iType, self.subType, _, self.invType, self.texture, _ = GetItemInfo(self.link)
     self.inlineTexture = self:_GetItemInlineTexture(self.link)
 
@@ -347,6 +348,9 @@ function Geary_Item:Probe(player)
         Geary:Log(Geary.CC_FAILED .. self.slot .. " item has no item level in " .. self.link .. Geary.CC_END)
         return false
     end
+
+    -- Set enchantable
+    self:_SetCanEnchant(self.slot, self.iLevel)
 
     -- Get socketed gem information
     self:_GetGems(self.slot)
@@ -397,7 +401,7 @@ function Geary_Item:Probe(player)
 
     if self:IsEnchanted() then
         Geary:Log(Geary.CC_CORRECT .. "   " .. self:GetEnchantText() .. Geary.CC_END)
-    elseif self:CanEnchant() then
+    elseif self:GetCanEnchant() then
         Geary:Log(Geary.CC_MISSING .. "   Missing enchant!" .. Geary.CC_END)
     end
 
@@ -575,6 +579,25 @@ function Geary_Item:_SetUpgrades(upgradeLevel, upgradeMax)
                 self.upgradeItemLevelMissing = (upgradeMax - upgradeLevel) * 4
             end
         end
+    end
+end
+
+function Geary_Item:_SetCanEnchant(slotName, iLevel)
+
+    if slotName == nil or iLevel == nil then
+        self.canEnchant = false
+        return
+    end
+
+    -- TODO 2ndary slot offhand is not WoD enchantable, but 2ndary slot weapon is
+
+    local minILevel, maxILevel = _slotDetails[slotName].enchantMinILevel, _slotDetails[slotName].enchantMaxILevel
+    if minILevel == nil or iLevel < minILevel then
+        self.canEnchant = false  -- Slot never enchantable or can be enchanted but item's ilevel is too low
+    elseif maxILevel == nil then
+        self.canEnchant = true   -- Slot can be enchanted, item's ilevel is above min, and there is no max
+    else
+        self.canEnchant = iLevel <= maxILevel  -- Enchantable is <= non-nil max
     end
 end
 

@@ -244,7 +244,7 @@ function Geary_Inspect:_ProcessFilledSlot(slotName, itemLink)
     self.emptySockets = self.emptySockets + Geary:TableSize(item.emptySockets)
     self.failedJewelIds = self.failedJewelIds + Geary:TableSize(item.failedJewelIds)
 
-    if item:CanEnchant() and not item:IsEnchanted() then
+    if item:GetCanEnchant() and not item:IsEnchanted() then
         self.unenchantedCount = self.unenchantedCount + 1
     end
     if item:IsEnchanted() then

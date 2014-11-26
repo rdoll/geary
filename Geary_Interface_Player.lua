@@ -569,7 +569,7 @@ function Geary_Interface_Player:_SetEnchantIcon(info, item)
         info.enchantTexture:SetTexture("Interface\\ICONS\\inv_misc_enchantedscroll")
         self:_AddInfoTooltipText(info, Geary.CC_CORRECT .. item:GetEnchantText() .. Geary.CC_END)
     else
-        if item:CanEnchant() then
+        if item:GetCanEnchant() then
             info.enchantTexture:SetTexture("Interface\\COMMON\\Indicator-Red")
             info.enchantTexture:SetTexCoord(0.125, 0.875, 0.125, 0.875)
             self:_AddInfoTooltipText(info, Geary.CC_ERROR .. "Missing enchant" .. Geary.CC_END)

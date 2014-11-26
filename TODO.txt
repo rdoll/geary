@@ -2,7 +2,10 @@ Ideas/Notes
 -----------
 * WoD support
 - Tooltip insertion of database stored ilevel doesn't work
-- Enchants changed; need pre-WoD and post-WoD enchant support (ilevel 600 is delimiter)
+- Enchantment changes
+  + Need pre-WoD and post-WoD enchant support (ilevel 600 is delimiter for MoP only slots)
+  + Limit belt buckle to pre-WoD gear
+  + Need to handle 2ndary slot weapon enchantable but 2ndary offhand not
 - Instead of showing gear tooltips for your class, show them for the target player's class
   + Needed in Player and Log tabs. Player tab is probably easy, but Log tab can have links for
     multiple classes in it -- can tooltip classes be set per tooltip?
