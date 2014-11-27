@@ -71,12 +71,22 @@ function Geary_Item:IsInvSlotName(slotName)
     return _slotDetails[slotName] ~= nil
 end
 
-function Geary_Item:IsWeapon()
+function Geary_Item:IsWeaponSlot()
     return self.slot == "MainHandSlot" or self.slot == "SecondaryHandSlot"
 end
 
+function Geary_Item:IsWeapon()
+    return self:IsWeaponSlot() and
+        (self.invType == "INVTYPE_2HWEAPON" or
+            self.invType == "INVTYPE_RANGED" or
+            self.invType == "INVTYPE_RANGEDRIGHT" or
+            self.invType == "INVTYPE_WEAPONMAINHAND" or
+            self.invType == "INVTYPE_WEAPONOFFHAND" or
+            self.invType == "INVTYPE_WEAPON")
+end
+
 function Geary_Item:IsTwoHandWeapon()
-    return self:IsWeapon() and
+    return self:IsWeaponSlot() and
         (self.invType == "INVTYPE_2HWEAPON" or self.invType == "INVTYPE_RANGED" or self.invType == "INVTYPE_RANGEDRIGHT")
 end
 
@@ -114,14 +124,7 @@ function Geary_Item:CanHaveEotbp(player)
         return false  -- Player ineligible for legendary
     end
 
-    if not (self:IsWeapon()
-        and (self.invType == "INVTYPE_2HWEAPON"
-            or self.invType == "INVTYPE_RANGED"
-            or self.invType == "INVTYPE_RANGEDRIGHT"
-            or self.invType == "INVTYPE_WEAPONMAINHAND"
-            or self.invType == "INVTYPE_WEAPONOFFHAND"
-            or self.invType == "INVTYPE_WEAPON"))
-    then
+    if not self:IsWeapon() then
         return false  -- Not a weapon type EotBP can be used on
     end
 
@@ -227,6 +230,10 @@ function Geary_Item:ILevelWithUpgrades()
 
     local _, _, _, colorCode = GetItemQualityColor(self.quality)
     return Geary.CC_START .. colorCode .. tostring(self.iLevel) .. Geary.CC_END .. upgrades
+end
+
+function Geary_Item:_CanHaveBeltBuckle(slotName, iLevel)
+    return slotName == "WaistSlot" and iLevel <= 599
 end
 
 function Geary_Item:GetBeltBuckleItemWithTexture()
@@ -356,7 +363,7 @@ function Geary_Item:Probe(player)
     self:_GetGems(self.slot)
 
     -- Check for special cases wrt gems
-    if self.slot == "WaistSlot" then
+    if self:_CanHaveBeltBuckle(self.slot, self.iLevel) then
         self.isMissingBeltBuckle = self:_IsMissingExtraGem()
     end
 
@@ -589,7 +596,12 @@ function Geary_Item:_SetCanEnchant(slotName, iLevel)
         return
     end
 
-    -- TODO 2ndary slot offhand is not WoD enchantable, but 2ndary slot weapon is
+    -- In WoD, only weapons (not offhands) can be enchanted.
+    -- If this is a weapon in the offhand slot, for enchants it is the same as the main hand slot
+    -- which is only weapons.
+    if slotName == "SecondaryHandSlot" and self:IsWeapon() then
+        slotName = "MainHandSlot"
+    end
 
     local minILevel, maxILevel = _slotDetails[slotName].enchantMinILevel, _slotDetails[slotName].enchantMaxILevel
     if minILevel == nil or iLevel < minILevel then
