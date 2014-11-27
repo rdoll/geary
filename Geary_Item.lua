@@ -301,6 +301,7 @@ function Geary_Item:new(o)
         filledSockets           = {},
         emptySockets            = {},
         failedJewelIds          = {},
+        canHaveBeltBuckle       = false,
         isMissingBeltBuckle     = false,
         canEnchant              = false,
         enchantText             = nil,
@@ -363,7 +364,8 @@ function Geary_Item:Probe(player)
     self:_GetGems(self.slot)
 
     -- Check for special cases wrt gems
-    if self:_CanHaveBeltBuckle(self.slot, self.iLevel) then
+    self.canHaveBeltBuckle = self:_CanHaveBeltBuckle(self.slot, self.iLevel)
+    if self.canHaveBeltBuckle then
         self.isMissingBeltBuckle = self:_IsMissingExtraGem()
     end
 

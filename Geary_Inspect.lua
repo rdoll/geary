@@ -52,6 +52,7 @@ function Geary_Inspect:_ResetData()
     self.filledSockets           = 0
     self.emptySockets            = 0
     self.failedJewelIds          = 0
+    self.canHaveBeltBuckle       = false
     self.isMissingBeltBuckle     = false
     self.enchantedCount          = 0
     self.unenchantedCount        = 0
@@ -187,6 +188,7 @@ function Geary_Inspect:_ProcessEmptySlot(slotName)
 
     -- Mark missing belt buckle if waist item
     if slotName == "WaistSlot" then
+        self.canHaveBeltBuckle = true
         self.isMissingBeltBuckle = true
     end
 end
@@ -211,6 +213,9 @@ function Geary_Inspect:_ProcessFilledSlot(slotName, itemLink)
         self.maxItem = item
     end
 
+    if item.canHaveBeltBuckle then
+        self.canHaveBeltBuckle = true
+    end
     if item.isMissingBeltBuckle then
         self.isMissingBeltBuckle = true
     end

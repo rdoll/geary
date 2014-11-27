@@ -1,25 +1,11 @@
 Ideas/Notes
 -----------
 * WoD support
-- Tooltip insertion of database stored ilevel doesn't work
-- Enchantment changes
-  + Need pre-WoD and post-WoD enchant support (ilevel 600 is delimiter for MoP only slots)
-  + Limit belt buckle to pre-WoD gear (yes, no, n/a)
-  + Need to handle 2ndary slot weapon enchantable but 2ndary offhand not
-- Instead of showing gear tooltips for your class, show them for the target player's class
-  + Needed in Player and Log tabs. Player tab is probably easy, but Log tab can have links for
+** Instead of showing gear tooltips for your class, show them for the target player's class
+*** Needed in Player and Log tabs. Player tab is hopefully easy, but Log tab can have links for
     multiple classes in it -- can tooltip classes be set per tooltip?
-- Track WoD legendary quest progress
-
-* Change next milestone in interface from "Next: 70 to HoF/ToES LFR" to "Next: 70 until 470"
-  with a tooltip that shows all milestones and how long until reaching them.
-** Show "-" and tooltip of "must be level 90" if too low.
-** What would be shown in log?
-** What would be shown if passed all milestones?
-** Note: Not sure if this can be done inside an EditBox
-** Add level to milestones so can have 90 and 100 milestones
-
-* Tooltip for the Geary icon?
+** Tooltip insertion of database stored ilevel doesn't work
+** Track WoD legendary quest progress
 
 * Geary options:
 ** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
@@ -29,23 +15,12 @@ Ideas/Notes
 
 * Use frame templates for repeat items (e.g. summary rows)?
 
-* If inspecting yourself, you know your professions and can check for profession perks
-
-* Missing EotBP on offhand weapon isn't the same as on main hand (no inline image or item link)
-** Maybe only when both MH and OH are missing EotBP?
-
 * Seen two cases where group tab hover and right click didn't work
 ** Last person in group that had enough people to cause scrolling
 ** No one in group
 ** Is related to being in combat when assigning onhover/onclick handlers?
 
 * With 300+ database entries, rendering database rows all at once is a noticeable delay
-
-* Convert from parsing "Upgrade Level: x/y" from tooltip to parsing to using the unknown value
-* of the item ID string per http://us.battle.net/wow/en/forum/topic/7199032730
-* This would deprecate the hard coding of upgrades for Blue/Purple items being 8/4 per upgrade level
-* No need to update EotBP checks because only Tier 16 (SoO) and Timeless Isle gear can be upgraded
-* 4 times and TI gear has no weapons and the T16 gear new ilevels don't overlap T15.
 
 
 Under Consideration

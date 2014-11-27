@@ -402,13 +402,15 @@ function Geary_Interface_Player:InspectionEnd(inspect)
         enchantCounts = inspect.enchantedCount .. "/" .. (inspect.enchantedCount + inspect.unenchantedCount)
     end
 
-    local beltColor, beltString
-    if inspect.isMissingBeltBuckle then
-        beltColor = Geary.CC_MISSING
-        beltString = "No"
-    else
-        beltColor = Geary.CC_CORRECT
-        beltString = "Yes"
+    local beltColor, beltString = Geary.CC_NA, "-"
+    if inspect.canHaveBeltBuckle then
+        if inspect.isMissingBeltBuckle then
+            beltColor = Geary.CC_MISSING
+            beltString = "No"
+        else
+            beltColor = Geary.CC_CORRECT
+            beltString = "Yes"
+        end
     end
 
     local gemColor, gemCounts = Geary.CC_NA, "-"
