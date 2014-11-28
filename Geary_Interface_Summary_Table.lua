@@ -62,7 +62,7 @@ function Geary_Interface_Summary_Table:_CreateContents(parent)
     headerFontString:SetFont(fontFilename, fontSize)
     headerFontString:SetPoint("TOPLEFT", headerButton, "TOPLEFT")
     headerFontString:SetText(Geary.CC_HEADER ..
-        "Fac  Cls  Spe  Rol  Lvl    iLevel    Name                         Missing     Inspected" .. Geary.CC_END)
+        "Fac  Cls  Spe  Rol    Lvl    iLevel    Name                          Missing     Inspected" .. Geary.CC_END)
 
     -- Set table header row frame's height to fit contents
     headerButton:SetHeight(headerFontString:GetHeight())

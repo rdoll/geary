@@ -101,7 +101,7 @@ function Geary_Interface_Summary_Row:_CreateContents(parent)
     -- Level font string
     self.levelFontString = self.rowButton:CreateFontString("$parent_Level", "ARTWORK")
     self.levelFontString:SetPoint("TOPLEFT", self.roleTexture, "TOPRIGHT", 8, 0)
-    self.levelFontString:SetSize((2 * fontCharacterWidth) + 1, rowHeight)  -- Add 1 because 34 doesn't fit
+    self.levelFontString:SetSize((3 * fontCharacterWidth) + 1, rowHeight)  -- Add 1 because 34 doesn't fit
     self.levelFontString:SetFont(fontFilename, fontSize)
     self.levelFontString:SetJustifyH("RIGHT")
     self.levelFontString:SetJustifyV("MIDDLE")

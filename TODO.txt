@@ -4,7 +4,6 @@ Ideas/Notes
 ** Instead of showing gear tooltips for your class, show them for the target player's class
 *** Needed in Player and Log tabs. Player tab is hopefully easy, but Log tab can have links for
     multiple classes in it -- can tooltip classes be set per tooltip?
-** Tooltip insertion of database stored ilevel doesn't work
 ** Track WoD legendary quest progress
 
 * Geary options:

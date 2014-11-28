@@ -44,7 +44,7 @@ function Geary_Tooltip:OnTooltipSetUnit(...)
     end
 
     local guid = UnitGUID(unit)
-    if not tonumber(guid) then
+    if not guid then
         Geary:DebugPrint("Could not find guid for name", tostring(name))
         return
     end
@@ -52,11 +52,11 @@ function Geary_Tooltip:OnTooltipSetUnit(...)
     local entry = Geary_Database:GetEntry(guid)
     Geary:DebugPrint("name", tostring(name), "unit", tostring(unit), "guid", tostring(guid), "entry", tostring(entry))
     if entry then
-        self:AddEntrySummaryToTooltip(entry, GameTooltip)
+        self:_AddEntrySummaryToTooltip(entry, GameTooltip)
     end
 end
 
-function Geary_Tooltip:AddEntrySummaryToTooltip(entry, tooltip)
+function Geary_Tooltip:_AddEntrySummaryToTooltip(entry, tooltip)
 
     local iLevel = entry:GetILevel()
     local iLevelColor = Geary.CC_NA
