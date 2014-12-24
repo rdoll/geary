@@ -50,7 +50,8 @@ function Geary_Tooltip:OnTooltipSetUnit(...)
     end
 
     local entry = Geary_Database:GetEntry(guid)
-    Geary:DebugPrint("name", tostring(name), "unit", tostring(unit), "guid", tostring(guid), "entry", tostring(entry))
+    Geary:DebugPrint(Geary.CC_DEBUG .. "name", tostring(name), "unit", tostring(unit), "guid", tostring(guid), "entry",
+        tostring(entry) .. Geary.CC_END)
     if entry then
         self:_AddEntrySummaryToTooltip(entry, GameTooltip)
     end

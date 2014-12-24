@@ -415,6 +415,12 @@ function Geary_Inspect:_InspectUnitRequest(unit)
         return
     end
 
+    -- Blizzard blocks inspections while you are on a flight path or taxi
+    if UnitOnTaxi("player") then
+        Geary:Print(Geary.CC_FAILED .. "Cannot inspect", unit, "while on a flight path or taxi" .. Geary.CC_END)
+        return
+    end
+
     -- Reset everything and show the UI for results
     self:_ResetInfo()
     self.timer:Stop()
@@ -489,6 +495,12 @@ function Geary_Inspect:InspectGroup()
             Geary:Print(Geary.CC_FAILED .. "Cannot inspect group while inspection of", self.player:GetFullNameLink(),
                 "still in progress." .. Geary.CC_END)
         end
+        return
+    end
+
+    -- Blizzard blocks inspections while you are on a flight path or taxi
+    if UnitOnTaxi("player") then
+        Geary:Print(Geary.CC_FAILED .. "Cannot inspect while on a flight path or taxi" .. Geary.CC_END)
         return
     end
 
