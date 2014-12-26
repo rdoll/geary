@@ -269,9 +269,10 @@ end
 -- Endgame minimum item level milestones
 -- NOTE: Must be in order from lowest iLevel to highest
 local _ITEM_LEVEL_MILESTONES = {
-    { iLevel = 600, milestone = "LFD normal" },
-    { iLevel = 610, milestone = "LFD heroic" },
-    { iLevel = 615, milestone = "HM LFR" }
+    { iLevel = 595, milestone = "LFD Normal" },
+    { iLevel = 610, milestone = "LFD Heroic" },
+    { iLevel = 615, milestone = "HM LFR" },
+    { iLevel = 635, milestone = "BRF LFR" }
 }
 
 function Geary_Inspect:GetItemLevelMilestone()
