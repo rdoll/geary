@@ -1,16 +1,25 @@
 Ideas/Notes
 -----------
 * WoD support
+** Track WoD legendary quest progress
 ** Instead of showing gear tooltips for your class, show them for the target player's class
 *** Needed in Player and Log tabs. Player tab is hopefully easy, but Log tab can have links for
     multiple classes in it -- can tooltip classes be set per tooltip?
-** Track WoD legendary quest progress
+*** Some people might want to see others' gear as it would be for their class; use a modifier key
+    like Alt or an option or both (option for always, never, when Alt held)?
 
-* Geary options:
-** If icon size is 55%, opening options sets it to 56%; 56% sets it to 57%. Some math is off.
-** Icon position shouldn't change when icon size changes
-** ceil(Geary_Options:GetIconScale() * 100) returns 56 when Geary_Saved_Options.iconScale = 0.55
-** Makes no sense. ceil(... * 1000) == 550, so no idea why * 100 returns 56
+* PvP support
+** Show # of PvP items and PvE items equipped
+** Show PvP equipped iLevel even when not in PvP combat (is there a way to check this?)
+** Should show PvP average iLevel in group/database summary?
+** Need an option to control this?
+** Can rely on PVP_ITEM_LEVEL_TOOLTIP = "Equip: Increases item level to %d in PvP combat."
+   to detect item is a PvP item for all including trinkets?
+
+* Scaled gear support
+** Show scaled iLevel and actual iLevel for every item
+** Show scaled average iLevel
+** Milestones, database, etc only use real iLevel
 
 * Use frame templates for repeat items (e.g. summary rows)?
 
@@ -37,12 +46,14 @@ Under Consideration
 ** //Doubtful:// Add options to control the font of the summary text
 ** //Doubtful:// Empty sockets shown with their graphic
 ** //Doubtful:// In item tooltips, show set pieces worn and empty extra sockets of the inspected character
+** //Doubtful:// Make item tooltips show for the inspection target's class instead of your class
 * Options:
 ** //Maybe:// Options to configure mouse clicks for icon and Group/Database tab actions
 ** //Doubtful:// Make options take effect immediately and have cancel revert to previous values
 * Detection:
-** //Maybe:// When item level is scaled down, show true max as well as current scaled down values
-** //Maybe:// Detect non-rare MoP gems and non-MoP enchants
+** //Maybe:// Track WoD legendary questline progress
+** //Maybe:// When item level is scaled up or down, show true max as well as current scaled values
+** //Maybe:// Detect non-rare WoD gems and non-WoD enchants
 ** //Maybe:// Show items with PvP stats
 ** //Maybe:// Show items with inappropriate stats (e.g. Prot Paladin wearing Intellect gear)
 ** //Maybe:// Detect unspent talent points
@@ -93,10 +104,25 @@ could report an item is missing a gem (in an extra socket) but the tooltip would
 (because it has to revert to SetHyperlink which doesn't show the extra socket).
 
 
+ceil with floating points
+-------------------------
+It appears as if floating point operations aren't as clean as expected which causes ceil to
+unexpectedly bump numbers up. This was a problem with the Geary icon and Geary interface scale
+options. Example:
+
+* Set icon scale to 55% in options
+* 55% is saved as floating point 0.55
+* Reopen options and it has to set the slider to a 50-200 integral value
+** It does this via ceil(0.55 * 100) which returns 56
+
+A ceil(55) == 55 and printing 0.55 * 100 shows "55", but it is not actually 55.
+Rather than fight with ceil, I switched to using floor.
+
+
 git Commit Procedure
 --------------------
 With git, releases must be tagged from a git push, not via curseforge's web interface.
-To tag and push the changes and the tag all in one:
+To tag and push the changes with the tag all in one:
 
 $ git commit
 $ vi z  # add commit message with newlines

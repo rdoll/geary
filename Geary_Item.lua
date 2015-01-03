@@ -530,8 +530,7 @@ end
 function Geary_Item:_GetGems(slot)
     -- Get jewelIds from the item link
     local jewelId = {}
-    jewelId[1], jewelId[2], jewelId[3], jewelId[4] =
-    self.link:match("item:.-:.-:(.-):(.-):(.-):(.-):")
+    jewelId[1], jewelId[2], jewelId[3], jewelId[4] = self.link:match("item:.-:.-:(.-):(.-):(.-):(.-):")
 
     -- Check all sockets for a gem
     for socketIndex = 1, self.MAX_GEMS do

@@ -494,8 +494,8 @@ function Geary_Options_Interface:OnShow(frame)
 
     -- Make the options match the current settings
     self.iconShownCheckbox:SetChecked(Geary_Options:IsIconShown())
-    self.iconScaleSlider:SetValue(ceil(Geary_Options:GetIconScale() * 100))
-    self.interfaceScaleSlider:SetValue(ceil(Geary_Options:GetInterfaceScale() * 100))
+    self.iconScaleSlider:SetValue(floor(Geary_Options:GetIconScale() * 100))
+    self.interfaceScaleSlider:SetValue(floor(Geary_Options:GetInterfaceScale() * 100))
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
@@ -511,8 +511,8 @@ end
 
 function Geary_Options_Interface:OnDefault(frame)
     self.iconShownCheckbox:SetChecked(Geary_Options:GetDefaultIconShown())
-    self.iconScaleSlider:SetValue(ceil(Geary_Options:GetDefaultIconScale() * 100))
-    self.interfaceScaleSlider:SetValue(ceil(Geary_Options:GetDefaultInterfaceScale() * 100))
+    self.iconScaleSlider:SetValue(floor(Geary_Options:GetDefaultIconScale() * 100))
+    self.interfaceScaleSlider:SetValue(floor(Geary_Options:GetDefaultInterfaceScale() * 100))
     -- Note: Not sure why, but must initialize before setting a value or we get garbage text
     UIDropDownMenu_Initialize(self.logFontFilenameDropdown, _logFontFilenameDropdownInitialize)
     UIDropDownMenu_SetSelectedID(self.logFontFilenameDropdown,
