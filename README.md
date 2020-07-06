@@ -4,7 +4,7 @@ Official home: https://www.curseforge.com/wow/addons/geary
 
 Official source home: `git clone https://repos.curseforge.com/wow/geary`
 
-Unofficial home: This git repo
+Unofficial home: https://github.com/rdoll/geary
 
 ## No Longer Supported
 
@@ -16,7 +16,11 @@ I appreciate everyone's kind words. I'm glad I could share this project with you
 
 ## Features
 
-Geary is a World of Warcraft (WoW) lightweight addon to examine equipped gear of yourself and other players. Key features:
+Geary is a World of Warcraft (WoW) lightweight addon to examine equipped gear of yourself and other players.
+
+Interface documentation is in the [doc](doc) directory
+
+Key features:
 
 - It shows a summary of all items with their gems and enchants
 - Missing gems, enchants, belt buckles, and unfilled upgrades are noted
@@ -91,8 +95,8 @@ You can also use a macro to invoke Geary inspections. For example, the following
 
 ## To Do
 
-See TODO.txt.
+See [TODO.txt](TODO.txt).
 
 ## License
 
-See LICENSE.txt.
+See [LICENSE.txt](LICENSE.txt).
